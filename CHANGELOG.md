@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] — 2026-05-12
+
+### Fixed
+- 🐛 **Binary-threshold sign bug in Gaussian copula sampling.** The previous
+  implementation used `X = 1{u < p}`, which produced the correct marginal
+  P(X=1) = p but **inverted the sign** of every continuous↔binary correlation.
+  On the real `pristine_tolerant_episodes.csv`, this meant e.g.
+  `corr(age, Hipertansiyon)` was reported as **−0.111** in synthetic output
+  vs **+0.207** in the source — wrong direction.
+- Switched to the canonical latent-Gaussian threshold form `X = 1{u ≥ 1 − p}`.
+  After the fix, every continuous↔binary correlation in the verification
+  matches the source in sign (every signed pair: age↔HTN +0.207 → +0.102,
+  age↔DM +0.078 → +0.028, BP↔HTN +0.133 → +0.073, etc.).
+- Added regression test `test_continuous_binary_correlation_sign_preserved`.
+
+### Known limitation (now explicit, queued for v0.4)
+- Magnitudes of continuous↔binary correlations are **attenuated ~50%** even
+  after the sign fix, because Spearman rank correlation on a tied (binary)
+  column is biased toward 0. The proper fix is **polyserial** correlation for
+  binary↔continuous and **tetrachoric** for binary↔binary pairs — added as
+  v0.4 in ROADMAP.md.
+
 ## [0.3.1] — 2026-05-12
 
 ### Added

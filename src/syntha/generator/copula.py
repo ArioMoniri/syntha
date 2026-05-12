@@ -110,8 +110,13 @@ class GaussianCopulaGenerator:
         out = {}
         for i, col in enumerate(m.columns):
             if col in m.binary_cols:
+                # Latent-Gaussian threshold model: X = 1{u >= 1 - p}.
+                # The earlier form (u < p) gave the same marginal but inverted
+                # the sign of every continuous-binary correlation, because the
+                # Gaussian copula's positive latent correlation maps "high u
+                # ↔ high u", and we want "high latent ↔ X = 1".
                 p = m.binary_p[col]
-                out[col] = (u[:, i] < p).astype(np.int8)
+                out[col] = (u[:, i] >= 1.0 - p).astype(np.int8)
             else:
                 q = m.continuous_quantiles[col]
                 # Empirical-quantile inverse via interpolation on the order

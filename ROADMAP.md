@@ -55,6 +55,15 @@ Legend: ✅ shipped · 🟡 in progress · ⬜ planned · 🟣 needs clinician (
 - 🟣 Verify Turkish display strings match clinical-Turkish convention rather than literal translation
 - 🟣 Sanity-check the ICD-10 codes against TR-specific clinical coding practice
 
+## v0.4 — Mixed-type correlation fix 🟡 (next)
+
+The current copula uses **Spearman rank correlation** as the input to the Gaussian copula parameter via the standard `ρ = 2 sin(π ρ_s / 6)` transform. That's exact for **continuous–continuous** pairs but **systematically attenuates** correlations involving binary columns (massive ties bias rank correlation toward 0). After fitting, signs are preserved (since v0.3.2) but magnitudes shrink ~50% on continuous↔binary and ~65% on binary↔binary pairs.
+
+- 🟡 Switch to **polyserial correlation** for binary↔continuous pairs.
+- 🟡 Switch to **tetrachoric correlation** for binary↔binary pairs.
+- 🟡 Validate against the same `pristine_tolerant_episodes.csv` source — target: shrinkage ratio ≥ 0.9 (currently ~0.5).
+- 🟡 Reference: Genest & Nešlehová (2007), *A primer on copulas for count data*.
+
 ## v0.7 — Advanced generative models ⬜
 
 - ⬜ Optional CTGAN/TVAE backend behind a `--engine ctgan` flag (heavier dependency, similar API)

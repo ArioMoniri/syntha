@@ -64,6 +64,7 @@ Plus a flat CSV that matches the **input schema** for drop-in use as training da
 - 🚫 **Not** privacy-proof. Gaussian copulas are not differentially private; if the source has fewer than ~50 patients with a rare combination, syntha may reproduce that combination too closely. **Do not use** when the source is a small sensitive cohort without adding a DP mechanism.
 - 🚫 **No disease *progression* simulator** yet — the copula gives a cross-sectional snapshot; longitudinal mode adds plausible drift but is not a Synthea-PADM state machine. (See [v0.8 in the roadmap](ROADMAP.md).)
 - 🚫 The source CSVs are **anonymized retrospective Turkish-cohort episodes of healthy patients** — synthetic disease prevalence is *lower* than Turkish national averages (TÜİK). If you need a population-representative Turkish cohort, calibrate per the [`v0.6` roadmap items](ROADMAP.md).
+- ⚠️ **Continuous↔binary correlations are attenuated ~50% in magnitude** (signs are correct since v0.3.2). Pure Spearman rank correlation on tied binary columns is biased toward zero; the proper fix is the polyserial/tetrachoric correlation, queued as [v0.4 in the roadmap](ROADMAP.md). For most downstream uses (training risk models, healthy-control comparisons) this is acceptable; if you need exact lab↔disease correlations, wait for v0.4 or contribute the fix.
 
 ## 🇹🇷 Turkish cohort + Turkish output
 

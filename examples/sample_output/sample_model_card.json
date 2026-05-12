@@ -4,7 +4,7 @@
   "source_csv": "data/raw/pristine_tolerant_episodes.csv",
   "source_sha256": "9865eb27966eb110e5e7a452abc69ba7f7b0f31217264da4d61ef9aa1f68e21e",
   "n_train": 135569,
-  "trained_at": "2026-05-12T11:17:03+00:00",
+  "trained_at": "2026-05-12T11:38:31+00:00",
   "syntha_version": "0.1.0",
   "binary_columns": [
     "gender_is_male",

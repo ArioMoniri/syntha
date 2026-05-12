@@ -56,6 +56,32 @@ def test_binary_marginals_approximate():
     assert abs(src_p - syn_p) < 0.05
 
 
+def test_continuous_binary_correlation_sign_preserved():
+    """Regression: an earlier implementation used X = 1{u < p}, which gave
+    the right marginal but flipped the sign of every continuous↔binary
+    correlation. Make sure positive source correlation stays positive."""
+    rng = np.random.default_rng(11)
+    n = 5000
+    age = rng.normal(45, 12, n).clip(18, 90)
+    # Higher age strongly increases HTN risk.
+    logit = -3.0 + 0.08 * (age - 45)
+    htn = (rng.random(n) < 1.0 / (1.0 + np.exp(-logit))).astype(int)
+    df = pd.DataFrame({"age": age, "Hipertansiyon": htn})
+    src_corr = df.corr(method="spearman").iloc[0, 1]
+    assert src_corr > 0.15  # sanity: source has clear positive corr
+
+    gen = GaussianCopulaGenerator(random_seed=1).fit(
+        df, binary_cols=["Hipertansiyon"], continuous_cols=["age"],
+    )
+    syn = gen.sample(20_000)
+    syn_corr = syn.corr(method="spearman").iloc[0, 1]
+    # Sign must match — that's the regression we care about. Magnitude
+    # attenuation is a known property of fitting Spearman correlations on
+    # tied (binary) columns; see ROADMAP v0.6 (polyserial / tetrachoric).
+    assert syn_corr > 0.05, f"expected positive corr, got {syn_corr:.3f}"
+    assert (src_corr > 0) == (syn_corr > 0), "sign of correlation must match"
+
+
 def test_save_load_roundtrip(tmp_path):
     df = _toy_df()
     gen = GaussianCopulaGenerator(random_seed=3).fit(

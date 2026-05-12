@@ -268,14 +268,14 @@
     {
       "column": "gender_is_male",
       "source_prevalence": 0.5155750946012732,
-      "synthetic_prevalence": 0.5,
-      "abs_error": 0.015575094601273154
+      "synthetic_prevalence": 0.54,
+      "abs_error": 0.02442490539872688
     },
     {
       "column": "Kanser",
       "source_prevalence": 0.01378633758455104,
-      "synthetic_prevalence": 0.01,
-      "abs_error": 0.0037863375845510402
+      "synthetic_prevalence": 0.04,
+      "abs_error": 0.02621366241544896
     },
     {
       "column": "Iskemik_Kalp",
@@ -292,8 +292,8 @@
     {
       "column": "Kalp_Yetmezligi",
       "source_prevalence": 0.0010105555104780591,
-      "synthetic_prevalence": 0.01,
-      "abs_error": 0.008989444489521941
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0010105555104780591
     },
     {
       "column": "Pulmoner_Emboli",
@@ -304,20 +304,20 @@
     {
       "column": "Aort_Anevrizma",
       "source_prevalence": 0.003747169338123022,
-      "synthetic_prevalence": 0.0,
-      "abs_error": 0.003747169338123022
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.006252830661876978
     },
     {
       "column": "Kronik_Bobrek",
       "source_prevalence": 0.0008261475706098001,
-      "synthetic_prevalence": 0.0,
-      "abs_error": 0.0008261475706098001
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.0091738524293902
     },
     {
       "column": "Karaciger_Siroz",
       "source_prevalence": 0.0012687266262936217,
-      "synthetic_prevalence": 0.0,
-      "abs_error": 0.0012687266262936217
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.008731273373706378
     },
     {
       "column": "Sepsis",
@@ -328,14 +328,14 @@
     {
       "column": "Atriyal_Fibrilasyon",
       "source_prevalence": 0.004654456402274856,
-      "synthetic_prevalence": 0.01,
-      "abs_error": 0.005345543597725144
+      "synthetic_prevalence": 0.02,
+      "abs_error": 0.015345543597725143
     },
     {
       "column": "COPD",
       "source_prevalence": 0.016899143609527253,
-      "synthetic_prevalence": 0.01,
-      "abs_error": 0.006899143609527253
+      "synthetic_prevalence": 0.03,
+      "abs_error": 0.013100856390472745
     },
     {
       "column": "DM_Komplikasyonlu",
@@ -352,14 +352,14 @@
     {
       "column": "Astim",
       "source_prevalence": 0.025824487899150986,
-      "synthetic_prevalence": 0.03,
-      "abs_error": 0.0041755121008490124
+      "synthetic_prevalence": 0.02,
+      "abs_error": 0.005824487899150986
     },
     {
       "column": "Hipertansiyon",
       "source_prevalence": 0.07450818402437136,
-      "synthetic_prevalence": 0.09,
-      "abs_error": 0.01549181597562864
+      "synthetic_prevalence": 0.07,
+      "abs_error": 0.004508184024371351
     },
     {
       "column": "Hiperlipidemi",
@@ -370,14 +370,14 @@
     {
       "column": "Tiroid",
       "source_prevalence": 0.14461270644468868,
-      "synthetic_prevalence": 0.15,
-      "abs_error": 0.005387293555311312
+      "synthetic_prevalence": 0.19,
+      "abs_error": 0.04538729355531132
     },
     {
       "column": "Obezite",
       "source_prevalence": 0.005672388230347646,
-      "synthetic_prevalence": 0.01,
-      "abs_error": 0.004327611769652354
+      "synthetic_prevalence": 0.02,
+      "abs_error": 0.014327611769652355
     },
     {
       "column": "Depresyon",
@@ -388,14 +388,14 @@
     {
       "column": "Anksiyete",
       "source_prevalence": 0.01089482108741674,
-      "synthetic_prevalence": 0.02,
-      "abs_error": 0.009105178912583261
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.0008948210874167393
     },
     {
       "column": "pristine_strict",
       "source_prevalence": 0.4064129705168586,
-      "synthetic_prevalence": 0.41,
-      "abs_error": 0.0035870294831413796
+      "synthetic_prevalence": 0.4,
+      "abs_error": 0.006412970516858574
     },
     {
       "column": "pristine_tolerant",
@@ -436,8 +436,8 @@
     {
       "column": "has_rx_data",
       "source_prevalence": 0.18468823993685873,
-      "synthetic_prevalence": 0.16,
-      "abs_error": 0.02468823993685873
+      "synthetic_prevalence": 0.24,
+      "abs_error": 0.05531176006314126
     },
     {
       "column": "has_blacklist_drug",
@@ -502,8 +502,8 @@
     {
       "column": "any_worsening",
       "source_prevalence": 0.45886596493298615,
-      "synthetic_prevalence": 0.44,
-      "abs_error": 0.018865964932986146
+      "synthetic_prevalence": 0.45,
+      "abs_error": 0.008865964932986137
     },
     {
       "column": "rf_kanser",
