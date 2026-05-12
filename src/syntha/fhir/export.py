@@ -1,4 +1,12 @@
-"""FHIR R4 Bundle writer for synthetic episodes."""
+"""FHIR R4 Bundle writer for synthetic episodes.
+
+The bundle for each episode contains:
+  * one Patient
+  * one Observation per non-null lab/vital (LOINC-coded)
+  * one Condition per active comorbidity flag (SNOMED-coded)
+  * extra resources emitted by Synthea-style modules in src/syntha/modules/
+    (Encounters, MedicationRequests, Procedures, CarePlans)
+"""
 from __future__ import annotations
 
 import json
@@ -21,8 +29,10 @@ def _is_present(v) -> bool:
 
 def _patient_resource(row: pd.Series, patient_id: str) -> dict:
     age = int(row.get("age")) if _is_present(row.get("age")) else None
-    gender = GENDER_MAP.get(int(row.get("gender_is_male", 0)), "unknown") if _is_present(row.get("gender_is_male")) else "unknown"
-    # Approximate birthDate from episode_date − age years. Falls back to today.
+    gender = (
+        GENDER_MAP.get(int(row.get("gender_is_male", 0)), "unknown")
+        if _is_present(row.get("gender_is_male")) else "unknown"
+    )
     episode_dt = pd.to_datetime(row.get("episode_date"), errors="coerce")
     if pd.isna(episode_dt):
         episode_dt = pd.Timestamp.utcnow()
@@ -85,9 +95,7 @@ def _observation_resource(
     }
 
 
-def _condition_resource(
-    patient_id: str, column: str, onset_iso: str
-) -> dict:
+def _condition_resource(patient_id: str, column: str, onset_iso: str) -> dict:
     code, display = CONDITION_SNOMED[column]
     return {
         "resourceType": "Condition",
@@ -119,48 +127,59 @@ def _condition_resource(
     }
 
 
-def episode_to_bundle(row: pd.Series) -> dict:
+def _wrap_entries(resources: list[dict]) -> list[dict]:
+    return [
+        {
+            "fullUrl": f"urn:uuid:{r['id']}",
+            "resource": r,
+            "request": {"method": "POST", "url": r["resourceType"]},
+        }
+        for r in resources
+    ]
+
+
+def episode_to_bundle(row: pd.Series, run_modules: bool = True) -> dict:
+    """Build one transaction Bundle for a single synthetic episode."""
     patient_id = str(uuid.uuid4())
     episode_dt = pd.to_datetime(row.get("episode_date"), errors="coerce")
     if pd.isna(episode_dt):
         episode_dt = pd.Timestamp.utcnow()
     effective_iso = episode_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    entries = [
-        {
-            "fullUrl": f"urn:uuid:{patient_id}",
-            "resource": _patient_resource(row, patient_id),
-            "request": {"method": "POST", "url": "Patient"},
-        }
-    ]
+    resources: list[dict] = [_patient_resource(row, patient_id)]
+
     for col in LAB_LOINC:
         if col in row.index:
             obs = _observation_resource(row, patient_id, col, effective_iso)
             if obs is not None:
-                entries.append(
-                    {
-                        "fullUrl": f"urn:uuid:{obs['id']}",
-                        "resource": obs,
-                        "request": {"method": "POST", "url": "Observation"},
-                    }
-                )
+                resources.append(obs)
+
+    condition_ids: dict[str, str] = {}
     for col in CONDITION_SNOMED:
         if col in row.index and _is_present(row.get(col)) and int(row.get(col)) == 1:
             cond = _condition_resource(patient_id, col, effective_iso)
-            entries.append(
-                {
-                    "fullUrl": f"urn:uuid:{cond['id']}",
-                    "resource": cond,
-                    "request": {"method": "POST", "url": "Condition"},
-                }
-            )
+            resources.append(cond)
+            condition_ids[col] = cond["id"]
+
+    if run_modules:
+        # Lazy import avoids a circular dependency at package init time.
+        from ..modules import REGISTRY
+        from ..modules.base import ModuleContext
+
+        ctx = ModuleContext(
+            patient_id=patient_id, episode_iso=effective_iso,
+            condition_ids=condition_ids,
+        )
+        for module in REGISTRY:
+            if module.applies(row):
+                resources.extend(module.expand(row, ctx).resources)
 
     return {
         "resourceType": "Bundle",
         "id": str(uuid.uuid4()),
         "type": "transaction",
         "timestamp": effective_iso,
-        "entry": entries,
+        "entry": _wrap_entries(resources),
     }
 
 
@@ -168,25 +187,21 @@ def write_fhir_bundles(
     df: pd.DataFrame,
     out_dir: str | Path,
     fmt: str = "ndjson",
+    run_modules: bool = True,
 ) -> Path:
-    """Write one Bundle per row.
-
-    fmt='ndjson' → single newline-delimited JSON file (Synthea bulk style).
-    fmt='json'   → one pretty-printed JSON file per bundle in a directory.
-    """
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     if fmt == "ndjson":
         target = out / "bundles.ndjson"
         with open(target, "w", encoding="utf-8") as f:
             for _, row in df.iterrows():
-                f.write(json.dumps(episode_to_bundle(row), ensure_ascii=False))
+                f.write(json.dumps(episode_to_bundle(row, run_modules), ensure_ascii=False))
                 f.write("\n")
         return target
     bundles_dir = out / "bundles"
     bundles_dir.mkdir(parents=True, exist_ok=True)
     for i, (_, row) in enumerate(df.iterrows()):
-        bundle = episode_to_bundle(row)
+        bundle = episode_to_bundle(row, run_modules)
         with open(bundles_dir / f"patient_{i:06d}.json", "w", encoding="utf-8") as f:
             json.dump(bundle, f, ensure_ascii=False, indent=2)
     return bundles_dir

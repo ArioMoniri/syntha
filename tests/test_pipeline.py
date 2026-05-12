@@ -41,7 +41,8 @@ def test_pipeline_end_to_end(tmp_path):
     assert result["n_generated"] == 50
     assert Path(result["csv"]).exists()
     assert Path(result["fhir"]).exists()
-    assert Path(result["model"]).exists()
+    assert Path(result["model_dir"]).exists()
+    assert (Path(result["model_dir"]) / "card.json").exists()
 
     syn = pd.read_csv(result["csv"])
     assert (syn["bp_systolic"] >= syn["bp_diastolic"]).all()

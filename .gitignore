@@ -8,10 +8,9 @@ output/
 !examples/*.csv
 !tests/**/*.csv
 
-# Trained model artifacts
+# Trained model artifacts (runtime; src/syntha/models/ is source code and IS tracked)
 *.pkl
 *.joblib
-models/
 
 # Python
 __pycache__/
