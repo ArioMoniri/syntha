@@ -1,0 +1,23 @@
+data:
+  strict_csv: data/raw/pristine_strict_episodes.csv
+  tolerant_csv: data/raw/pristine_tolerant_episodes.csv
+
+generator:
+  type: gaussian_copula
+  random_seed: 42
+  oversample_factor: 1.5
+
+constraints:
+  enforce_systolic_gt_diastolic: true
+  min_pulse_pressure: 20
+  enforce_cholesterol_friedewald: true
+  friedewald_tolerance: 40.0
+  enforce_egfr_creatinine: true
+  drop_invalid: true
+  max_rejection_rounds: 5
+
+output:
+  dir: output
+  csv: true
+  fhir: true
+  fhir_format: ndjson
