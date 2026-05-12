@@ -130,11 +130,13 @@ class GaussianCopulaGenerator:
                 mask = rng.random(n) < p
                 df.loc[mask, col] = np.nan
 
-        # Cast count-like continuous to integers (drugs, counts, age).
+        # Cast count-like continuous to integers (drugs, counts, age, platelet
+        # K-counts). WBC is intentionally NOT cast — clinical labs report WBC
+        # to one decimal (e.g. 5.56 K/uL) and rounding destroys signal.
         int_cast = {
             "age", "n_drugs", "n_medications", "drug_class_count",
             "charlson_cci", "comorbidity_count", "n_ep_labs_available_x",
-            "keyword_total_flags", "platelets_latest", "wbc_latest",
+            "keyword_total_flags", "platelets_latest",
         }
         for c in int_cast & set(df.columns):
             df[c] = df[c].round().astype("Int64")

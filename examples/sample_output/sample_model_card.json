@@ -1,0 +1,447 @@
+{
+  "name": "copula_tolerant",
+  "cohort": "tolerant",
+  "source_csv": "data/raw/pristine_tolerant_episodes.csv",
+  "source_sha256": "9865eb27966eb110e5e7a452abc69ba7f7b0f31217264da4d61ef9aa1f68e21e",
+  "n_train": 135569,
+  "trained_at": "2026-05-12T11:17:03+00:00",
+  "syntha_version": "0.1.0",
+  "binary_columns": [
+    "gender_is_male",
+    "Kanser",
+    "Iskemik_Kalp",
+    "Serebrovaskuler",
+    "Kalp_Yetmezligi",
+    "Pulmoner_Emboli",
+    "Aort_Anevrizma",
+    "Kronik_Bobrek",
+    "Karaciger_Siroz",
+    "Sepsis",
+    "Atriyal_Fibrilasyon",
+    "COPD",
+    "DM_Komplikasyonlu",
+    "DM_Tum",
+    "Astim",
+    "Hipertansiyon",
+    "Hiperlipidemi",
+    "Tiroid",
+    "Obezite",
+    "Depresyon",
+    "Anksiyete",
+    "pristine_strict",
+    "pristine_tolerant",
+    "tier_healthy_episode",
+    "is_cancer",
+    "is_ex",
+    "is_cancer_or_ex",
+    "drug_safe",
+    "has_rx_data",
+    "has_blacklist_drug",
+    "rule_clean",
+    "keyword_clean",
+    "berturk_clean",
+    "text_available",
+    "nlp_filter_pass",
+    "all_ep_labs_normal_x",
+    "polypharmacy_flag",
+    "high_risk_drug_flag",
+    "has_nontolerable_icd_30d",
+    "any_worsening",
+    "rf_kanser",
+    "rf_kronik_hastalik",
+    "rf_akut_ciddi",
+    "rf_psikiyatri_ciddi",
+    "rf_ilac_risk_metin",
+    "rf_fonksiyon_kaybi"
+  ],
+  "continuous_columns": [
+    "age",
+    "glucose_fasting_latest",
+    "ldl_direct_latest",
+    "hdl_latest",
+    "cholesterol_total_latest",
+    "triglycerides_latest",
+    "egfr_latest",
+    "creatinine_latest",
+    "hemoglobin_latest",
+    "wbc_latest",
+    "platelets_latest",
+    "alt_latest",
+    "ast_latest",
+    "ferritin_latest",
+    "vitamin_b12_latest",
+    "bp_systolic",
+    "bp_diastolic",
+    "n_drugs",
+    "n_medications",
+    "drug_class_count",
+    "charlson_cci",
+    "comorbidity_count",
+    "n_ep_labs_available_x",
+    "keyword_total_flags",
+    "lab_abnormal_pct",
+    "max_ilac_onem",
+    "mean_ilac_onem",
+    "berturk_similarity",
+    "tier_healthy_patient"
+  ],
+  "binary_marginals": {
+    "gender_is_male": 0.5155750946012732,
+    "Kanser": 0.01378633758455104,
+    "Iskemik_Kalp": 0.042288428770589144,
+    "Serebrovaskuler": 0.007988551955092979,
+    "Kalp_Yetmezligi": 0.0010105555104780591,
+    "Pulmoner_Emboli": 0.0024636900766399398,
+    "Aort_Anevrizma": 0.003747169338123022,
+    "Kronik_Bobrek": 0.0008261475706098001,
+    "Karaciger_Siroz": 0.0012687266262936217,
+    "Sepsis": 0.00015490266948933753,
+    "Atriyal_Fibrilasyon": 0.004654456402274856,
+    "COPD": 0.016899143609527253,
+    "DM_Komplikasyonlu": 0.003311966600033931,
+    "DM_Tum": 0.04795344068334206,
+    "Astim": 0.025824487899150986,
+    "Hipertansiyon": 0.07450818402437136,
+    "Hiperlipidemi": 0.11964387138652642,
+    "Tiroid": 0.14461270644468868,
+    "Obezite": 0.005672388230347646,
+    "Depresyon": 0.0022350242312032986,
+    "Anksiyete": 0.01089482108741674,
+    "pristine_strict": 0.4064129705168586,
+    "pristine_tolerant": 1.0,
+    "tier_healthy_episode": 1.0,
+    "is_cancer": 0.0,
+    "is_ex": 0.0,
+    "is_cancer_or_ex": 0.0,
+    "drug_safe": 1.0,
+    "has_rx_data": 0.18468823993685873,
+    "has_blacklist_drug": 0.0,
+    "rule_clean": 1.0,
+    "keyword_clean": 1.0,
+    "berturk_clean": 1.0,
+    "text_available": 1.0,
+    "nlp_filter_pass": 1.0,
+    "all_ep_labs_normal_x": 1.0,
+    "polypharmacy_flag": 0.0003024290213839447,
+    "high_risk_drug_flag": 2.9505270378921434e-05,
+    "has_nontolerable_icd_30d": 0.0,
+    "any_worsening": 0.45886596493298615,
+    "rf_kanser": 0.0,
+    "rf_kronik_hastalik": 0.0,
+    "rf_akut_ciddi": 0.0,
+    "rf_psikiyatri_ciddi": 0.0,
+    "rf_ilac_risk_metin": 0.0,
+    "rf_fonksiyon_kaybi": 0.0
+  },
+  "continuous_summary": {
+    "age": {
+      "mean": 39.39732534724015,
+      "std": 11.149771889207518,
+      "q05": 20.0,
+      "q50": 39.0,
+      "q95": 59.0,
+      "n_observed": 135569
+    },
+    "glucose_fasting_latest": {
+      "mean": 93.85458240489386,
+      "std": 8.816617300544346,
+      "q05": 81.0,
+      "q50": 93.0,
+      "q95": 110.0,
+      "n_observed": 133719
+    },
+    "ldl_direct_latest": {
+      "mean": 116.4525439388799,
+      "std": 24.964514431382224,
+      "q05": 73.0,
+      "q50": 118.0,
+      "q95": 154.0,
+      "n_observed": 117899
+    },
+    "hdl_latest": {
+      "mean": 55.43055365324234,
+      "std": 16.501230299317694,
+      "q05": 33.0,
+      "q50": 53.0,
+      "q95": 85.35899999999994,
+      "n_observed": 117523
+    },
+    "cholesterol_total_latest": {
+      "mean": 189.25979469656053,
+      "std": 31.175265390073168,
+      "q05": 138.0,
+      "q50": 190.0,
+      "q95": 238.0,
+      "n_observed": 117750
+    },
+    "triglycerides_latest": {
+      "mean": 104.63954869438712,
+      "std": 78.35694461430725,
+      "q05": 36.0,
+      "q50": 83.0,
+      "q95": 240.0,
+      "n_observed": 120633
+    },
+    "egfr_latest": {
+      "mean": 104.55029755417564,
+      "std": 15.263195272805511,
+      "q05": 77.5,
+      "q50": 106.0,
+      "q95": 127.53,
+      "n_observed": 118365
+    },
+    "creatinine_latest": {
+      "mean": 0.7911389153216105,
+      "std": 0.184961339423181,
+      "q05": 0.51,
+      "q50": 0.78,
+      "q95": 1.1,
+      "n_observed": 130515
+    },
+    "hemoglobin_latest": {
+      "mean": 13.992316649339076,
+      "std": 1.5062739595915093,
+      "q05": 11.5,
+      "q50": 14.0,
+      "q95": 16.3,
+      "n_observed": 134660
+    },
+    "wbc_latest": {
+      "mean": 6.820335708279184,
+      "std": 3.3501253954853194,
+      "q05": 4.13,
+      "q50": 6.32,
+      "q95": 10.35,
+      "n_observed": 130810
+    },
+    "platelets_latest": {
+      "mean": 239.70469307430676,
+      "std": 56.44607342311521,
+      "q05": 161.0,
+      "q50": 234.0,
+      "q95": 338.0,
+      "n_observed": 134658
+    },
+    "alt_latest": {
+      "mean": 28.932543829814286,
+      "std": 13.508774140440714,
+      "q05": 12.0,
+      "q50": 26.0,
+      "q95": 57.0,
+      "n_observed": 133701
+    },
+    "ast_latest": {
+      "mean": 20.16609324678356,
+      "std": 7.981515514919919,
+      "q05": 12.0,
+      "q50": 19.0,
+      "q95": 32.0,
+      "n_observed": 124672
+    },
+    "ferritin_latest": {
+      "mean": 59.62611737150294,
+      "std": 73.8494014794068,
+      "q05": 6.0,
+      "q50": 35.0,
+      "q95": 194.0,
+      "n_observed": 38425
+    },
+    "vitamin_b12_latest": {
+      "mean": 438.55433615411073,
+      "std": 187.9240271987809,
+      "q05": 230.0,
+      "q50": 400.0,
+      "q95": 774.0,
+      "n_observed": 72675
+    },
+    "bp_systolic": {
+      "mean": 108.67049606056605,
+      "std": 12.985708881595867,
+      "q05": 90.0,
+      "q50": 110.0,
+      "q95": 130.0,
+      "n_observed": 22719
+    },
+    "bp_diastolic": {
+      "mean": 72.67701863354037,
+      "std": 9.094573830318568,
+      "q05": 60.0,
+      "q50": 70.0,
+      "q95": 87.0,
+      "n_observed": 22701
+    },
+    "n_drugs": {
+      "mean": 0.34650989533005333,
+      "std": 0.8870567611750881,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 2.0,
+      "n_observed": 135569
+    },
+    "n_medications": {
+      "mean": 0.08950423769445817,
+      "std": 0.47363477254327796,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 1.0,
+      "n_observed": 135569
+    },
+    "drug_class_count": {
+      "mean": 0.0024784427118294005,
+      "std": 0.05600171203298791,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 0.0,
+      "n_observed": 135569
+    },
+    "charlson_cci": {
+      "mean": 0.012451224099904845,
+      "std": 0.1145531993624811,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 0.0,
+      "n_observed": 135569
+    },
+    "comorbidity_count": {
+      "mean": 0.01690651992712198,
+      "std": 0.13297747809389532,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 0.0,
+      "n_observed": 135569
+    },
+    "n_ep_labs_available_x": {
+      "mean": 4.876210638125235,
+      "std": 0.5163056395227524,
+      "q05": 4.0,
+      "q50": 5.0,
+      "q95": 6.0,
+      "n_observed": 135569
+    },
+    "keyword_total_flags": {
+      "mean": 0.0,
+      "std": 0.0,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 0.0,
+      "n_observed": 135569
+    },
+    "lab_abnormal_pct": {
+      "mean": 0.10592685648595915,
+      "std": 0.06286594152016955,
+      "q05": 0.0238095238095238,
+      "q50": 0.0967741935483871,
+      "q95": 0.2222222222222222,
+      "n_observed": 135569
+    },
+    "max_ilac_onem": {
+      "mean": 0.20094564391564443,
+      "std": 0.43941179354227555,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 1.0,
+      "n_observed": 135569
+    },
+    "mean_ilac_onem": {
+      "mean": 0.19567882116694896,
+      "std": 0.4210136018379005,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 1.0,
+      "n_observed": 135569
+    },
+    "berturk_similarity": {
+      "mean": 0.9776486878257238,
+      "std": 0.02248439643017239,
+      "q05": 0.9586957335472106,
+      "q50": 0.9824324250221252,
+      "q95": 0.9898003697395324,
+      "n_observed": 135569
+    },
+    "tier_healthy_patient": {
+      "mean": 0.2586210711888411,
+      "std": 0.4378785528472586,
+      "q05": 0.0,
+      "q50": 0.0,
+      "q95": 1.0,
+      "n_observed": 135569
+    }
+  },
+  "top_correlations": [
+    {
+      "a": "max_ilac_onem",
+      "b": "mean_ilac_onem",
+      "spearman": 0.9999956829613071
+    },
+    {
+      "a": "has_rx_data",
+      "b": "max_ilac_onem",
+      "spearman": 0.9983249536190781
+    },
+    {
+      "a": "has_rx_data",
+      "b": "mean_ilac_onem",
+      "spearman": 0.9983206438116253
+    },
+    {
+      "a": "has_rx_data",
+      "b": "n_drugs",
+      "spearman": 0.9940689569345046
+    },
+    {
+      "a": "max_ilac_onem",
+      "b": "n_drugs",
+      "spearman": 0.9934130923563373
+    },
+    {
+      "a": "mean_ilac_onem",
+      "b": "n_drugs",
+      "spearman": 0.9933363356919838
+    },
+    {
+      "a": "cholesterol_total_latest",
+      "b": "ldl_direct_latest",
+      "spearman": 0.8372503347288107
+    },
+    {
+      "a": "any_worsening",
+      "b": "pristine_strict",
+      "spearman": -0.7619598309145339
+    },
+    {
+      "a": "gender_is_male",
+      "b": "hemoglobin_latest",
+      "spearman": 0.7600400508788321
+    },
+    {
+      "a": "creatinine_latest",
+      "b": "gender_is_male",
+      "spearman": 0.7318377162128641
+    },
+    {
+      "a": "creatinine_latest",
+      "b": "egfr_latest",
+      "spearman": -0.7058250436346868
+    },
+    {
+      "a": "creatinine_latest",
+      "b": "hemoglobin_latest",
+      "spearman": 0.6311502331894011
+    },
+    {
+      "a": "hdl_latest",
+      "b": "triglycerides_latest",
+      "spearman": -0.5708073147128825
+    },
+    {
+      "a": "alt_latest",
+      "b": "ast_latest",
+      "spearman": 0.5684773033652083
+    },
+    {
+      "a": "any_worsening",
+      "b": "tier_healthy_patient",
+      "spearman": -0.5438790520895697
+    }
+  ]
+}

@@ -15,6 +15,7 @@ from .generator.constraints import ConstraintConfig, PhysiologicConstraints
 from .generator.copula import GaussianCopulaGenerator
 from .longitudinal import TrajectoryConfig, expand_to_trajectories
 from .models.registry import ModelRegistry
+from .validate import save_report, validate
 
 
 @dataclass
@@ -32,6 +33,7 @@ class PipelineConfig:
     years_of_history: float = 3.0
     constraint: ConstraintConfig = field(default_factory=ConstraintConfig)
     registry_dir: str | None = None
+    write_validation: bool = True
 
 
 def _generate_ids_and_dates(
@@ -119,6 +121,14 @@ def run(input_csv, output_dir, cfg: PipelineConfig) -> dict:
     )
     written["model_dir"] = str(registry.model_dir(card.name))
 
+    validation_summary: dict | None = None
+    if cfg.write_validation:
+        report = validate(modeled, synthetic, ccols, bcols)
+        report_path = out / "validation_report.json"
+        save_report(report, report_path)
+        written["validation_report"] = str(report_path)
+        validation_summary = report.summary()
+
     return {
         "n_requested": cfg.n,
         "n_generated": len(synthetic),
@@ -127,5 +137,6 @@ def run(input_csv, output_dir, cfg: PipelineConfig) -> dict:
         "cohort": cfg.cohort,
         "training_rows": len(modeled),
         "source_sha256": card.source_sha256,
+        "validation": validation_summary,
         **written,
     }

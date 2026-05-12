@@ -115,5 +115,22 @@ def fhir(input_csv, output_dir, fmt, modules):
     click.echo(json.dumps({"rows": len(df), "fhir": str(path)}, indent=2))
 
 
+@main.command()
+@click.option("--source", "source_csv", required=True, type=click.Path(exists=True))
+@click.option("--synthetic", "synthetic_csv", required=True, type=click.Path(exists=True))
+@click.option("--output", "report_path", required=True, type=click.Path())
+def validate(source_csv, synthetic_csv, report_path):
+    """Compute KS / Wasserstein / correlation-diff between source and synthetic."""
+    from . import data, preprocess
+    from .validate import save_report, validate as _v
+
+    src = preprocess.coerce_types(data.filter_to_modeled(data.load_episodes(source_csv)))
+    syn = pd.read_csv(synthetic_csv)
+    _, bcols, ccols = preprocess.split_modeled(src)
+    report = _v(src, syn, ccols, bcols)
+    save_report(report, report_path)
+    click.echo(json.dumps(report.summary(), indent=2))
+
+
 if __name__ == "__main__":
     main()

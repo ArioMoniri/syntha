@@ -1,5 +1,13 @@
-"""LOINC and SNOMED CT code tables for the columns this generator emits."""
+"""LOINC, SNOMED CT, and ICD-10 code tables.
+
+Every Condition resource is emitted with **dual coding**: SNOMED CT (the FHIR
+preferred clinical terminology) plus ICD-10 (used by Turkish billing /
+administrative pipelines). Code text carries both English and Turkish
+preferred terms for the condition.
+"""
 from __future__ import annotations
+
+from ..locale.turkish import CONDITION_DISPLAY_TR
 
 # (LOINC code, display, UCUM unit) per modeled lab/vital column.
 LAB_LOINC: dict[str, tuple[str, str, str]] = {
@@ -21,7 +29,7 @@ LAB_LOINC: dict[str, tuple[str, str, str]] = {
     "bp_diastolic": ("8462-4", "Diastolic blood pressure", "mm[Hg]"),
 }
 
-# SNOMED CT codes for the 20 Turkish-labeled comorbidity flags.
+# SNOMED CT codes for the 20 source-CSV comorbidity flags.
 CONDITION_SNOMED: dict[str, tuple[str, str]] = {
     "Kanser": ("363346000", "Malignant neoplastic disease (disorder)"),
     "Iskemik_Kalp": ("414545008", "Ischemic heart disease (disorder)"),
@@ -34,7 +42,14 @@ CONDITION_SNOMED: dict[str, tuple[str, str]] = {
     "Sepsis": ("91302008", "Sepsis (disorder)"),
     "Atriyal_Fibrilasyon": ("49436004", "Atrial fibrillation (disorder)"),
     "COPD": ("13645005", "Chronic obstructive pulmonary disease (disorder)"),
-    "DM_Komplikasyonlu": ("75682002", "Diabetes mellitus due to insulin receptor antibodies (disorder)"),
+    # DM_Komplikasyonlu: SCT does not have a single generic
+    # "diabetes-with-complications" parent. The previously-used 75682002 was
+    # the rare type-B insulin-receptor-antibody form — wrong. We now use
+    # 44054006 (Type 2 diabetes mellitus) on the assumption the complicated
+    # cases in this Turkish-cohort source are predominantly T2DM, and rely on
+    # the paired ICD-10 (E11.8) below to convey "with unspecified
+    # complications".
+    "DM_Komplikasyonlu": ("44054006", "Type 2 diabetes mellitus (disorder)"),
     "DM_Tum": ("73211009", "Diabetes mellitus (disorder)"),
     "Astim": ("195967001", "Asthma (disorder)"),
     "Hipertansiyon": ("38341003", "Hypertensive disorder, systemic arterial (disorder)"),
@@ -45,4 +60,36 @@ CONDITION_SNOMED: dict[str, tuple[str, str]] = {
     "Anksiyete": ("48694002", "Anxiety (finding)"),
 }
 
+# ICD-10 codes paired with each comorbidity flag. Codes use the unspecified
+# form when source CSV does not distinguish subtype (e.g. E11.9 for DM).
+CONDITION_ICD10: dict[str, tuple[str, str]] = {
+    "Kanser": ("C80.1", "Malignant neoplasm, unspecified"),
+    "Iskemik_Kalp": ("I25.9", "Chronic ischaemic heart disease, unspecified"),
+    "Serebrovaskuler": ("I67.9", "Cerebrovascular disease, unspecified"),
+    "Kalp_Yetmezligi": ("I50.9", "Heart failure, unspecified"),
+    "Pulmoner_Emboli": ("I26.9", "Pulmonary embolism without acute cor pulmonale"),
+    "Aort_Anevrizma": ("I71.9", "Aortic aneurysm of unspecified site, without mention of rupture"),
+    "Kronik_Bobrek": ("N18.9", "Chronic kidney disease, unspecified"),
+    "Karaciger_Siroz": ("K74.6", "Other and unspecified cirrhosis of liver"),
+    "Sepsis": ("A41.9", "Sepsis, unspecified organism"),
+    "Atriyal_Fibrilasyon": ("I48.91", "Unspecified atrial fibrillation"),
+    "COPD": ("J44.9", "Chronic obstructive pulmonary disease, unspecified"),
+    "DM_Komplikasyonlu": ("E11.8", "Type 2 diabetes mellitus with unspecified complications"),
+    "DM_Tum": ("E11.9", "Type 2 diabetes mellitus without complications"),
+    "Astim": ("J45.9", "Asthma, unspecified"),
+    "Hipertansiyon": ("I10", "Essential (primary) hypertension"),
+    "Hiperlipidemi": ("E78.5", "Hyperlipidaemia, unspecified"),
+    "Tiroid": ("E07.9", "Disorder of thyroid, unspecified"),
+    "Obezite": ("E66.9", "Obesity, unspecified"),
+    "Depresyon": ("F32.9", "Depressive episode, unspecified"),
+    "Anksiyete": ("F41.9", "Anxiety disorder, unspecified"),
+}
+
 GENDER_MAP = {1: "male", 0: "female"}
+
+
+def condition_display_dual(flag: str) -> str:
+    """English/Turkish bilingual display string for a comorbidity flag."""
+    en = CONDITION_SNOMED.get(flag, (None, flag))[1]
+    tr = CONDITION_DISPLAY_TR.get(flag, flag)
+    return f"{en} / {tr}"

@@ -9,13 +9,20 @@ The bundle for each episode contains:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import uuid
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
-from .codes import CONDITION_SNOMED, GENDER_MAP, LAB_LOINC
+from ..locale.turkish import (
+    CONDITION_DISPLAY_TR,
+    sample_address,
+    sample_name,
+)
+from .codes import CONDITION_ICD10, CONDITION_SNOMED, GENDER_MAP, LAB_LOINC
 
 
 def _is_present(v) -> bool:
@@ -27,20 +34,51 @@ def _is_present(v) -> bool:
         return True
 
 
+def _patient_rng(row: pd.Series, patient_id: str) -> np.random.Generator:
+    """Deterministic per-patient RNG so HumanName and Address are reproducible."""
+    seed_src = f"{patient_id}|{row.get('HASTA_ID', '')}|{row.get('RF_EPISODE2', '')}"
+    seed = int(hashlib.sha256(seed_src.encode("utf-8")).hexdigest()[:16], 16)
+    return np.random.default_rng(seed)
+
+
 def _patient_resource(row: pd.Series, patient_id: str) -> dict:
     age = int(row.get("age")) if _is_present(row.get("age")) else None
-    gender = (
-        GENDER_MAP.get(int(row.get("gender_is_male", 0)), "unknown")
-        if _is_present(row.get("gender_is_male")) else "unknown"
+    is_male = (
+        bool(int(row.get("gender_is_male", 0)))
+        if _is_present(row.get("gender_is_male")) else False
     )
+    gender = GENDER_MAP.get(int(is_male), "unknown")
     episode_dt = pd.to_datetime(row.get("episode_date"), errors="coerce")
     if pd.isna(episode_dt):
         episode_dt = pd.Timestamp.utcnow()
     birth = (episode_dt - pd.DateOffset(years=age)) if age is not None else None
+
+    rng = _patient_rng(row, patient_id)
+    given, family = sample_name(rng, is_male)
+    addr = sample_address(rng)
+
     res = {
         "resourceType": "Patient",
         "id": patient_id,
         "gender": gender,
+        "name": [{"use": "official", "family": family, "given": [given]}],
+        "address": [{
+            "use": "home",
+            "type": "physical",
+            "city": addr.city,
+            "state": addr.state_code,
+            "country": addr.country,
+        }],
+        "communication": [{
+            "language": {
+                "coding": [{
+                    "system": "urn:ietf:bcp:47",
+                    "code": "tr", "display": "Turkish",
+                }],
+                "text": "Turkish",
+            },
+            "preferred": True,
+        }],
         "extension": [
             {
                 "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
@@ -96,7 +134,17 @@ def _observation_resource(
 
 
 def _condition_resource(patient_id: str, column: str, onset_iso: str) -> dict:
-    code, display = CONDITION_SNOMED[column]
+    sct_code, sct_display = CONDITION_SNOMED[column]
+    icd_code, icd_display = CONDITION_ICD10.get(column, ("", ""))
+    tr_display = CONDITION_DISPLAY_TR.get(column, sct_display)
+    coding = [
+        {"system": "http://snomed.info/sct", "code": sct_code, "display": sct_display},
+    ]
+    if icd_code:
+        coding.append({
+            "system": "http://hl7.org/fhir/sid/icd-10",
+            "code": icd_code, "display": icd_display,
+        })
     return {
         "resourceType": "Condition",
         "id": str(uuid.uuid4()),
@@ -117,10 +165,8 @@ def _condition_resource(patient_id: str, column: str, onset_iso: str) -> dict:
             ]
         },
         "code": {
-            "coding": [
-                {"system": "http://snomed.info/sct", "code": code, "display": display}
-            ],
-            "text": display,
+            "coding": coding,
+            "text": f"{sct_display} / {tr_display}",
         },
         "subject": {"reference": f"urn:uuid:{patient_id}"},
         "onsetDateTime": onset_iso,

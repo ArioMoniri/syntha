@@ -5,8 +5,13 @@ data/raw/*
 # Generated outputs
 output/
 *.csv
-!examples/*.csv
+!examples/**/*.csv
 !tests/**/*.csv
+
+# JSON / NDJSON outputs — generally ignore, but commit small samples under examples/
+*.ndjson
+!examples/**/*.ndjson
+!examples/**/*.json
 
 # Trained model artifacts (runtime; src/syntha/models/ is source code and IS tracked)
 *.pkl

@@ -1,0 +1,545 @@
+{
+  "n_source": 135569,
+  "n_synthetic": 100,
+  "correlation_frobenius": 2.9448169692463027,
+  "continuous": [
+    {
+      "column": "age",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.04765315079406057,
+      "ks_pvalue": 0.9688985528906332,
+      "wasserstein": 0.8293137074109866,
+      "mean_abs_error": 0.3873253472401501,
+      "std_abs_error": 0.7300798375484963
+    },
+    {
+      "column": "glucose_fasting_latest",
+      "n_source": 133719,
+      "n_synthetic": 97,
+      "ks_stat": 0.08038344449504542,
+      "ks_pvalue": 0.5312097196818237,
+      "wasserstein": 1.4985567219813685,
+      "mean_abs_error": 1.3799815061509264,
+      "std_abs_error": 1.3533836824938277
+    },
+    {
+      "column": "ldl_direct_latest",
+      "n_source": 117899,
+      "n_synthetic": 94,
+      "ks_stat": 0.07178764441905106,
+      "ks_pvalue": 0.6905925649822464,
+      "wasserstein": 2.122408733153497,
+      "mean_abs_error": 0.9796644337241531,
+      "std_abs_error": 0.12676070454043753
+    },
+    {
+      "column": "hdl_latest",
+      "n_source": 117523,
+      "n_synthetic": 76,
+      "ks_stat": 0.08948438760251637,
+      "ks_pvalue": 0.5467424171067778,
+      "wasserstein": 1.6957790295283235,
+      "mean_abs_error": 0.7705526986181539,
+      "std_abs_error": 1.3715008871591845
+    },
+    {
+      "column": "cholesterol_total_latest",
+      "n_source": 117750,
+      "n_synthetic": 89,
+      "ks_stat": 0.10842901786779269,
+      "ks_pvalue": 0.22907822020972224,
+      "wasserstein": 5.253211999122305,
+      "mean_abs_error": 0.3592867890376681,
+      "std_abs_error": 0.17992562481983043
+    },
+    {
+      "column": "triglycerides_latest",
+      "n_source": 120633,
+      "n_synthetic": 87,
+      "ks_stat": 0.058269924996219635,
+      "ks_pvalue": 0.9123397063029554,
+      "wasserstein": 7.824549501000364,
+      "mean_abs_error": 5.8252076093151,
+      "std_abs_error": 18.995404114116774
+    },
+    {
+      "column": "egfr_latest",
+      "n_source": 118365,
+      "n_synthetic": 89,
+      "ks_stat": 0.06977445978612146,
+      "ks_pvalue": 0.7524518198139556,
+      "wasserstein": 1.7635669814091661,
+      "mean_abs_error": 0.7838932489011228,
+      "std_abs_error": 1.0316043147143237
+    },
+    {
+      "column": "creatinine_latest",
+      "n_source": 130515,
+      "n_synthetic": 99,
+      "ks_stat": 0.05555172457827325,
+      "ks_pvalue": 0.9032037674308179,
+      "wasserstein": 0.0190389061159531,
+      "mean_abs_error": 0.005795216652862201,
+      "std_abs_error": 0.015902704552058694
+    },
+    {
+      "column": "hemoglobin_latest",
+      "n_source": 134660,
+      "n_synthetic": 99,
+      "ks_stat": 0.07288374612004495,
+      "ks_pvalue": 0.6420175906667768,
+      "wasserstein": 0.1282921716796661,
+      "mean_abs_error": 0.04686210388453027,
+      "std_abs_error": 0.05265755587767096
+    },
+    {
+      "column": "wbc_latest",
+      "n_source": 130810,
+      "n_synthetic": 96,
+      "ks_stat": 0.05662379277832985,
+      "ks_pvalue": 0.900590923017716,
+      "wasserstein": 0.4101018273639994,
+      "mean_abs_error": 0.07395490695804341,
+      "std_abs_error": 1.4573653800390458
+    },
+    {
+      "column": "platelets_latest",
+      "n_source": 134658,
+      "n_synthetic": 100,
+      "ks_stat": 0.08290305811760157,
+      "ks_pvalue": 0.4726884202808198,
+      "wasserstein": 10.830690638506436,
+      "mean_abs_error": 0.6053069256932417,
+      "std_abs_error": 31.759883712924875
+    },
+    {
+      "column": "alt_latest",
+      "n_source": 133701,
+      "n_synthetic": 98,
+      "ks_stat": 0.059325415269435355,
+      "ks_pvalue": 0.8601814368909637,
+      "wasserstein": 1.1739415790049161,
+      "mean_abs_error": 0.4768722700324943,
+      "std_abs_error": 0.2981825677374239
+    },
+    {
+      "column": "ast_latest",
+      "n_source": 124672,
+      "n_synthetic": 93,
+      "ks_stat": 0.06431801779051027,
+      "ks_pvalue": 0.8125681845798014,
+      "wasserstein": 1.0032176378018192,
+      "mean_abs_error": 0.5354425696418907,
+      "std_abs_error": 0.3651751155343108
+    },
+    {
+      "column": "vitamin_b12_latest",
+      "n_source": 72675,
+      "n_synthetic": 55,
+      "ks_stat": 0.1235975857647684,
+      "ks_pvalue": 0.34179981481247534,
+      "wasserstein": 35.02304088894451,
+      "mean_abs_error": 7.375974431376392,
+      "std_abs_error": 43.345421714395144
+    },
+    {
+      "column": "n_drugs",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.06531176006314132,
+      "ks_pvalue": 0.7621896206800367,
+      "wasserstein": 0.1058064896842199,
+      "mean_abs_error": 0.07349010466994665,
+      "std_abs_error": 0.048244810542426686
+    },
+    {
+      "column": "n_medications",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.02841741106005058,
+      "ks_pvalue": 0.999991726019379,
+      "wasserstein": 0.04759177983167251,
+      "mean_abs_error": 0.04049576230554183,
+      "std_abs_error": 0.0489566795183532
+    },
+    {
+      "column": "drug_class_count",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.0021833900080401314,
+      "ks_pvalue": 1.0,
+      "wasserstein": 0.0024784427118293983,
+      "mean_abs_error": 0.0024784427118294005,
+      "std_abs_error": 0.056001505489400125
+    },
+    {
+      "column": "charlson_cci",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.012193052984089237,
+      "ks_pvalue": 1.0,
+      "wasserstein": 0.012451224099904845,
+      "mean_abs_error": 0.012451224099904845,
+      "std_abs_error": 0.11455277687131199
+    },
+    {
+      "column": "comorbidity_count",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.0036245749396985882,
+      "ks_pvalue": 1.0,
+      "wasserstein": 0.004155669806519158,
+      "mean_abs_error": 0.0030934800728780187,
+      "std_abs_error": 0.007023012349064772
+    },
+    {
+      "column": "n_ep_labs_available_x",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.08715864246250984,
+      "ks_pvalue": 0.4097721280600741,
+      "wasserstein": 0.11621063812523505,
+      "mean_abs_error": 0.11621063812523502,
+      "std_abs_error": 0.015109474921402577
+    },
+    {
+      "column": "keyword_total_flags",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.0,
+      "ks_pvalue": 1.0,
+      "wasserstein": 0.0,
+      "mean_abs_error": 0.0,
+      "std_abs_error": 0.0
+    },
+    {
+      "column": "lab_abnormal_pct",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.04563462148426267,
+      "ks_pvalue": 0.9792587923565379,
+      "wasserstein": 0.00614522349893225,
+      "mean_abs_error": 0.002682820186079432,
+      "std_abs_error": 0.0008077460316935139
+    },
+    {
+      "column": "max_ilac_onem",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.05531176006314131,
+      "ks_pvalue": 0.9028498314022413,
+      "wasserstein": 0.07156916404192704,
+      "mean_abs_error": 0.03905435608435556,
+      "std_abs_error": 0.012327042837562474
+    },
+    {
+      "column": "mean_ilac_onem",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.05531176006314131,
+      "ks_pvalue": 0.9028498314022413,
+      "wasserstein": 0.06630234129323158,
+      "mean_abs_error": 0.044321178833051034,
+      "std_abs_error": 0.006071081011234825
+    },
+    {
+      "column": "berturk_similarity",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.07268940539503865,
+      "ks_pvalue": 0.6392578938663357,
+      "wasserstein": 0.0019795593670754886,
+      "mean_abs_error": 0.0002787669409238802,
+      "std_abs_error": 0.004218569119553962
+    },
+    {
+      "column": "tier_healthy_patient",
+      "n_source": 135569,
+      "n_synthetic": 100,
+      "ks_stat": 0.028621071188841163,
+      "ks_pvalue": 0.9999900833933915,
+      "wasserstein": 0.028621071188841163,
+      "mean_abs_error": 0.02862107118884108,
+      "std_abs_error": 0.01704442962862729
+    }
+  ],
+  "binary": [
+    {
+      "column": "gender_is_male",
+      "source_prevalence": 0.5155750946012732,
+      "synthetic_prevalence": 0.5,
+      "abs_error": 0.015575094601273154
+    },
+    {
+      "column": "Kanser",
+      "source_prevalence": 0.01378633758455104,
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.0037863375845510402
+    },
+    {
+      "column": "Iskemik_Kalp",
+      "source_prevalence": 0.042288428770589144,
+      "synthetic_prevalence": 0.03,
+      "abs_error": 0.012288428770589145
+    },
+    {
+      "column": "Serebrovaskuler",
+      "source_prevalence": 0.007988551955092979,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.007988551955092979
+    },
+    {
+      "column": "Kalp_Yetmezligi",
+      "source_prevalence": 0.0010105555104780591,
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.008989444489521941
+    },
+    {
+      "column": "Pulmoner_Emboli",
+      "source_prevalence": 0.0024636900766399398,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0024636900766399398
+    },
+    {
+      "column": "Aort_Anevrizma",
+      "source_prevalence": 0.003747169338123022,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.003747169338123022
+    },
+    {
+      "column": "Kronik_Bobrek",
+      "source_prevalence": 0.0008261475706098001,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0008261475706098001
+    },
+    {
+      "column": "Karaciger_Siroz",
+      "source_prevalence": 0.0012687266262936217,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0012687266262936217
+    },
+    {
+      "column": "Sepsis",
+      "source_prevalence": 0.00015490266948933753,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.00015490266948933753
+    },
+    {
+      "column": "Atriyal_Fibrilasyon",
+      "source_prevalence": 0.004654456402274856,
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.005345543597725144
+    },
+    {
+      "column": "COPD",
+      "source_prevalence": 0.016899143609527253,
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.006899143609527253
+    },
+    {
+      "column": "DM_Komplikasyonlu",
+      "source_prevalence": 0.003311966600033931,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.003311966600033931
+    },
+    {
+      "column": "DM_Tum",
+      "source_prevalence": 0.04795344068334206,
+      "synthetic_prevalence": 0.05,
+      "abs_error": 0.0020465593166579393
+    },
+    {
+      "column": "Astim",
+      "source_prevalence": 0.025824487899150986,
+      "synthetic_prevalence": 0.03,
+      "abs_error": 0.0041755121008490124
+    },
+    {
+      "column": "Hipertansiyon",
+      "source_prevalence": 0.07450818402437136,
+      "synthetic_prevalence": 0.09,
+      "abs_error": 0.01549181597562864
+    },
+    {
+      "column": "Hiperlipidemi",
+      "source_prevalence": 0.11964387138652642,
+      "synthetic_prevalence": 0.13,
+      "abs_error": 0.010356128613473584
+    },
+    {
+      "column": "Tiroid",
+      "source_prevalence": 0.14461270644468868,
+      "synthetic_prevalence": 0.15,
+      "abs_error": 0.005387293555311312
+    },
+    {
+      "column": "Obezite",
+      "source_prevalence": 0.005672388230347646,
+      "synthetic_prevalence": 0.01,
+      "abs_error": 0.004327611769652354
+    },
+    {
+      "column": "Depresyon",
+      "source_prevalence": 0.0022350242312032986,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0022350242312032986
+    },
+    {
+      "column": "Anksiyete",
+      "source_prevalence": 0.01089482108741674,
+      "synthetic_prevalence": 0.02,
+      "abs_error": 0.009105178912583261
+    },
+    {
+      "column": "pristine_strict",
+      "source_prevalence": 0.4064129705168586,
+      "synthetic_prevalence": 0.41,
+      "abs_error": 0.0035870294831413796
+    },
+    {
+      "column": "pristine_tolerant",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "tier_healthy_episode",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "is_cancer",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "is_ex",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "is_cancer_or_ex",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "drug_safe",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "has_rx_data",
+      "source_prevalence": 0.18468823993685873,
+      "synthetic_prevalence": 0.16,
+      "abs_error": 0.02468823993685873
+    },
+    {
+      "column": "has_blacklist_drug",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "rule_clean",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "keyword_clean",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "berturk_clean",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "text_available",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "nlp_filter_pass",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "all_ep_labs_normal_x",
+      "source_prevalence": 1.0,
+      "synthetic_prevalence": 1.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "polypharmacy_flag",
+      "source_prevalence": 0.0003024290213839447,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0003024290213839447
+    },
+    {
+      "column": "high_risk_drug_flag",
+      "source_prevalence": 2.9505270378921434e-05,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 2.9505270378921434e-05
+    },
+    {
+      "column": "has_nontolerable_icd_30d",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "any_worsening",
+      "source_prevalence": 0.45886596493298615,
+      "synthetic_prevalence": 0.44,
+      "abs_error": 0.018865964932986146
+    },
+    {
+      "column": "rf_kanser",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "rf_kronik_hastalik",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "rf_akut_ciddi",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "rf_psikiyatri_ciddi",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "rf_ilac_risk_metin",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    },
+    {
+      "column": "rf_fonksiyon_kaybi",
+      "source_prevalence": 0.0,
+      "synthetic_prevalence": 0.0,
+      "abs_error": 0.0
+    }
+  ]
+}
