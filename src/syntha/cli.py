@@ -116,6 +116,16 @@ def fhir(input_csv, output_dir, fmt, modules):
 
 
 @main.command()
+@click.option("--bundles", "bundles_ndjson", required=True, type=click.Path(exists=True), help="Path to bundles.ndjson")
+@click.option("--host", default="127.0.0.1", show_default=True)
+@click.option("--port", default=8080, show_default=True)
+def serve(bundles_ndjson, host, port):
+    """Boot a minimal read-only FHIR R4 server backed by a bundles NDJSON file."""
+    from .server import serve_forever
+    serve_forever(bundles_ndjson, host=host, port=port)
+
+
+@main.command()
 @click.option("--source", "source_csv", required=True, type=click.Path(exists=True))
 @click.option("--synthetic", "synthetic_csv", required=True, type=click.Path(exists=True))
 @click.option("--output", "report_path", required=True, type=click.Path())

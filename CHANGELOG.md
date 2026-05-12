@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-05-12
+
+### Added
+- 🌐 **`syntha serve`** — minimal in-memory FHIR R4 read-only server (`src/syntha/server.py`, ~150 LOC, stdlib only). Exposes canonical REST endpoints (`GET /Patient`, `GET /Observation/{id}`, `GET /metadata`, `GET /$export`, etc.) backed by a transaction-Bundle NDJSON file. 4 server integration tests.
+- 📡 **`scripts/post_to_fhir.sh`** — POSTs every transaction Bundle from an NDJSON file to a configurable FHIR endpoint (defaults to the public HAPI FHIR test server).
+- 📖 **README — embedded viewers** — collapsible `<details>` blocks with inline previews of the sample Bundle / CSV / validation report, plus links to the GitHub built-in JSON viewer, Simplifier.net, and the HL7 Clinical FHIR Renderer.
+- 📖 **README — FHIR endpoints table** — maps every emitted resource type to its canonical REST endpoint and demonstrates spinning up the local demo server + POSTing to a remote one.
+- 📖 **README — three explicit clinician-curation paths**: (1) tell the maintainer agent; (2) open an issue with the Clinical curation template; (3) submit a PR. Lists which files map to which kind of change.
+
 ## [0.3.0] — 2026-05-12
 
 ### Added

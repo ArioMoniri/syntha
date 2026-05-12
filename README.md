@@ -21,11 +21,12 @@
 - [🚀 Quick start](#-quick-start)
 - [📊 Distribution fidelity](#-distribution-fidelity)
 - [📦 Example output](#-example-output-embedded)
+- [🌐 FHIR endpoints](#-fhir-endpoints)
 - [🧱 Architecture](#-architecture)
 - [🧬 Synthea-style clinical modules](#-synthea-style-clinical-modules)
 - [🛠️ CLI reference](#%EF%B8%8F-cli-reference)
 - [🗺️ Roadmap](#%EF%B8%8F-roadmap)
-- [🤝 Contributing](#-contributing--clinician-curation-welcome)
+- [🤝 Contributing + clinician curation](#-contributing--clinician-curation-welcome)
 - [📄 License + citation](#-license--citation)
 
 ---
@@ -149,59 +150,160 @@ A 100-episode sample of `tolerant` cohort vs the full 135 569-row source:
 
 ## 📦 Example output (embedded)
 
-A pretty-printed sample FHIR Bundle, a 100-episode CSV, the validation report, and the model card all live under [`examples/sample_output/`](examples/sample_output/) and are tracked in git.
+A pretty-printed sample FHIR Bundle, a 100-episode synthetic CSV, the model card, and the validation report all live under [`examples/sample_output/`](examples/sample_output/) and are tracked in git.
 
-**Patient resource — Turkish localized:**
+| File | Click to view (GitHub built-in viewer) | What's inside |
+|---|---|---|
+| 🧾 **Full FHIR Bundle (pretty)** | [`sample_bundle_pretty.json`](examples/sample_output/sample_bundle_pretty.json) | One transaction Bundle: Patient + Observations + Conditions + Encounter + MedicationRequests + Procedure + CarePlan |
+| 📡 **100 bundles, NDJSON** | [`sample_bundles.ndjson`](examples/sample_output/sample_bundles.ndjson) | Bulk-FHIR-style export, one transaction Bundle per line |
+| 📊 **Flat CSV** | [`sample_episodes.csv`](examples/sample_output/sample_episodes.csv) | 100 synthetic episodes matching input schema |
+| 🗒️ **Model card** | [`sample_model_card.json`](examples/sample_output/sample_model_card.json) | source sha256, n_train, marginals, top correlations |
+| ✅ **Validation report** | [`sample_validation_report.json`](examples/sample_output/sample_validation_report.json) | KS / Wasserstein / correlation-Frobenius per column |
 
-```json
-{
-  "resourceType": "Patient",
-  "id": "…",
-  "gender": "female",
-  "name": [{"use": "official", "family": "Bulut", "given": ["Pınar"]}],
-  "address": [{
-    "use": "home", "type": "physical",
-    "city": "Antalya", "state": "TR-35", "country": "TR"
-  }],
-  "communication": [{
-    "language": {"coding": [{"system": "urn:ietf:bcp:47", "code": "tr", "display": "Turkish"}]},
-    "preferred": true
-  }],
-  "birthDate": "1970-…"
-}
-```
+> 💡 **Embedded viewer.** GitHub renders the linked JSON files with syntax highlighting and a collapsible outline (click the `{}` icon top-right of the file view). For full **FHIR-aware** validation and tree-view rendering, drag the file onto [simplifier.net](https://simplifier.net/) or paste it into the [official HL7 Clinical FHIR Renderer](https://clinical-fhir.github.io/Renderer/).
 
-**Condition — dual SNOMED + ICD-10 + Turkish display:**
+<details>
+<summary>👁️ <b>Inline preview — first synthetic patient (click to expand)</b></summary>
 
 ```json
 {
-  "resourceType": "Condition",
-  "code": {
-    "coding": [
-      {"system": "http://snomed.info/sct", "code": "414545008",
-       "display": "Ischemic heart disease (disorder)"},
-      {"system": "http://hl7.org/fhir/sid/icd-10", "code": "I25.9",
-       "display": "Chronic ischaemic heart disease, unspecified"}
-    ],
-    "text": "Ischemic heart disease (disorder) / İskemik kalp hastalığı"
-  }
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "timestamp": "2017-05-27T21:49:42Z",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "20f13c43-d17b-443b-b7a7-69ccc40631c6",
+        "gender": "male",
+        "name": [{"use": "official", "family": "Avcı", "given": ["Furkan"]}],
+        "address": [{
+          "use": "home", "type": "physical",
+          "city": "İstanbul", "state": "TR-34", "country": "TR"
+        }],
+        "communication": [{
+          "language": {"coding": [{"system": "urn:ietf:bcp:47", "code": "tr", "display": "Turkish"}]},
+          "preferred": true
+        }],
+        "birthDate": "1975-…"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "code": {
+          "coding": [{"system": "http://loinc.org", "code": "8480-6",
+                       "display": "Systolic blood pressure"}]
+        },
+        "valueQuantity": {"value": 118.72, "unit": "mm[Hg]"}
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "code": {
+          "coding": [
+            {"system": "http://snomed.info/sct", "code": "414545008",
+             "display": "Ischemic heart disease (disorder)"},
+            {"system": "http://hl7.org/fhir/sid/icd-10", "code": "I25.9",
+             "display": "Chronic ischaemic heart disease, unspecified"}
+          ],
+          "text": "Ischemic heart disease (disorder) / İskemik kalp hastalığı"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "medicationCodeableConcept": {
+          "coding": [{
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "243670", "display": "Aspirin 81 MG Oral Tablet"
+          }]
+        },
+        "dosageInstruction": [{"text": "81 mg daily"}]
+      }
+    }
+  ]
 }
 ```
 
-**MedicationRequest — RxNorm-coded:**
+</details>
+
+<details>
+<summary>👁️ <b>Inline preview — first 5 rows of the CSV</b></summary>
+
+| RF_EPISODE2 | HASTA_ID | episode_date | gender | age | bp_sys | bp_dia | hdl | ldl | hgb | egfr | Hipertansiyon | DM_Tum |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 92893619 | SYN_7D70431D | 2017-05-27 | M | 42 | 118.7 | 63.0 | 95.0 | 58.0 | 12.9 | 105.7 | 0 | 0 |
+| … | … | … | … | … | … | … | … | … | … | … | … | … |
+
+Full file: [`examples/sample_output/sample_episodes.csv`](examples/sample_output/sample_episodes.csv) (100 rows × 73 cols).
+
+</details>
+
+<details>
+<summary>👁️ <b>Inline preview — validation report summary</b></summary>
 
 ```json
 {
-  "resourceType": "MedicationRequest",
-  "medicationCodeableConcept": {
-    "coding": [{
-      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-      "code": "243670", "display": "Aspirin 81 MG Oral Tablet"
-    }]
-  },
-  "dosageInstruction": [{"text": "81 mg daily"}]
+  "n_source": 135569,
+  "n_synthetic": 100,
+  "ks_max": 0.14,
+  "ks_mean": 0.07,
+  "binary_max_abs_error": 0.025,
+  "correlation_frobenius": 2.94
 }
 ```
+
+</details>
+
+## 🌐 FHIR endpoints
+
+syntha emits canonical FHIR R4 resources, so every emitted resource type maps to its standard REST endpoint:
+
+| Resource type | GET (read) | GET (search) | Create (POST to base) |
+|---|---|---|---|
+| 👤 Patient | `GET /Patient/{id}` | `GET /Patient` | as part of transaction `Bundle` |
+| 🧪 Observation | `GET /Observation/{id}` | `GET /Observation?subject={ref}` | ↑ |
+| 🩺 Condition | `GET /Condition/{id}` | `GET /Condition?patient={id}` | ↑ |
+| 🏥 Encounter | `GET /Encounter/{id}` | `GET /Encounter?patient={id}` | ↑ |
+| 💊 MedicationRequest | `GET /MedicationRequest/{id}` | `GET /MedicationRequest?patient={id}` | ↑ |
+| 🔬 Procedure | `GET /Procedure/{id}` | `GET /Procedure?patient={id}` | ↑ |
+| 📋 CarePlan | `GET /CarePlan/{id}` | `GET /CarePlan?patient={id}` | ↑ |
+| 📦 Bundle | `GET /Bundle/{id}` | — | `POST /` (transaction) |
+
+### Spin up a demo FHIR server locally
+
+```bash
+syntha serve --bundles examples/sample_output/sample_bundles.ndjson --port 8080
+```
+
+Then:
+
+```bash
+curl http://127.0.0.1:8080/metadata           # CapabilityStatement
+curl http://127.0.0.1:8080/Patient            # searchset Bundle (all Patients)
+curl http://127.0.0.1:8080/Patient/{id}       # single Patient
+curl http://127.0.0.1:8080/Observation        # all Observations
+curl http://127.0.0.1:8080/\$export           # FHIR Bulk Data export (NDJSON)
+```
+
+This is a **read-only demo server** (stdlib `http.server`, no dependencies). For a production-grade FHIR server, POST the bundles to a HAPI / Microsoft FHIR / Google Healthcare API instance — see below.
+
+### POST the bundles to any FHIR R4 server
+
+`scripts/post_to_fhir.sh` POSTs every transaction Bundle in an NDJSON file to a configurable FHIR endpoint (default: the public [HAPI test server](https://hapi.fhir.org/baseR4)):
+
+```bash
+# To the public HAPI playground:
+bash scripts/post_to_fhir.sh examples/sample_output/sample_bundles.ndjson
+
+# To your own server:
+FHIR_BASE=http://localhost:8080/fhir bash scripts/post_to_fhir.sh
+```
+
+Once uploaded, you can browse the resources in any FHIR UI — e.g. [HAPI's built-in browser](https://hapi.fhir.org/) or the [Open Patient Browser](https://patient-browser.smarthealthit.org/).
 
 ## 🧱 Architecture
 
@@ -254,6 +356,7 @@ See [docs/MODULES.md](docs/MODULES.md) for the authoring guide. Clinician contri
 | `syntha sample` | Raw sampling from a registered model |
 | `syntha fhir` | Convert an existing synthetic CSV to FHIR bundles |
 | `syntha validate` | KS / Wasserstein / correlation diff between source and synthetic |
+| `syntha serve` | Boot a read-only FHIR R4 demo server from a bundles NDJSON file |
 | `syntha list-models` | List models in a registry |
 | `syntha show-card` | Print a model card |
 
@@ -269,9 +372,59 @@ The full phased roadmap (v0.1 → v1.0) lives in [ROADMAP.md](ROADMAP.md). Highl
 - **v0.9 — TSTR benchmark** ⬜
 - **v1.0 — PyPI + paper** ⬜
 
-## 🤝 Contributing — clinician curation welcome
+## 🤝 Contributing + clinician curation welcome
 
-Open an issue with the [Clinical curation template](.github/ISSUE_TEMPLATE/clinical_curation.md) or just paste your guidance into a fresh issue. Code contributions: see [CONTRIBUTING.md](CONTRIBUTING.md). All tests must pass in CI before merge.
+There are **three ways** to feed clinical guidance into syntha — pick whichever is least friction for you:
+
+### 1. 🚀 Just tell me (lowest friction)
+
+Reply in any open conversation with Claude (the agent that maintains this repo) saying e.g.
+
+> *"In Türkiye, perindopril 5 mg is the typical first-line ACEi for uncomplicated hypertension per TKD 2023 — switch the default in the hypertension module."*
+
+…and I'll edit the relevant file, push, and re-run CI. No GitHub UI needed.
+
+### 2. 📝 GitHub issue (recommended for asynchronous tracking)
+
+Open an issue using the **🧑‍⚕️ Clinical curation** template — one click:
+
+👉 **[Open a Clinical curation issue](https://github.com/ArioMoniri/syntha/issues/new?template=clinical_curation.md&labels=clinical-curation&title=%5Bclinical-curation%5D%20)** 👈
+
+The template pre-lists the files most likely to need changes:
+
+| If you want to change… | Edit this file |
+|---|---|
+| Which drug a module prescribes | `src/syntha/modules/<condition>.py` |
+| The RxNorm code or dose text | `src/syntha/fhir/rxnorm.py` |
+| The SNOMED / ICD-10 code for a Condition | `src/syntha/fhir/codes.py` |
+| Turkish display strings | `src/syntha/locale/turkish.py` |
+| Prevalence calibration / disease-progression rules | `src/syntha/longitudinal.py` |
+
+### 3. 🔧 Pull request
+
+```bash
+git clone https://github.com/ArioMoniri/syntha
+cd syntha
+pip install -e ".[dev]"
+# … edit files …
+pytest -q
+git checkout -b clinical/<short-topic>
+git commit -am "clinical: <what you changed and why>"
+git push -u origin clinical/<short-topic>
+gh pr create   # or open via the GitHub UI
+```
+
+### What's currently flagged 🟣 (waiting for clinician input)
+
+Per [ROADMAP.md → v0.6](ROADMAP.md):
+
+- 🟣 **TR-specific first-line drug calibration** — current defaults are international (lisinopril/amlodipine for HTN, metformin for DM, atorvastatin for hyperlipidemia). Turkish primary-care reality may differ (e.g. perindopril, nebivolol).
+- 🟣 **New modules**: CKD staging (eGFR-driven), MAFLD (ALT/AST + obesity), anemia (Hb-driven), B12 deficiency (vit B12 column directly available).
+- 🟣 **Prevalence calibration to TÜİK** — synthetic disease rates currently mirror the *pristine-healthy* source cohort. To use syntha as a Turkish-population baseline rather than a healthy baseline, the marginals should be calibrated to TÜİK figures.
+- 🟣 **Turkish display string review** — confirm clinical-Turkish preferred terms match `Türk Tabipleri Birliği` / TR-specific usage rather than literal translations.
+- 🟣 **ICD-10 specificity** — the current mapping uses unspecified (".9") forms; specifying further (`E11.65`, `I50.32`, etc.) when the source flag carries the information would improve downstream realism.
+
+Full developer guide: [CONTRIBUTING.md](CONTRIBUTING.md). All PRs must pass the CI matrix (Py 3.10 → 3.13) before merge.
 
 ## 📄 License + citation
 
