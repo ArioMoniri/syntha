@@ -107,9 +107,10 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          # Only attach files; do not overwrite the release's name / body /
+          # draft flag. Whatever was previously authored (manually or via a
+          # prior `gh release edit`) survives subsequent matrix jobs.
           files: release-assets/${{ matrix.release-name }}
-          draft: false
-          prerelease: false
           fail_on_unmatched_files: true
 
       # On manual workflow_dispatch: upload the artifact as a GitHub Actions
