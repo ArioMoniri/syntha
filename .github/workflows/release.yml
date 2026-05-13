@@ -48,7 +48,7 @@ jobs:
           ls -lh app/src/model_tolerant.json app/src/model_strict.json
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
 
