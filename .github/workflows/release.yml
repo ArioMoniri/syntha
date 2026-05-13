@@ -149,42 +149,57 @@ jobs:
           ls -lh release-assets/
 
       # ── Updater artifacts ──
-      # Tauri 2 with createUpdaterArtifacts: true emits a <bundle>.tar.gz (mac
-      # / linux) or <bundle>.zip (windows) plus a <bundle>.sig minisign
-      # signature next to the regular installer. We copy both into
-      # release-assets with stable names — the latest.json manifest assembled
-      # later points end-user installs at these stable URLs.
+      # Tauri 2 with createUpdaterArtifacts: true emits an extra updater
+      # archive per platform (alongside the human-installer):
+      #   macOS    bundle/macos/<name>.app.tar.gz  + .sig
+      #   Linux    bundle/appimage/<name>.AppImage + .sig   (.AppImage is
+      #            both the installer and the updater payload on Linux)
+      #   Windows  bundle/nsis/<name>-setup.exe    + .sig   (signed in place)
+      # The .sig is a minisign signature over the archive bytes. End users
+      # only see installer files; the auto-updater fetches .sig + the archive
+      # and verifies before installing.
       - name: Collect updater artifact + signature
         shell: bash
         run: |
           set -euo pipefail
+
+          TARGET_ROOT="app/src-tauri/target/${{ matrix.rust-target }}/release/bundle"
+          echo "── full bundle tree ──"
+          ls -R "$TARGET_ROOT" || true
+
           case "${{ matrix.label }}" in
             macos-aarch64)
-              src=$(ls "${{ matrix.bundle-dir }}"/*.tar.gz 2>/dev/null | head -n1) || true
+              src=$(ls "$TARGET_ROOT/macos"/*.app.tar.gz 2>/dev/null | head -n1) || true
+              sig="${src}.sig"
               dest_archive="release-assets/syntha_aarch64.app.tar.gz"
               ;;
             windows-x64)
-              # On Windows we sign the NSIS .exe directly (no archive); the
-              # .sig sits next to it.
-              src=$(ls "${{ matrix.bundle-dir }}"/*-setup.exe 2>/dev/null | head -n1) || true
+              src=$(ls "$TARGET_ROOT/nsis"/*-setup.exe 2>/dev/null | head -n1) || true
+              sig="${src}.sig"
               dest_archive="release-assets/syntha_x64-setup.exe"
               ;;
             linux-amd64)
-              src=$(ls "${{ matrix.bundle-dir }}"/*.AppImage 2>/dev/null | head -n1) || true
+              src=$(ls "$TARGET_ROOT/appimage"/*.AppImage 2>/dev/null | head -n1) || true
+              sig="${src}.sig"
               dest_archive="release-assets/syntha_amd64.AppImage"
               ;;
           esac
-          if [[ -n "${src:-}" ]]; then
-            cp "$src" "$dest_archive"
-            cp "${src}.sig" "${dest_archive}.sig"
-            echo "✓ updater artifact: $dest_archive"
-            echo "✓ updater signature: ${dest_archive}.sig"
-            ls -lh release-assets/
-          else
-            echo "✗ no updater artifact found in ${{ matrix.bundle-dir }}"
-            ls -R "${{ matrix.bundle-dir }}"
+
+          if [[ -z "${src:-}" || ! -f "$src" ]]; then
+            echo "✗ no updater artifact found"; exit 1
+          fi
+          if [[ ! -s "$sig" ]]; then
+            echo "✗ updater signature missing or empty at $sig"
+            echo "  (this means TAURI_SIGNING_PRIVATE_KEY didn't reach the build step)"
+            ls -la "$(dirname "$sig")" | head -20
             exit 1
           fi
+
+          cp "$src" "$dest_archive"
+          cp "$sig" "${dest_archive}.sig"
+          echo "✓ updater artifact: $dest_archive  ($(wc -c <"$dest_archive") bytes)"
+          echo "✓ updater signature: ${dest_archive}.sig  ($(wc -c <"${dest_archive}.sig") bytes)"
+          ls -lh release-assets/
 
       # On tag push: attach the renamed artifact to the matching GitHub
       # release. softprops/action-gh-release finds the release with tagName
