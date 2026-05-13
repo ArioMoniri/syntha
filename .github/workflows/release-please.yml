@@ -1,0 +1,35 @@
+name: release-please
+
+# Automates semver tagging + CHANGELOG maintenance based on conventional-
+# commit messages (`feat:`, `fix:`, `chore:`, `feat!:` for breaking).
+#
+# Behavior: on every push to main, release-please scans the commit log
+# since the last release. If there are user-facing changes (feat/fix), it
+# opens (or updates) a release PR with the proposed CHANGELOG diff and
+# version bump. When that PR is merged, release-please creates the tag
+# automatically — which then triggers .github/workflows/release.yml to
+# build and attach the installers.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run release-please
+        uses: googleapis/release-please-action@v4
+        with:
+          release-type: python
+          package-name: syntha
+          # Same versioning across Python lib, Cargo, npm. Driven by the
+          # `manifest` mode which reads release-please-config.json and
+          # release-please-manifest.json from the repo root.
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json

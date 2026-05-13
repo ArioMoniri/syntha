@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "package-name": "syntha",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "toml",
+          "path": "pyproject.toml",
+          "jsonpath": "$.project.version"
+        },
+        {
+          "type": "json",
+          "path": "app/package.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "app/src-tauri/tauri.conf.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "generic",
+          "path": "app/src-tauri/Cargo.toml"
+        }
+      ],
+      "changelog-sections": [
+        { "type": "feat", "section": "🆕 Features" },
+        { "type": "fix", "section": "🐛 Bug fixes" },
+        { "type": "perf", "section": "⚡ Performance" },
+        { "type": "docs", "section": "📚 Documentation" },
+        { "type": "build", "section": "🔧 Build / packaging" },
+        { "type": "ci", "section": "🤖 CI / infrastructure" },
+        { "type": "test", "section": "🧪 Tests" },
+        { "type": "refactor", "section": "♻️ Refactor", "hidden": true },
+        { "type": "style", "section": "💄 Style", "hidden": true },
+        { "type": "chore", "section": "🧹 Chores", "hidden": true }
+      ]
+    }
+  }
+}

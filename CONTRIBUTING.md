@@ -58,6 +58,19 @@ N=1000 bash scripts/run_full_pipeline.sh
 - New modules go in `src/syntha/modules/` and are registered in `src/syntha/modules/__init__.py`.
 - New ICD-10 / SNOMED / RxNorm / LOINC codes go in the corresponding table under `src/syntha/fhir/`.
 
+### Commit message format — conventional commits
+
+This repo uses [Conventional Commits](https://www.conventionalcommits.org/) so [release-please](https://github.com/googleapis/release-please) can auto-generate the next version + CHANGELOG. Prefix the subject with one of:
+
+| Prefix | What it triggers | Example |
+|---|---|---|
+| `feat:` | minor version bump | `feat(modules): add MAFLD module` |
+| `fix:` | patch version bump | `fix(copula): handle empty cohort` |
+| `feat!:` or `BREAKING CHANGE:` in body | major version bump | `feat!: drop legacy spearman corr_method` |
+| `chore:`, `docs:`, `ci:`, `test:`, `refactor:`, `perf:`, `build:`, `style:` | no version bump | `ci: add HAPI validator` |
+
+A release PR will appear automatically on `main` whenever there are unreleased commits. Merging that PR cuts the tag and triggers the installer build.
+
 ### Adding a Synthea-style module
 
 ```python
