@@ -1,0 +1,80 @@
+name: Publish to PyPI
+
+# Builds + publishes `syntha` to PyPI on every v* tag.
+#
+# Authentication uses PyPI's "trusted publishers" mechanism — no API token
+# stored in GitHub secrets. One-time PyPI setup:
+#   1. Register the project at https://pypi.org/manage/projects/ (you must
+#      first own the name `syntha` — register a 1.0.0a0 release manually,
+#      or claim the name and let this workflow publish the first real one).
+#   2. PyPI project → Settings → Publishing → Add trusted publisher:
+#        Owner:           ArioMoniri
+#        Repository:      syntha
+#        Workflow:        pypi-publish.yml
+#        Environment:     pypi-publish
+#   3. Create a matching GitHub environment named `pypi-publish` with
+#      branch protection set to "Selected tags: v*".
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # required for PyPI trusted-publishers (OIDC)
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build sdist + wheel
+        run: |
+          python -m build
+          ls -lh dist/
+
+      - name: Twine-validate
+        run: twine check dist/*
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+          retention-days: 7
+
+  publish-pypi:
+    name: Publish → PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: pypi-publish
+      url: https://pypi.org/p/syntha
+    steps:
+      - name: Download distribution artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI
+        # Trusted-publisher OIDC: no token, the action requests a temporary
+        # one from PyPI tied to this exact (repo, workflow, env, tag) tuple.
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true   # tolerate re-runs of the same tag
+          verbose: true
