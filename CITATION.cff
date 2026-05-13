@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+title: "syntha: hybrid synthetic patient record generator"
+message: "If you use syntha in academic work, please cite it as below."
+type: software
+authors:
+  - family-names: Moniri
+    given-names: Ariorad
+    email: ariomoniri@icloud.com
+repository-code: "https://github.com/ArioMoniri/syntha"
+url: "https://github.com/ArioMoniri/syntha"
+keywords:
+  - synthetic-data
+  - synthetic-patients
+  - FHIR
+  - copula
+  - gaussian-copula
+  - polyserial-correlation
+  - tetrachoric-correlation
+  - healthcare-informatics
+  - bioinformatics
+  - Turkish-EHR
+  - LOINC
+  - SNOMED-CT
+  - ICD-10
+  - RxNorm
+license: Apache-2.0
+abstract: >
+  syntha is a Synthea-inspired hybrid synthetic patient record generator.
+  It learns the joint distribution of real anonymized Turkish-cohort EHR
+  episodes with a Gaussian copula (Spearman→Pearson for continuous pairs,
+  polyserial for continuous↔binary pairs, tetrachoric for binary↔binary
+  pairs as of v0.5), then layers Synthea-style clinical-pathway modules
+  on top to emit fully-coded FHIR R4 transaction bundles in Turkish with
+  LOINC, SNOMED CT, ICD-10, and RxNorm coding. Includes a Tauri 2 desktop
+  app that runs the sampler entirely client-side.
+preferred-citation:
+  type: software
+  title: "syntha: hybrid synthetic patient record generator"
+  authors:
+    - family-names: Moniri
+      given-names: Ariorad
+  year: 2026
+  url: "https://github.com/ArioMoniri/syntha"

@@ -1,0 +1,86 @@
+# Dependabot keeps four ecosystems patched without manual chasing:
+#   - GitHub Actions (the workflows themselves)
+#   - Python deps in pyproject.toml
+#   - npm deps in app/package.json
+#   - Cargo deps in app/src-tauri/Cargo.toml
+#
+# Weekly cadence, grouped patch updates, low PR noise (max 5 open).
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      actions-patches:
+        update-types:
+          - "patch"
+          - "minor"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "python"
+    groups:
+      python-patches:
+        update-types:
+          - "patch"
+          - "minor"
+
+  - package-ecosystem: "npm"
+    directory: "/app"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "tauri-app"
+    groups:
+      tauri-patches:
+        patterns:
+          - "@tauri-apps/*"
+        update-types:
+          - "patch"
+          - "minor"
+      frontend-patches:
+        patterns:
+          - "vite"
+          - "typescript"
+        update-types:
+          - "patch"
+          - "minor"
+
+  - package-ecosystem: "cargo"
+    directory: "/app/src-tauri"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "rust"
+    groups:
+      cargo-patches:
+        update-types:
+          - "patch"
+          - "minor"

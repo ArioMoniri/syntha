@@ -1,0 +1,19 @@
+# CODEOWNERS — auto-requests review from the owner of each touched path.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+
+# Repo-wide default owner.
+*                                       @ArioMoniri
+
+# Anything clinical / terminology-coded needs MD eyes.
+/src/syntha/modules/                    @ArioMoniri
+/src/syntha/fhir/codes.py               @ArioMoniri
+/src/syntha/fhir/rxnorm.py              @ArioMoniri
+/src/syntha/fhir/panels.py              @ArioMoniri
+/src/syntha/locale/turkish.py           @ArioMoniri
+/docs/MEDICAL_OFFICER_REVIEW_v0.5.md    @ArioMoniri
+
+# Release / signing infrastructure — security-sensitive.
+/.github/workflows/release.yml          @ArioMoniri
+/.github/workflows/verify-install-buttons.yml @ArioMoniri
+/app/src-tauri/tauri.conf.json          @ArioMoniri
+/app/src-tauri/Entitlements.plist       @ArioMoniri

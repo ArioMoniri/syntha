@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Questions / discussion
+    url: https://github.com/ArioMoniri/syntha/discussions
+    about: For open-ended questions or "is this the right tool for X?" — please use Discussions, not Issues.
+  - name: 🧑‍⚕️ Clinical curation
+    url: https://github.com/ArioMoniri/syntha/issues/new?template=clinical_curation.md
+    about: Suggest a clinical change (drug default, ICD-10 code, Turkish display string, new module)
