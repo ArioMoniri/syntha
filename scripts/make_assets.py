@@ -46,58 +46,6 @@ def _windows_paths() -> list[str]:
     ]
 
 
-def _draw_tux(ctx: "cairo.Context") -> None:
-    """Draw a Tux-style penguin on a 24×24 canvas.
-
-    Uses a single fused silhouette (body + head + flippers + feet as one
-    union of overlapping shapes) so the outline reads as a coherent penguin
-    rather than disconnected blobs. Then overlays small black ovals for the
-    eyes, leaving the beak as a subtle white triangle off the head.
-    """
-    import math
-
-    def ellipse(cx, cy, rx, ry):
-        ctx.save()
-        ctx.translate(cx, cy)
-        ctx.scale(rx, ry)
-        ctx.arc(0, 0, 1, 0, 2 * math.pi)
-        ctx.restore()
-
-    # ── Fused WHITE silhouette ──────────────────────────────
-    # Order matters: cairo unions shapes as long as we fill once at the end.
-    # Body — a tall pear (wider near the bottom). Two stacked ellipses give
-    # the classic Tux teardrop without a hard waist.
-    ellipse(12.0, 15.3, 5.8, 6.2)
-    ellipse(12.0, 11.5, 4.6, 4.0)
-    # Head — round, slightly tucked into the body.
-    ellipse(12.0, 6.8, 3.7, 3.9)
-    # Flippers — angled outward from upper body, blending with the silhouette.
-    for sign in (-1, 1):
-        ctx.save()
-        ctx.translate(12.0 + sign * 4.6, 13.2)
-        ctx.rotate(sign * 0.45)
-        ctx.scale(1.55, 3.4)
-        ctx.arc(0, 0, 1, 0, 2 * math.pi)
-        ctx.restore()
-    # Feet — two splayed triangles at the bottom.
-    for sign in (-1, 1):
-        ctx.move_to(12.0 + sign * 0.3, 21.0)
-        ctx.line_to(12.0 + sign * 4.2, 22.4)
-        ctx.line_to(12.0 + sign * 1.4, 22.7)
-        ctx.close_path()
-    # Beak — a small triangle off the head pointing down-left/right.
-    ctx.move_to(12.0, 7.6)
-    ctx.line_to(12.0 + 1.4, 8.3)
-    ctx.line_to(12.0 - 1.4, 8.3)
-    ctx.close_path()
-    ctx.fill()
-
-    # ── BLACK detail: eyes ──
-    ctx.set_source_rgba(0, 0, 0, 1)
-    ellipse(10.7, 6.2, 0.45, 0.65)
-    ellipse(13.3, 6.2, 0.45, 0.65)
-    ctx.fill()
-
 
 
 
@@ -119,17 +67,6 @@ def _render_svg_glyph(paths: list[str], size_px: int, fill_rgb=(1, 1, 1)) -> Ima
     return img
 
 
-def _render_tux(size_px: int) -> Image.Image:
-    """Render the Tux silhouette via primitive-shape composition."""
-    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, size_px, size_px)
-    ctx = cairo.Context(surface)
-    ctx.set_antialias(cairo.ANTIALIAS_BEST)
-    scale = size_px / 24.0
-    ctx.scale(scale, scale)
-    ctx.set_source_rgba(1, 1, 1, 1)
-    _draw_tux(ctx)
-    buf = surface.get_data()
-    return Image.frombuffer("RGBA", (size_px, size_px), bytes(buf), "raw", "BGRA", 0, 1)
 
 
 def _parse_svg_path(ctx, path: str) -> None:
@@ -242,7 +179,7 @@ def _font(size: int, *, bold: bool = False) -> ImageFont.FreeTypeFont:
 
 
 def _round_rect_button(
-    glyph: Image.Image,
+    glyph: Image.Image | None,
     headline: str,
     platform: str,
     width: int = 620,
@@ -250,7 +187,12 @@ def _round_rect_button(
     bg: str = "#0a0a0a",
     fg: str = "#ffffff",
 ) -> Image.Image:
-    """Compose one download button matching the reference design."""
+    """Compose one download button matching the reference design.
+
+    When ``glyph`` is ``None`` the button is text-only and horizontally
+    centered (used for the Linux badge — we couldn't render a Tux silhouette
+    we were happy with, so we ship a clean text-only black box instead).
+    """
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -258,32 +200,37 @@ def _round_rect_button(
     radius = int(min(width, height) * 0.10)
     draw.rounded_rectangle((0, 0, width, height), radius=radius, fill=bg)
 
-    # Glyph block — sized to ~70% of button height, anchored on the left.
-    glyph_h = int(height * 0.70)
-    g = glyph.resize((glyph_h, glyph_h), Image.LANCZOS)
-    gx = int(width * 0.07)
-    gy = (height - glyph_h) // 2
-    img.paste(g, (gx, gy), g)
-
-    # Text block to the right of the glyph.
-    text_x = gx + glyph_h + int(width * 0.06)
     headline_font = _font(int(height * 0.13), bold=False)
     platform_font = _font(int(height * 0.27), bold=True)
 
     # "DOWNLOAD FOR" — small-caps, letter-spaced, sitting above the platform name.
     spaced = " ".join(list(headline.upper()))
-    # Measure with getbbox so we can vertically center the text pair.
     h_bbox = draw.textbbox((0, 0), spaced, font=headline_font)
     p_bbox = draw.textbbox((0, 0), platform, font=platform_font)
     h_h = h_bbox[3] - h_bbox[1]
     p_h = p_bbox[3] - p_bbox[1]
+    h_w = h_bbox[2] - h_bbox[0]
+    p_w = p_bbox[2] - p_bbox[0]
     gap = int(height * 0.04)
     block_h = h_h + gap + p_h
-    block_top = (height - block_h) // 2 - int(h_bbox[1])  # account for font ascent
+    block_top = (height - block_h) // 2 - int(h_bbox[1])
 
-    draw.text((text_x, block_top), spaced, fill="#cccccc", font=headline_font)
-    draw.text((text_x, block_top + h_h + gap), platform, fill=fg, font=platform_font)
+    if glyph is not None:
+        glyph_h = int(height * 0.70)
+        g = glyph.resize((glyph_h, glyph_h), Image.LANCZOS)
+        gx = int(width * 0.07)
+        gy = (height - glyph_h) // 2
+        img.paste(g, (gx, gy), g)
+        text_x_headline = gx + glyph_h + int(width * 0.06)
+        text_x_platform = text_x_headline
+    else:
+        # Center the text block as a whole.
+        block_w = max(h_w, p_w)
+        text_x_headline = (width - block_w) // 2 + (block_w - h_w) // 2
+        text_x_platform = (width - block_w) // 2 + (block_w - p_w) // 2
 
+    draw.text((text_x_headline, block_top), spaced, fill="#cccccc", font=headline_font)
+    draw.text((text_x_platform, block_top + h_h + gap), platform, fill=fg, font=platform_font)
     return img
 
 
@@ -337,12 +284,11 @@ def write_download_badges() -> None:
 
     apple = _render_svg_glyph([APPLE_PATH], size_px=256)
     windows = _render_svg_glyph(_windows_paths(), size_px=256)
-    tux = _render_tux(size_px=256)
-
+    # Linux: no glyph — see make_assets._round_rect_button for rationale.
     badges = [
         ("download-macos.png", apple, "Download for", "macOS"),
         ("download-windows.png", windows, "Download for", "Windows"),
-        ("download-linux.png", tux, "Download for", "Linux"),
+        ("download-linux.png", None, "Download for", "Linux"),
     ]
     for fname, glyph, headline, platform in badges:
         img = _round_rect_button(glyph, headline, platform)
