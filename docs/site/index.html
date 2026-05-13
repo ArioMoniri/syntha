@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>syntha — benchmark dashboard</title>
+  <link rel="stylesheet" href="assets/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>🩺 syntha — benchmark dashboard</h1>
+    <p class="tagline">
+      Open, third-party-reproducible fidelity / utility / privacy metrics across syntha releases.
+      Auto-updated on every <code>v*</code> tag.
+    </p>
+    <p class="meta">
+      <a href="https://github.com/ArioMoniri/syntha">📦 repo</a> ·
+      <a href="https://github.com/ArioMoniri/syntha/releases">📋 releases</a> ·
+      <a href="https://github.com/ArioMoniri/syntha/blob/main/CHANGELOG.md">📜 changelog</a> ·
+      <a href="https://github.com/ArioMoniri/syntha/blob/main/docs/MEDICAL_OFFICER_REVIEW_v0.5.md">🧑‍⚕️ MO review</a>
+    </p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>📊 Distributional fidelity — Kolmogorov–Smirnov by release</h2>
+      <p class="hint">
+        Lower KS = synthetic marginals closer to source. The horizontal line at
+        0.05 is the conventional "indistinguishable from same distribution"
+        threshold; below that a two-sample test fails to reject the null at α=0.05.
+      </p>
+      <canvas id="ks-chart" height="280"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>🧮 Correlation magnitude recovery — by pair type</h2>
+      <p class="hint">
+        Ratio of synthetic-vs-source Spearman correlation magnitude, averaged
+        across all pairs of the indicated type. v0.5 polyserial+tetrachoric
+        fix lifts mixed-type pairs from ~50–65% to ~90%+ of source.
+      </p>
+      <canvas id="corr-chart" height="280"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>🎯 Downstream utility — TSTR (train on synthetic, test on real)</h2>
+      <p class="hint">
+        Risk-model ROC-AUC when trained on syntha-generated data vs trained on
+        the source data. Closer the two columns, the better synthetic transfers
+        to real-data tasks. <em>Populated by <code>benchmarks/synthehrella_run.py</code>
+        on each release once v0.5.6 lands.</em>
+      </p>
+      <canvas id="tstr-chart" height="280"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>🔐 Privacy — membership inference + attribute inference</h2>
+      <p class="hint">
+        ROC-AUC of an attacker trying to determine whether a real source row
+        was in the training set (membership inference) or guess held-out
+        attributes (attribute inference). 0.50 = chance, 1.00 = perfect attack.
+        DP-SGD variants of syntha (v0.5.3) push both toward 0.50. <em>Placeholder
+        until v0.5 G2 lands.</em>
+      </p>
+      <canvas id="privacy-chart" height="280"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>📈 Release timeline + scope</h2>
+      <table id="release-table">
+        <thead>
+          <tr><th>version</th><th>date</th><th>scope</th><th>tests</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      📊 Built from <code>benchmarks/*.json</code> committed in this repo
+      (regenerated per release).<br>
+      Apache 2.0 © 2026 Ariorad Moniri.
+    </p>
+  </footer>
+
+  <script src="assets/dashboard.js" type="module"></script>
+</body>
+</html>

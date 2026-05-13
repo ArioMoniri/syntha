@@ -1,0 +1,60 @@
+name: GitHub Pages — benchmark dashboard
+
+# Publishes docs/site/ + benchmarks/ to GitHub Pages.
+# https://ariomoniri.github.io/syntha
+#
+# One-time setup (already enabled via API): Settings → Pages → Source =
+# GitHub Actions. After that, every push to main rebuilds + deploys.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/site/**"
+      - "benchmarks/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble dashboard publish dir
+        run: |
+          mkdir -p _publish
+          cp -r docs/site/* _publish/
+          # Mirror the benchmarks/ JSON next to the dashboard so the fetch()
+          # path '../../benchmarks/dashboard.json' resolves correctly.
+          mkdir -p _publish/benchmarks
+          cp -r benchmarks/* _publish/benchmarks/
+          ls -R _publish
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _publish
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
