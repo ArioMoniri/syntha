@@ -7,6 +7,7 @@
 [![Cross-platform](https://github.com/ArioMoniri/syntha/actions/workflows/cross-platform.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/cross-platform.yml)
 [![Release](https://github.com/ArioMoniri/syntha/actions/workflows/release.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/release.yml)
 [![Install buttons](https://github.com/ArioMoniri/syntha/actions/workflows/verify-install-buttons.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/verify-install-buttons.yml)
+[![Codecov](https://codecov.io/gh/ArioMoniri/syntha/branch/main/graph/badge.svg)](https://codecov.io/gh/ArioMoniri/syntha)
 [![Latest release](https://img.shields.io/github/v/release/ArioMoniri/syntha?include_prereleases&sort=semver&label=latest&color=2563eb)](https://github.com/ArioMoniri/syntha/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/ArioMoniri/syntha/total?color=2563eb)](https://github.com/ArioMoniri/syntha/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)

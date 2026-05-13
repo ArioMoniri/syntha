@@ -1,0 +1,30 @@
+# Codecov configuration.
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  precision: 1
+  round: down
+  range: "70...95"
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 2%      # don't fail PRs that move coverage by < 2pp
+    patch:
+      default:
+        target: 85%        # new code should be well-tested
+        threshold: 5%
+
+# Generated / not-quite-source files we don't want counted.
+ignore:
+  - "src/syntha/cli.py"            # click decorators are mostly glue
+  - "tests/"
+  - "scripts/"
+  - "app/"                          # Tauri / TS code, not Python
+  - "docs/"
+  - "examples/"
+
+comment:
+  layout: "header, diff, flags, components, files"
+  behavior: default
+  require_changes: false
