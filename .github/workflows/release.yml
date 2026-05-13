@@ -118,14 +118,19 @@ jobs:
           # When these env vars are set Tauri 2 automatically code-signs the
           # .app, then runs notarytool against $APPLE_ID + $APPLE_PASSWORD
           # ($APPLE_TEAM_ID) and staples the notarization ticket to the .dmg.
-          # If they're unset Tauri produces an unsigned bundle and skips
-          # notarization (current behavior pre-secret-setup).
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Tauri 2 updater: when these are set + bundle.createUpdaterArtifacts
+          # is true in tauri.conf.json, the build emits .tar.gz / .zip / .json
+          # artifacts signed with the minisign private key. The .json files
+          # are per-platform signature files; we still need to assemble the
+          # top-level latest.json manifest after the build (next step).
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: npm run tauri-build -- --target ${{ matrix.rust-target }}
 
       - name: Inspect produced bundle
@@ -143,6 +148,44 @@ jobs:
           cp "$src" "release-assets/${{ matrix.release-name }}"
           ls -lh release-assets/
 
+      # ── Updater artifacts ──
+      # Tauri 2 with createUpdaterArtifacts: true emits a <bundle>.tar.gz (mac
+      # / linux) or <bundle>.zip (windows) plus a <bundle>.sig minisign
+      # signature next to the regular installer. We copy both into
+      # release-assets with stable names — the latest.json manifest assembled
+      # later points end-user installs at these stable URLs.
+      - name: Collect updater artifact + signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${{ matrix.label }}" in
+            macos-aarch64)
+              src=$(ls "${{ matrix.bundle-dir }}"/*.tar.gz 2>/dev/null | head -n1) || true
+              dest_archive="release-assets/syntha_aarch64.app.tar.gz"
+              ;;
+            windows-x64)
+              # On Windows we sign the NSIS .exe directly (no archive); the
+              # .sig sits next to it.
+              src=$(ls "${{ matrix.bundle-dir }}"/*-setup.exe 2>/dev/null | head -n1) || true
+              dest_archive="release-assets/syntha_x64-setup.exe"
+              ;;
+            linux-amd64)
+              src=$(ls "${{ matrix.bundle-dir }}"/*.AppImage 2>/dev/null | head -n1) || true
+              dest_archive="release-assets/syntha_amd64.AppImage"
+              ;;
+          esac
+          if [[ -n "${src:-}" ]]; then
+            cp "$src" "$dest_archive"
+            cp "${src}.sig" "${dest_archive}.sig"
+            echo "✓ updater artifact: $dest_archive"
+            echo "✓ updater signature: ${dest_archive}.sig"
+            ls -lh release-assets/
+          else
+            echo "✗ no updater artifact found in ${{ matrix.bundle-dir }}"
+            ls -R "${{ matrix.bundle-dir }}"
+            exit 1
+          fi
+
       # On tag push: attach the renamed artifact to the matching GitHub
       # release. softprops/action-gh-release finds the release with tagName
       # equal to the pushed tag (creating it if missing) and uploads files
@@ -154,8 +197,13 @@ jobs:
           # Only attach files; do not overwrite the release's name / body /
           # draft flag. Whatever was previously authored (manually or via a
           # prior `gh release edit`) survives subsequent matrix jobs.
-          files: release-assets/${{ matrix.release-name }}
-          fail_on_unmatched_files: true
+          # We attach the installer, the updater archive (same file for
+          # Windows / Linux; .app.tar.gz on macOS), and the .sig.
+          files: |
+            release-assets/${{ matrix.release-name }}
+            release-assets/*.sig
+            release-assets/syntha_aarch64.app.tar.gz
+          fail_on_unmatched_files: false
 
       # On manual workflow_dispatch: upload the artifact as a GitHub Actions
       # workflow artifact so we can verify the build end-to-end without
@@ -165,6 +213,89 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.release-name }}
-          path: release-assets/${{ matrix.release-name }}
+          path: release-assets/
           retention-days: 30
           if-no-files-found: error
+
+  # ─────────────────────────────────────────────────────────────────
+  # latest.json — the Tauri updater manifest. Runs after the build
+  # matrix finishes; downloads each platform's .sig from the release
+  # we just populated, assembles the manifest, uploads it to the
+  # release. End-user installs poll https://.../releases/latest/
+  # download/latest.json (configured in tauri.conf.json).
+  # ─────────────────────────────────────────────────────────────────
+  manifest:
+    name: Publish latest.json
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for release assets to be available
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          echo "Tag $TAG  Version $VERSION"
+
+          # Download the three .sig files + the macOS app.tar.gz from the
+          # release we just populated. The macOS bundle is delivered as a
+          # tar.gz (the updater can't apply a .dmg); Windows uses the .exe
+          # installer directly; Linux uses the .AppImage.
+          mkdir -p sigs
+          for asset in \
+              syntha_aarch64.app.tar.gz syntha_aarch64.app.tar.gz.sig \
+              syntha_x64-setup.exe.sig \
+              syntha_amd64.AppImage.sig; do
+            for attempt in 1 2 3 4 5; do
+              if gh release download "$TAG" -R "$GITHUB_REPOSITORY" \
+                     -p "$asset" -D sigs --clobber 2>/dev/null; then
+                echo "  ✓ $asset"
+                break
+              fi
+              echo "  · $asset not ready (attempt $attempt) — waiting 10s"
+              sleep 10
+            done
+            test -f "sigs/$asset" || { echo "✗ $asset never appeared"; exit 1; }
+          done
+
+          # Build latest.json. Schema per
+          # https://v2.tauri.app/plugin/updater/#static-json-file
+          base="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}"
+          mac_sig=$(cat sigs/syntha_aarch64.app.tar.gz.sig)
+          win_sig=$(cat sigs/syntha_x64-setup.exe.sig)
+          lin_sig=$(cat sigs/syntha_amd64.AppImage.sig)
+
+          cat > latest.json <<EOF
+          {
+            "version": "${VERSION}",
+            "notes": "See https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}",
+            "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": {
+              "darwin-aarch64": {
+                "signature": "${mac_sig}",
+                "url": "${base}/syntha_aarch64.app.tar.gz"
+              },
+              "windows-x86_64": {
+                "signature": "${win_sig}",
+                "url": "${base}/syntha_x64-setup.exe"
+              },
+              "linux-x86_64": {
+                "signature": "${lin_sig}",
+                "url": "${base}/syntha_amd64.AppImage"
+              }
+            }
+          }
+          EOF
+          cat latest.json
+          jq empty latest.json   # syntax check
+
+      - name: Attach latest.json to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: latest.json
+          fail_on_unmatched_files: true

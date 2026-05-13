@@ -6,6 +6,7 @@ import {
   type CopulaModel,
   type SampleResult,
 } from "./copula";
+import { checkOnDemand, checkOnStartup } from "./updater";
 
 // Lazy-load the bundled model for the chosen cohort.
 async function loadModel(cohort: "tolerant" | "strict"): Promise<CopulaModel> {
@@ -147,3 +148,7 @@ el<HTMLButtonElement>("preview-btn").addEventListener("click", async () => {
 });
 
 setStatus("Idle. Pick a cohort and parameters, then click Generate.");
+
+// Updater: silent check on launch + wire the footer button.
+checkOnStartup();
+document.getElementById("check-updates")?.addEventListener("click", checkOnDemand);
