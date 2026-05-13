@@ -476,3 +476,28 @@ https://github.com/ArioMoniri/syntha
 - 🩺 [Synthea](https://github.com/synthetichealth/synthea) — the inspiration for the clinical-module layer and FHIR output format.
 - 🌐 Open clinical terminologies: [LOINC](https://loinc.org/), [SNOMED CT](https://www.snomed.org/), [ICD-10](https://icd.who.int/browse10/), [RxNorm](https://www.nlm.nih.gov/research/umls/rxnorm/).
 - 📊 The anonymized Turkish-cohort EHR data used to train the copula (de-identified by the upstream data steward; never redistributed by this repo).
+
+### Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ArioMoniri"><img src="https://avatars.githubusercontent.com/u/ArioMoniri?v=4?s=80" width="80px;" alt="Ariorad Moniri"/><br /><sub><b>Ariorad Moniri</b></sub></a><br /><a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Code">💻</a> <a href="#design-ArioMoniri" title="Design">🎨</a> <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Documentation">📖</a> <a href="#maintenance-ArioMoniri" title="Maintenance">🚧</a> <a href="#ideas-ArioMoniri" title="Ideas & Planning">🤔</a> <a href="https://github.com/ArioMoniri/syntha/pulls?q=is%3Apr+reviewed-by%3AArioMoniri" title="Reviewed Pull Requests">👀</a> <a href="#infra-ArioMoniri" title="Infrastructure">🚇</a> <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Tests">⚠️</a></td>
+    </tr>
+  </tbody>
+</table>
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://allcontributors.org/) specification — contributions of any kind welcome. Comment `@all-contributors please add @username for code,doc` on an issue or PR to nominate someone.
+
+### 💬 Community
+
+- 🗨️ **[GitHub Discussions](https://github.com/ArioMoniri/syntha/discussions)** — open questions, "is this the right tool for X?", show-and-tell
+- 🐛 **[Issues](https://github.com/ArioMoniri/syntha/issues)** — bug reports + feature requests + clinical-curation
+- 📖 **[Contributing](CONTRIBUTING.md)** — dev setup + commit conventions + clinical-curation workflow
