@@ -118,6 +118,43 @@ def sample(registry_dir, name, output_csv, n):
     click.echo(json.dumps({"rows": len(df), "csv": output_csv}, indent=2))
 
 
+@main.command(name="sample-conditional")
+@click.option("--registry", "registry_dir", required=True, type=click.Path(exists=True))
+@click.option("--name", required=True)
+@click.option("--output", "output_csv", required=True, type=click.Path())
+@click.option("--n", default=1000, show_default=True, help="Target number of accepted rows")
+@click.option(
+    "--condition",
+    required=True,
+    help=(
+        "pandas-style filter expression in the model's column names. "
+        'Example: --condition "age > 60 & DM_Tum == 1 & bp_systolic >= 140"'
+    ),
+)
+@click.option("--oversample", default=5.0, show_default=True,
+              help="Initial oversample factor for rejection sampling")
+@click.option("--max-rounds", default=10, show_default=True)
+def sample_conditional_cmd(registry_dir, name, output_csv, n, condition,
+                            oversample, max_rounds):
+    """Conditional sampling via rejection — return only rows matching --condition."""
+    from .conditional import sample_conditional
+    registry = ModelRegistry(registry_dir)
+    gen, _ = registry.load(name)
+    result = sample_conditional(
+        gen, n=n, condition=condition,
+        oversample_factor=oversample, max_rounds=max_rounds,
+    )
+    Path(output_csv).parent.mkdir(parents=True, exist_ok=True)
+    result.rows.to_csv(output_csv, index=False)
+    click.echo(json.dumps({
+        "n_requested": result.n_requested,
+        "n_generated": result.n_generated,
+        "rounds": result.rounds,
+        "rejection_rate": round(result.rejection_rate, 3),
+        "csv": output_csv,
+    }, indent=2))
+
+
 @main.command()
 @click.option("--input", "input_csv", required=True, type=click.Path(exists=True))
 @click.option("--output", "output_dir", required=True, type=click.Path())
