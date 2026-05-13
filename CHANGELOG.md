@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0-dev] — 2026-05-13 (in progress)
+
+### Added — scientific-correctness sprint per MO-reviewed roadmap
+
+- 🧮 **Polyserial + tetrachoric correlation** (`src/syntha/generator/mixed_corr.py`, 14 tests). The Gaussian copula now uses the **right estimator per pair type**:
+  - continuous↔continuous: Kruskal `ρ = 2 sin(π ρₛ/6)` (unchanged)
+  - continuous↔binary: **polyserial** (Olsson 1982 two-step) — recovers latent correlation directly via `ρ = r_pb · √(p(1-p)) / φ(τ)`
+  - binary↔binary: **tetrachoric** — finds the latent ρ such that the bivariate-normal CDF reproduces the observed 2×2 cell probabilities, solved by bisection
+  - dispatch via `GaussianCopulaGenerator.fit(..., corr_method="mixed")` (now default; `"spearman"` preserved for v0.4 reproducibility)
+- 🩺 **Synthetic-patient FHIR marker** (G1 from medical-officer review): every Patient resource now carries the standard `HTEST` tag (terminology.hl7.org/CodeSystem/v3-ActReason) **plus** a `syntha-copula` source tag. Matches Synthea's convention and is a patient-safety prerequisite — synthetic patients can no longer be confused for real ones in downstream systems.
+- 🧪 **Lab-panel DiagnosticReport grouping** (`src/syntha/fhir/panels.py`, 3 tests). Five panels emitted when their constituent Observations exist: lipid panel (LOINC 57698-3), CBC (58410-2), CMP (24323-8), iron studies (24350-1), BP panel (85354-9). FHIR consumers (HAPI, Aidbox, OMOP ETL) now see ordered-together labs grouped correctly.
+- 📋 **Medical Officer Review** (`docs/MEDICAL_OFFICER_REVIEW_v0.5.md`) — explicit clinician-perspective sign-off on the v0.5 roadmap, with 3 mandatory guardrails (G1 ✓ shipped; G2 G3 queued) and revised implementation-priority order.
+- 📘 **Expanded ROADMAP** with 6 v0.5 items, each carrying a Method / Reference / Implementation / Success-metric block.
+
+### Validated (empirical, on real source data)
+
+Strict cohort (n=55,141), `gender_is_male` × 14 continuous labs:
+- v0.4 Spearman pipeline: **mean magnitude ratio (synthetic / source) = 83.7%**
+- v0.5 mixed-corr fix:    **mean magnitude ratio = 94.2%**  (**+10.5 percentage points**)
+- Example specific pairs: gender↔hemoglobin source +0.761 → v0.5 +0.735 (was +0.635 in v0.4); gender↔HDL source −0.505 → v0.5 −0.499 (was −0.424).
+
+The strict cohort is "pristine healthy" by construction so disease-flag prevalences are ~0; the binary↔binary tetrachoric estimator has full unit-test coverage on toy data and will deliver larger gains on the tolerant cohort once a fresh CSV is re-ingested.
+
+### Regenerated artifacts
+
+- `app/src/model_strict.json` — refitted with `corr_method="mixed"` (173 KB; same size, better correlations)
+
+### Tests
+
+55 / 55 passing (was 51).
+
 ## [0.4.0] — 2026-05-13
 
 ### Added

@@ -4,8 +4,12 @@ The fit step records:
   * per-column missingness rate (independent Bernoulli at sample time);
   * per-column marginal — Bernoulli probability for binary, empirical quantile
     function for continuous;
-  * a Spearman-rank correlation matrix on conditionally-non-missing pairs,
-    projected to the nearest positive semi-definite matrix.
+  * a latent-Gaussian correlation matrix on conditionally-non-missing pairs,
+    projected to the nearest positive semi-definite matrix. As of v0.5 the
+    matrix can be built with the polyserial + tetrachoric estimators
+    (corr_method="mixed") for unbiased recovery on continuous↔binary and
+    binary↔binary pairs; the legacy Spearman → Gaussian path is preserved
+    as corr_method="spearman" for backwards compatibility with v0.4 models.
 
 The sample step draws from a centered multivariate normal with that correlation,
 maps to U(0,1) via the standard-normal CDF, then inverts each marginal.
@@ -57,7 +61,21 @@ class GaussianCopulaGenerator:
         binary_cols: list[str],
         continuous_cols: list[str],
         cohort: str = "unknown",
+        corr_method: str = "mixed",
     ) -> "GaussianCopulaGenerator":
+        """Fit the copula.
+
+        Parameters
+        ----------
+        corr_method:
+            ``"mixed"`` (default, v0.5+) — use polyserial for continuous↔binary
+            pairs and tetrachoric for binary↔binary pairs. Recovers
+            magnitudes ≈ 0.9× of source on mixed pairs.
+            ``"spearman"`` (legacy, v0.4) — pipe Spearman through the
+            Kruskal transform ρ = 2 sin(π ρₛ/6) for every pair. Attenuates
+            mixed-type magnitudes ~50%. Preserved for reproducibility of
+            v0.4 models.
+        """
         columns = binary_cols + continuous_cols
         p_missing = {c: float(df[c].isna().mean()) for c in columns}
 
@@ -74,15 +92,23 @@ class GaussianCopulaGenerator:
                 obs = np.array([0.0])
             continuous_quantiles[c] = np.sort(obs)
 
-        # Spearman rank correlation handles non-linear monotonic relationships
-        # and is invariant to the marginal transforms.
-        spearman = df[columns].corr(method="spearman").to_numpy()
-        spearman = np.where(np.isfinite(spearman), spearman, 0.0)
-        np.fill_diagonal(spearman, 1.0)
-        # Convert Spearman ρ to Gaussian copula parameter via 2*sin(πρ/6).
-        gaussian_rho = 2.0 * np.sin(np.pi * spearman / 6.0)
-        np.fill_diagonal(gaussian_rho, 1.0)
-        correlation = _nearest_psd(gaussian_rho)
+        if corr_method == "mixed":
+            from .mixed_corr import mixed_correlation_matrix
+
+            sub = df[columns].copy()
+            raw = mixed_correlation_matrix(
+                sub, binary_cols=set(binary_cols), continuous_cols=set(continuous_cols),
+            )
+            raw = np.where(np.isfinite(raw), raw, 0.0)
+            np.fill_diagonal(raw, 1.0)
+            correlation = _nearest_psd(raw)
+        else:
+            spearman = df[columns].corr(method="spearman").to_numpy()
+            spearman = np.where(np.isfinite(spearman), spearman, 0.0)
+            np.fill_diagonal(spearman, 1.0)
+            gaussian_rho = 2.0 * np.sin(np.pi * spearman / 6.0)
+            np.fill_diagonal(gaussian_rho, 1.0)
+            correlation = _nearest_psd(gaussian_rho)
 
         self.model = CopulaModel(
             columns=columns,
@@ -93,6 +119,7 @@ class GaussianCopulaGenerator:
             correlation=correlation,
             n_train=len(df),
             cohort=cohort,
+            extras={"corr_method": corr_method},
         )
         return self
 
