@@ -4,10 +4,29 @@
 > — learns the joint distribution of real anonymized Turkish-cohort EHR episodes with a Gaussian copula, then layers Synthea-style clinical pathways on top to emit fully-coded FHIR R4 bundles in Turkish.
 
 [![CI](https://github.com/ArioMoniri/syntha/actions/workflows/ci.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/ci.yml)
+[![Release](https://github.com/ArioMoniri/syntha/actions/workflows/release.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/release.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/)
 [![Locale: tr-TR](https://img.shields.io/badge/locale-tr--TR-red)](#-turkish-cohort--turkish-output)
+
+---
+
+## 🖥️ Desktop app — generate synthetic patients without code
+
+<p align="center">
+  <a href="https://github.com/ArioMoniri/syntha/releases/latest/download/syntha_aarch64.dmg"><img src="docs/assets/download-macos.png" alt="Download macOS Apple Silicon (.dmg)" height="64"/></a>
+  &nbsp;
+  <a href="https://github.com/ArioMoniri/syntha/releases/latest/download/syntha_x64-setup.exe"><img src="docs/assets/download-windows.png" alt="Download Windows installer (.exe)" height="64"/></a>
+  &nbsp;
+  <a href="https://github.com/ArioMoniri/syntha/releases/latest/download/syntha_amd64.AppImage"><img src="docs/assets/download-linux.png" alt="Download Linux AppImage" height="64"/></a>
+</p>
+
+<p align="center">
+  <sub>A Tauri 2 desktop app that bundles the trained Gaussian copula and samples synthetic patients <b>fully client-side</b> (no Python required). Pick cohort + n + seed + constraints, hit <b>Generate</b>, and download a CSV.</sub>
+</p>
+
+> 📦 Installers are produced by the [release workflow](.github/workflows/release.yml) on every `v*` tag push. Source for the app lives in [`app/`](app/) — see [`app/README.md`](app/README.md).
 
 ---
 
@@ -358,6 +377,7 @@ See [docs/MODULES.md](docs/MODULES.md) for the authoring guide. Clinician contri
 | `syntha fhir` | Convert an existing synthetic CSV to FHIR bundles |
 | `syntha validate` | KS / Wasserstein / correlation diff between source and synthetic |
 | `syntha serve` | Boot a read-only FHIR R4 demo server from a bundles NDJSON file |
+| `syntha export-model` | Export a registered copula to a compact JSON the desktop app consumes |
 | `syntha list-models` | List models in a registry |
 | `syntha show-card` | Print a model card |
 

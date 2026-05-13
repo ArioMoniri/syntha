@@ -64,6 +64,13 @@ The current copula uses **Spearman rank correlation** as the input to the Gaussi
 - 🟡 Validate against the same `pristine_tolerant_episodes.csv` source — target: shrinkage ratio ≥ 0.9 (currently ~0.5).
 - 🟡 Reference: Genest & Nešlehová (2007), *A primer on copulas for count data*.
 
+## v0.5 — Signed desktop installers ⬜
+
+- ⬜ Apple Developer ID notarization for the `.dmg`
+- ⬜ Microsoft Authenticode signing for `-setup.exe`
+- ⬜ AppImage signature
+- ⬜ Auto-update via Tauri's updater plugin
+
 ## v0.7 — Advanced generative models ⬜
 
 - ⬜ Optional CTGAN/TVAE backend behind a `--engine ctgan` flag (heavier dependency, similar API)

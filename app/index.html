@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>syntha — synthetic patient generator</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🩺 syntha</h1>
+      <p class="tagline">
+        Synthea-inspired synthetic patient record generator —
+        <span class="cohort-label">Turkish pristine-healthy cohort</span>.
+      </p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1 · Choose a cohort</h2>
+        <p class="hint">
+          The Gaussian copula was fitted offline on real anonymized Turkish-cohort EHR episodes.
+          Each cohort is a different inclusion criterion (strict = clinically pristine only;
+          tolerant = mild comorbidity allowed).
+        </p>
+        <div class="row">
+          <label><input type="radio" name="cohort" value="tolerant" checked /> Tolerant <span class="muted">(n_train = 135,569)</span></label>
+          <label><input type="radio" name="cohort" value="strict" /> Strict <span class="muted">(n_train = 55,141)</span></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2 · Sampling parameters</h2>
+        <div class="grid">
+          <div>
+            <label>
+              Number of episodes
+              <input id="n" type="number" min="1" max="1000000" value="1000" />
+            </label>
+          </div>
+          <div>
+            <label>
+              Random seed
+              <input id="seed" type="number" value="42" />
+            </label>
+          </div>
+          <div>
+            <label class="checkbox">
+              <input id="apply-constraints" type="checkbox" checked />
+              Apply physiologic constraints
+              <span class="muted">(pulse pressure, Friedewald, eGFR ↔ creatinine)</span>
+            </label>
+          </div>
+          <div>
+            <label class="checkbox">
+              <input id="include-missingness" type="checkbox" checked />
+              Reproduce source-data missingness pattern
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3 · Generate</h2>
+        <div class="actions">
+          <button id="generate" class="primary">Generate &amp; download CSV</button>
+          <button id="preview-btn">Preview first 10 rows</button>
+        </div>
+        <p id="status" class="status muted"></p>
+      </section>
+
+      <section class="card" id="preview-card" hidden>
+        <h2>Preview</h2>
+        <div id="preview" class="preview"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Apache 2.0 · trained on open clinical standards (LOINC / SNOMED CT / ICD-10 / RxNorm) ·
+        <a href="https://github.com/ArioMoniri/syntha" target="_blank" rel="noopener">GitHub</a>
+      </p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

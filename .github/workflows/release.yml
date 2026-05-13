@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.label }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: macos-aarch64
+            os: macos-14
+            rust-target: aarch64-apple-darwin
+            artifact-glob: "app/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/syntha_*.dmg"
+            release-name: "syntha_aarch64.dmg"
+          - label: windows-x64
+            os: windows-latest
+            rust-target: x86_64-pc-windows-msvc
+            artifact-glob: "app/src-tauri/target/release/bundle/nsis/syntha_*-setup.exe"
+            release-name: "syntha_x64-setup.exe"
+          - label: linux-amd64
+            os: ubuntu-22.04
+            rust-target: x86_64-unknown-linux-gnu
+            artifact-glob: "app/src-tauri/target/release/bundle/appimage/syntha_*_amd64.AppImage"
+            release-name: "syntha_amd64.AppImage"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python (for model refresh)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Refresh bundled model JSONs from committed sample
+        shell: bash
+        run: |
+          # In CI we don't have the source CSVs, so seed data/raw/ from the
+          # committed example output. The exported JSON is small enough that
+          # the live release builds always reflect the latest copula math.
+          mkdir -p data/raw
+          cp examples/sample_output/sample_episodes.csv data/raw/pristine_tolerant_episodes.csv
+          cp examples/sample_output/sample_episodes.csv data/raw/pristine_strict_episodes.csv
+          bash scripts/refresh_app_model.sh
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install npm deps
+        working-directory: app
+        run: npm ci
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
+
+      - name: Cache cargo registry & target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            app/src-tauri/target
+          key: ${{ matrix.label }}-cargo-${{ hashFiles('app/src-tauri/Cargo.lock') }}
+
+      - name: Linux deps
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Build Tauri app
+        working-directory: app
+        run: npm run tauri-build -- --target ${{ matrix.rust-target }}
+
+      - name: Rename artifact to stable filename
+        shell: bash
+        run: |
+          src=$(ls ${{ matrix.artifact-glob }} | head -n1)
+          test -n "$src" || { echo "no artifact matched ${{ matrix.artifact-glob }}"; exit 1; }
+          mkdir -p release-assets
+          cp "$src" "release-assets/${{ matrix.release-name }}"
+          ls -lh release-assets/
+
+      - name: Upload to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/${{ matrix.release-name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true

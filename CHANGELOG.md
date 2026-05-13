@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-05-13
+
+### Added
+- 🖥️ **Tauri 2 desktop app** (`app/`) — Rust shell + TypeScript frontend, runs the Gaussian copula sampler entirely client-side using a bundled ~170 KB exported model JSON per cohort. No Python required at runtime. UI exposes cohort selection (strict / tolerant), n episodes, seed, physiologic-constraint toggle, missingness toggle. One button → download CSV with timestamped filename.
+- 📦 **`syntha export-model` CLI** — serialize a registered copula to compact JSON (downsamples each continuous marginal to ≤ N order statistics; default 200). Used by the app build pipeline.
+- 🔧 **`scripts/refresh_app_model.sh`** — regenerates `app/src/model_{tolerant,strict}.json` from the latest fitted copulas.
+- 🚀 **`.github/workflows/release.yml`** — builds `.dmg` (macOS aarch64), `-setup.exe` (Windows x64), `.AppImage` (Linux x86_64) on `v*` tag pushes; renames artifacts to stable filenames (`syntha_aarch64.dmg`, `syntha_x64-setup.exe`, `syntha_amd64.AppImage`) and uploads to the GitHub release.
+- 🎨 **`scripts/make_assets.py`** — generates Tauri app icons (32 / 128 / 128@2x / `.icns` / `.ico`) and README download-button PNGs (`docs/assets/download-{macos,windows,linux}.png`) procedurally so we don't ship licensed artwork.
+- 📥 **Install buttons in README** linking to the latest GitHub release artifacts.
+
+### Notes
+- The TS copula implementation in `app/src/copula.ts` matches the Python reference one-for-one (Cholesky on Σ, Φ-CDF mapping, ECDF inverse via linear interpolation on order statistics, **post-v0.3.2 latent threshold** `X = 1{u ≥ 1−p}` for binaries, physiologic-constraint rejection sampling). xoshiro128** PRNG seeded by user input.
+- App is **not signed/notarized** by default — Tauri's release workflow stub produces ad-hoc-signed builds. Adding Apple Developer ID / Microsoft Authenticode signing is a v0.5 task (see ROADMAP).
+
 ## [0.3.2] — 2026-05-12
 
 ### Fixed

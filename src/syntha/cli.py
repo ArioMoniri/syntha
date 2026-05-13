@@ -77,6 +77,22 @@ def list_models(registry_dir):
     click.echo(json.dumps(registry.list_models(), indent=2))
 
 
+@main.command(name="export-model")
+@click.option("--registry", "registry_dir", required=True, type=click.Path(exists=True))
+@click.option("--name", required=True)
+@click.option("--output", "output_path", required=True, type=click.Path())
+@click.option("--quantiles", default=200, show_default=True, help="Order statistics per continuous marginal")
+def export_model(registry_dir, name, output_path, quantiles):
+    """Export a registered copula to JSON for use by the Tauri desktop app."""
+    from .export_model import export_model_to_json
+    gen, card = ModelRegistry(registry_dir).load(name)
+    path = export_model_to_json(gen, output_path, n_quantiles=quantiles)
+    click.echo(json.dumps({
+        "path": str(path), "cohort": card.cohort,
+        "n_train": card.n_train, "size_kb": path.stat().st_size // 1024,
+    }, indent=2))
+
+
 @main.command(name="show-card")
 @click.option("--registry", "registry_dir", required=True, type=click.Path(exists=True))
 @click.option("--name", required=True)
