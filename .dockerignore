@@ -1,0 +1,34 @@
+# Keep the build context small — Docker copies the working dir up to the
+# daemon, and we don't want gigabytes of source CSVs or output bundles.
+.git
+.github
+.venv
+venv
+node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+
+# Source data (never enters the image)
+data/
+output/
+
+# Tauri app — distributed separately as installers, not via the Docker image.
+app/
+
+# Build outputs from previous attempts
+dist/
+build/
+*.egg-info/
+
+# Editor / OS
+.DS_Store
+.idea
+.vscode
+*.swp
+
+# Docs / examples we don't need at runtime
+docs/figures/
+examples/
