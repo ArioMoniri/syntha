@@ -34,26 +34,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python (for model refresh)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install python deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-
-      - name: Refresh bundled model JSONs from committed sample
+      - name: Verify bundled models are present
         shell: bash
         run: |
-          # In CI we don't have the source CSVs, so seed data/raw/ from the
-          # committed example output. The exported JSON is small enough that
-          # the live release builds always reflect the latest copula math.
-          mkdir -p data/raw
-          cp examples/sample_output/sample_episodes.csv data/raw/pristine_tolerant_episodes.csv
-          cp examples/sample_output/sample_episodes.csv data/raw/pristine_strict_episodes.csv
-          bash scripts/refresh_app_model.sh
+          # The committed app/src/model_*.json files are trained on the full
+          # source cohorts (135k / 55k rows). CI does not have access to the
+          # raw PHI-adjacent CSVs, so we ship the artifacts in-repo and
+          # rebuild them via scripts/refresh_app_model.sh locally only.
+          ls -lh app/src/model_tolerant.json app/src/model_strict.json
 
       - name: Set up Node
         uses: actions/setup-node@v4
