@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/all-contributors/all-contributors/master/.all-contributorsrc.schema.json",
+  "projectName": "syntha",
+  "projectOwner": "ArioMoniri",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": ["README.md"],
+  "imageSize": 80,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributorsPerLine": 6,
+  "contributorsSortAlphabetically": true,
+  "skipCi": true,
+  "contributors": [
+    {
+      "login": "ArioMoniri",
+      "name": "Ariorad Moniri",
+      "avatar_url": "https://avatars.githubusercontent.com/u/ArioMoniri?v=4",
+      "profile": "https://github.com/ArioMoniri",
+      "contributions": [
+        "code",
+        "design",
+        "doc",
+        "maintenance",
+        "ideas",
+        "review",
+        "infra",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 6,
+  "linkToUsage": true
+}
