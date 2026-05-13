@@ -62,7 +62,7 @@ class GaussianCopulaGenerator:
         continuous_cols: list[str],
         cohort: str = "unknown",
         corr_method: str = "mixed",
-    ) -> "GaussianCopulaGenerator":
+    ) -> GaussianCopulaGenerator:
         """Fit the copula.
 
         Parameters
@@ -183,7 +183,7 @@ class GaussianCopulaGenerator:
             pickle.dump({"model": self.model, "seed": self.random_seed}, f)
 
     @classmethod
-    def load(cls, path: str | Path) -> "GaussianCopulaGenerator":
+    def load(cls, path: str | Path) -> GaussianCopulaGenerator:
         with open(path, "rb") as f:
             blob = pickle.load(f)
         gen = cls(random_seed=blob["seed"])

@@ -25,8 +25,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from scipy.stats import norm
 from scipy.optimize import brentq
+from scipy.stats import norm
 
 __all__ = [
     "spearman_to_gaussian",
@@ -132,7 +132,7 @@ def tetrachoric_correlation(
         return 0.0
     xv = df.iloc[:, 0].astype(int).to_numpy()
     yv = df.iloc[:, 1].astype(int).to_numpy()
-    n = len(xv)
+    len(xv)
 
     p_x = float(np.mean(xv))
     p_y = float(np.mean(yv))

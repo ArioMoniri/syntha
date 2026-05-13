@@ -2,7 +2,6 @@ import pandas as pd
 
 from syntha.fhir.export import episode_to_bundle
 from syntha.modules import REGISTRY
-from syntha.modules.base import ModuleContext
 
 
 def _row(**overrides):

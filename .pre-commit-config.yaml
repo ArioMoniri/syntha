@@ -1,0 +1,43 @@
+# Pre-commit hooks. Install once: `pre-commit install`.
+# Runs `ruff` + `black` + a few common safety checks before every commit.
+#
+# We intentionally keep this conservative: no mypy at pre-commit time
+# (too slow / too noisy without per-file ignores). Type checking runs in
+# CI instead.
+
+repos:
+  # ── Generic safety ──
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: "^app/src/model_.*\\.json$"
+      - id: end-of-file-fixer
+        exclude: "^app/src/model_.*\\.json$"
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+        exclude: "^examples/sample_output/.*\\.json$|^app/src/model_.*\\.json$"
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=2048]   # 2 MB; model JSONs fit, source CSVs don't
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # ── Python lint + format ──
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # ── Python type stubs lite-check ──
+  # (kept fast — only touches changed files; full mypy stays in CI)
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile=black", "--filter-files"]

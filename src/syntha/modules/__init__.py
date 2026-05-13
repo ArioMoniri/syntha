@@ -6,8 +6,8 @@ additional Encounter/MedicationRequest/Procedure/CarePlan resources.
 """
 from __future__ import annotations
 
-from .base import ModuleContext, ModuleOutput, SyntheaModule
 from .asthma_copd import AsthmaModule, COPDModule
+from .base import ModuleContext, ModuleOutput, SyntheaModule
 from .depression_anxiety import AnxietyModule, DepressionModule
 from .diabetes import DiabetesModule
 from .hyperlipidemia import HyperlipidemiaModule

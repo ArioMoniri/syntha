@@ -34,5 +34,5 @@ def test_condition_displays_cover_all_flags():
         "Depresyon", "Anksiyete",
     }
     assert expected <= set(CONDITION_DISPLAY_TR)
-    for k, v in CONDITION_DISPLAY_TR.items():
+    for _k, v in CONDITION_DISPLAY_TR.items():
         assert isinstance(v, str) and v.strip()

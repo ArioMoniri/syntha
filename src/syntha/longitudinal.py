@@ -59,7 +59,7 @@ def expand_to_trajectories(
         anchor = pd.Timestamp(date_lo + pd.Timedelta(seconds=float(rng.random() * window_seconds)))
         span = pd.Timedelta(days=int(cfg.years_of_history * 365.25))
         offsets = np.sort(rng.random(n_enc)) * span.total_seconds()
-        for i, off in enumerate(offsets):
+        for _i, off in enumerate(offsets):
             row = base.copy()
             episode_dt = anchor + pd.Timedelta(seconds=float(off))
             row["HASTA_ID"] = patient_id

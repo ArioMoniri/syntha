@@ -11,7 +11,6 @@ Panel definitions follow LOINC's PanelHierarchy ontology.
 from __future__ import annotations
 
 import uuid
-from typing import Iterable
 
 # (panel-LOINC, display, constituent-columns).
 # The "constituent-columns" list must reference the columns in the

@@ -148,7 +148,8 @@ def serve(bundles_ndjson, host, port):
 def validate(source_csv, synthetic_csv, report_path):
     """Compute KS / Wasserstein / correlation-diff between source and synthetic."""
     from . import data, preprocess
-    from .validate import save_report, validate as _v
+    from .validate import save_report
+    from .validate import validate as _v
 
     src = preprocess.coerce_types(data.filter_to_modeled(data.load_episodes(source_csv)))
     syn = pd.read_csv(synthetic_csv)

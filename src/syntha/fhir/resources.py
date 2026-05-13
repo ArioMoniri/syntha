@@ -6,7 +6,7 @@ Synthea-style modules in src/syntha/modules/.
 from __future__ import annotations
 
 import uuid
-from typing import Iterable
+from collections.abc import Iterable
 
 
 def _now_or(iso: str) -> str:

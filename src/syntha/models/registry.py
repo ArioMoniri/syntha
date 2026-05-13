@@ -52,7 +52,7 @@ class ModelCard:
         return json.dumps(asdict(self), indent=2, ensure_ascii=False)
 
     @classmethod
-    def from_json(cls, text: str) -> "ModelCard":
+    def from_json(cls, text: str) -> ModelCard:
         return cls(**json.loads(text))
 
 
