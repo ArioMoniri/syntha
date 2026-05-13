@@ -26,7 +26,12 @@
   <sub>A Tauri 2 desktop app that bundles the trained Gaussian copula and samples synthetic patients <b>fully client-side</b> (no Python required). Pick cohort + n + seed + constraints, hit <b>Generate</b>, and download a CSV.</sub>
 </p>
 
-> 📦 Installers are produced by the [release workflow](.github/workflows/release.yml) on every `v*` tag push. Source for the app lives in [`app/`](app/) — see [`app/README.md`](app/README.md).
+> 📦 Installers are produced by the [release workflow](.github/workflows/release.yml) on every `v*` tag push. Source for the app lives in [`app/`](app/).
+
+> 🛡️ **macOS sees `"syntha.app" is damaged`?** That's Gatekeeper's misleading error for unsigned apps. Until the signing pipeline ships ([app/README.md → signing setup](app/README.md#macos-code-signing--notarization)), strip the quarantine flag manually:
+> ```bash
+> xattr -dr com.apple.quarantine /Applications/syntha.app
+> ```
 
 ---
 

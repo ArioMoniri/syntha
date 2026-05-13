@@ -80,8 +80,52 @@ jobs:
             libxdo-dev libssl-dev libayatana-appindicator3-dev \
             librsvg2-dev patchelf
 
+      # ── macOS code signing setup ──
+      # On macOS, import the Developer ID Application certificate from a GitHub
+      # secret into a temporary keychain so codesign can find it during the
+      # Tauri build. If the secret is absent the build proceeds **unsigned**
+      # (and Gatekeeper will reject the resulting .app with the misleading
+      # "damaged" error). Setup instructions in app/README.md.
+      - name: Import Apple Developer ID certificate
+        if: matrix.os == 'macos-14' && env.APPLE_CERTIFICATE != ''
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERT_PATH="$RUNNER_TEMP/syntha_cert.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/syntha-build.keychain-db"
+
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$CERT_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain    -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" \
+            -P "$APPLE_CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+          echo "✓ Developer ID certificate imported"
+
       - name: Build Tauri app
         working-directory: app
+        env:
+          # When these env vars are set Tauri 2 automatically code-signs the
+          # .app, then runs notarytool against $APPLE_ID + $APPLE_PASSWORD
+          # ($APPLE_TEAM_ID) and staples the notarization ticket to the .dmg.
+          # If they're unset Tauri produces an unsigned bundle and skips
+          # notarization (current behavior pre-secret-setup).
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npm run tauri-build -- --target ${{ matrix.rust-target }}
 
       - name: Inspect produced bundle

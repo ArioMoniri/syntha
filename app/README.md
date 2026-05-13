@@ -49,3 +49,32 @@ npm run tauri-build
 - `syntha_amd64.AppImage`
 
 That's what the install buttons in the top-level README link to.
+
+## macOS code signing & notarization
+
+Without signing, macOS shows the `"syntha.app" is damaged` error (Gatekeeper's misleading message for unsigned apps). The release workflow signs **and** notarizes the macOS DMG automatically — once these six GitHub repository secrets are set:
+
+| Secret name | What it is | How to get it |
+|---|---|---|
+| `APPLE_CERTIFICATE` | Base64-encoded **Developer ID Application** `.p12` | `base64 -i Cert.p12 -o Cert.p12.b64 && pbcopy < Cert.p12.b64` |
+| `APPLE_CERTIFICATE_PASSWORD` | The password you set during the `.p12` export | — |
+| `APPLE_SIGNING_IDENTITY` | Full identity string, e.g. `Developer ID Application: Ariorad Moniri (FF68N39FU5)` | `security find-identity -v -p codesigning` after importing into Keychain |
+| `APPLE_ID` | Your Apple ID **email** | — |
+| `APPLE_PASSWORD` | App-specific password (NOT your Apple ID password) | https://appleid.apple.com → Sign-In and Security → App-Specific Passwords |
+| `APPLE_TEAM_ID` | Your 10-character team identifier | https://developer.apple.com/account → Membership → Team ID |
+| `KEYCHAIN_PASSWORD` | Any random string for the throwaway CI keychain | `openssl rand -base64 24` |
+
+How the workflow uses them
+- Imports the `.p12` into a fresh keychain in `$RUNNER_TEMP` (gone at job end).
+- Sets `APPLE_*` env vars on the `tauri build` step; Tauri 2 then calls `codesign` with the hardened runtime + `Entitlements.plist`, runs `xcrun notarytool submit --wait`, and **staples** the notarization ticket to the resulting `.dmg`.
+
+If any secret is absent the workflow skips signing — the build still succeeds, but the DMG ships unsigned and users will see the Gatekeeper "damaged" warning.
+
+### Local user workaround for unsigned builds
+
+Until signed installers are available, end users can run an unsigned `syntha.app` with one terminal command after dragging it to `/Applications/`:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/syntha.app
+open /Applications/syntha.app
+```
