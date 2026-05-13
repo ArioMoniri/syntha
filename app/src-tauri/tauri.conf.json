@@ -46,6 +46,14 @@
       "signingIdentity": null,
       "providerShortName": null
     },
+    "windows": {
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "http://timestamp.sectigo.com",
+      "tsp": false,
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      }
+    },
     "createUpdaterArtifacts": true
   },
   "plugins": {
