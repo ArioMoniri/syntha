@@ -185,6 +185,24 @@ footer {
 footer a { color: var(--primary); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
 
+.locale-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--border);
+}
+.locale-control select {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 4px;
+  font: inherit;
+  font-size: 12px;
+}
+
 /* ── Update banner (Tauri updater) ────────────────────────────── */
 .update-banner {
   margin: 12px 32px 0;

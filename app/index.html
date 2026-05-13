@@ -10,76 +10,91 @@
     <header>
       <h1>🩺 syntha</h1>
       <p class="tagline">
-        Synthea-inspired synthetic patient record generator —
-        <span class="cohort-label">Turkish pristine-healthy cohort</span>.
+        <span data-i18n-key="tagline_prefix">Synthea-inspired synthetic patient record generator —</span>
+        <span class="cohort-label" data-i18n-key="cohort_label">Turkish pristine-healthy cohort</span>.
       </p>
     </header>
 
     <main>
       <section class="card">
-        <h2>1 · Choose a cohort</h2>
-        <p class="hint">
+        <h2 data-i18n-key="section_cohort">1 · Choose a cohort</h2>
+        <p class="hint" data-i18n-key="cohort_hint">
           The Gaussian copula was fitted offline on real anonymized Turkish-cohort EHR episodes.
           Each cohort is a different inclusion criterion (strict = clinically pristine only;
           tolerant = mild comorbidity allowed).
         </p>
         <div class="row">
-          <label><input type="radio" name="cohort" value="tolerant" checked /> Tolerant <span class="muted">(n_train = 135,569)</span></label>
-          <label><input type="radio" name="cohort" value="strict" /> Strict <span class="muted">(n_train = 55,141)</span></label>
+          <label>
+            <input type="radio" name="cohort" value="tolerant" checked />
+            <span data-i18n-key="cohort_tolerant">Tolerant</span>
+            <span class="muted">(<span data-i18n-key="ntrain_label">n_train</span> = 135,569)</span>
+          </label>
+          <label>
+            <input type="radio" name="cohort" value="strict" />
+            <span data-i18n-key="cohort_strict">Strict</span>
+            <span class="muted">(<span data-i18n-key="ntrain_label">n_train</span> = 55,141)</span>
+          </label>
         </div>
       </section>
 
       <section class="card">
-        <h2>2 · Sampling parameters</h2>
+        <h2 data-i18n-key="section_params">2 · Sampling parameters</h2>
         <div class="grid">
           <div>
             <label>
-              Number of episodes
+              <span data-i18n-key="param_n">Number of episodes</span>
               <input id="n" type="number" min="1" max="1000000" value="1000" />
             </label>
           </div>
           <div>
             <label>
-              Random seed
+              <span data-i18n-key="param_seed">Random seed</span>
               <input id="seed" type="number" value="42" />
             </label>
           </div>
           <div>
             <label class="checkbox">
               <input id="apply-constraints" type="checkbox" checked />
-              Apply physiologic constraints
-              <span class="muted">(pulse pressure, Friedewald, eGFR ↔ creatinine)</span>
+              <span data-i18n-key="param_constraints">Apply physiologic constraints</span>
+              <span class="muted" data-i18n-key="param_constraints_hint">(pulse pressure, Friedewald, eGFR ↔ creatinine)</span>
             </label>
           </div>
           <div>
             <label class="checkbox">
               <input id="include-missingness" type="checkbox" checked />
-              Reproduce source-data missingness pattern
+              <span data-i18n-key="param_missingness">Reproduce source-data missingness pattern</span>
             </label>
           </div>
         </div>
       </section>
 
       <section class="card">
-        <h2>3 · Generate</h2>
+        <h2 data-i18n-key="section_generate">3 · Generate</h2>
         <div class="actions">
-          <button id="generate" class="primary">Generate &amp; download CSV</button>
-          <button id="preview-btn">Preview first 10 rows</button>
+          <button id="generate" class="primary" data-i18n-key="btn_generate">Generate &amp; download CSV</button>
+          <button id="preview-btn" data-i18n-key="btn_preview">Preview first 10 rows</button>
         </div>
         <p id="status" class="status muted"></p>
       </section>
 
       <section class="card" id="preview-card" hidden>
-        <h2>Preview</h2>
+        <h2 data-i18n-key="section_preview">Preview</h2>
         <div id="preview" class="preview"></div>
       </section>
     </main>
 
     <footer>
       <p>
-        Apache 2.0 · trained on open clinical standards (LOINC / SNOMED CT / ICD-10 / RxNorm) ·
-        <a href="https://github.com/ArioMoniri/syntha" target="_blank" rel="noopener">GitHub</a> ·
-        <a href="#" id="check-updates">Check for updates</a>
+        <span data-i18n-key="footer_license">Apache 2.0 · trained on open clinical standards (LOINC / SNOMED CT / ICD-10 / RxNorm) ·</span>
+        <a href="https://github.com/ArioMoniri/syntha" target="_blank" rel="noopener" data-i18n-key="footer_github">GitHub</a> ·
+        <a href="#" id="check-updates" data-i18n-key="footer_check_updates">Check for updates</a>
+        <span class="locale-control">
+          <span data-i18n-key="footer_lang_label">Language</span>:
+          <select id="locale-switcher" aria-label="Language">
+            <option value="en">English</option>
+            <option value="tr">Türkçe</option>
+          </select>
+        </span>
       </p>
     </footer>
 

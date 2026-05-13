@@ -6,6 +6,7 @@ import {
   type CopulaModel,
   type SampleResult,
 } from "./copula";
+import { initI18n, t } from "./i18n";
 import { checkOnDemand, checkOnStartup } from "./updater";
 
 // Lazy-load the bundled model for the chosen cohort.
@@ -147,7 +148,14 @@ el<HTMLButtonElement>("preview-btn").addEventListener("click", async () => {
   }
 });
 
-setStatus("Idle. Pick a cohort and parameters, then click Generate.");
+// Initialize i18n before any user-facing strings are emitted. Sets
+// document.documentElement.lang + walks [data-i18n-key] and substitutes
+// translations for the detected locale (tr if browser locale starts with
+// 'tr', else en). Saved preference in localStorage["syntha.locale"]
+// overrides detection.
+initI18n();
+
+setStatus(t("status_idle"));
 
 // Updater: silent check on launch + wire the footer button.
 checkOnStartup();
