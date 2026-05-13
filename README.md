@@ -4,7 +4,11 @@
 > — learns the joint distribution of real anonymized Turkish-cohort EHR episodes with a Gaussian copula, then layers Synthea-style clinical pathways on top to emit fully-coded FHIR R4 bundles in Turkish.
 
 [![CI](https://github.com/ArioMoniri/syntha/actions/workflows/ci.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/ci.yml)
+[![Cross-platform](https://github.com/ArioMoniri/syntha/actions/workflows/cross-platform.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/cross-platform.yml)
 [![Release](https://github.com/ArioMoniri/syntha/actions/workflows/release.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/release.yml)
+[![Install buttons](https://github.com/ArioMoniri/syntha/actions/workflows/verify-install-buttons.yml/badge.svg)](https://github.com/ArioMoniri/syntha/actions/workflows/verify-install-buttons.yml)
+[![Latest release](https://img.shields.io/github/v/release/ArioMoniri/syntha?include_prereleases&sort=semver&label=latest&color=2563eb)](https://github.com/ArioMoniri/syntha/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/ArioMoniri/syntha/total?color=2563eb)](https://github.com/ArioMoniri/syntha/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/)
@@ -26,7 +30,7 @@
   <sub>A Tauri 2 desktop app that bundles the trained Gaussian copula and samples synthetic patients <b>fully client-side</b> (no Python required). Pick cohort + n + seed + constraints, hit <b>Generate</b>, and download a CSV.</sub>
 </p>
 
-> 📦 Installers are produced by the [release workflow](.github/workflows/release.yml) on every `v*` tag push. Source for the app lives in [`app/`](app/).
+> 📦 Installers are produced by the [release workflow](.github/workflows/release.yml) on every `v*` tag push and live at stable filenames (`syntha_aarch64.dmg`, `syntha_x64-setup.exe`, `syntha_amd64.AppImage`). The buttons above all use `releases/latest/download/…` so they **track the latest release automatically** — no manual link maintenance per version. A daily [Install-buttons verification workflow](.github/workflows/verify-install-buttons.yml) HEAD-checks each URL and opens an issue if any 404s. Source for the app lives in [`app/`](app/).
 
 > 🛡️ **macOS sees `"syntha.app" is damaged`?** That's Gatekeeper's misleading error for unsigned apps. Until the signing pipeline ships ([app/README.md → signing setup](app/README.md#macos-code-signing--notarization)), strip the quarantine flag manually:
 > ```bash

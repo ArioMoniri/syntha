@@ -314,3 +314,48 @@ jobs:
         with:
           files: latest.json
           fail_on_unmatched_files: true
+
+      # ── Install-button URL guard ──
+      # The README install buttons all point at
+      #     https://github.com/ArioMoniri/syntha/releases/latest/download/<FILE>
+      # GitHub auto-redirects /latest/ to the most recent release, so as soon
+      # as this workflow finishes the buttons resolve to *this* release's
+      # assets. We assert that resolution actually works for all three
+      # canonical filenames before the workflow exits successfully. If any
+      # filename drifted or an upload was dropped, the release fails here
+      # (not weeks later when a user clicks a 404 link).
+      - name: Verify README install URLs resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download"
+          REQUIRED=(
+            "syntha_aarch64.dmg"
+            "syntha_x64-setup.exe"
+            "syntha_amd64.AppImage"
+            "latest.json"
+          )
+          failed=0
+          # GitHub's /latest/ redirect can take up to ~30s to update after a
+          # release goes published, so retry briefly.
+          for f in "${REQUIRED[@]}"; do
+            url="$BASE/$f"
+            ok=0
+            for attempt in 1 2 3 4 5; do
+              code=$(curl -sIL -o /dev/null -w "%{http_code}" "$url" || true)
+              if [[ "$code" == "200" ]]; then
+                ok=1
+                size=$(curl -sIL "$url" | awk '/content-length:/ {print $2}' | tail -1 | tr -d '\r')
+                printf "  ✓ %-30s  HTTP %s   %s bytes\n" "$f" "$code" "${size:-?}"
+                break
+              fi
+              printf "  · %-30s  HTTP %s   (attempt %d) — waiting 10s\n" "$f" "$code" "$attempt"
+              sleep 10
+            done
+            [[ "$ok" == "1" ]] || { failed=$((failed+1)); echo "  ✗ $f never resolved"; }
+          done
+          if [[ "$failed" -gt 0 ]]; then
+            echo "✗ $failed required install assets are missing from /latest/"
+            exit 1
+          fi
+          echo "✓ all README install URLs resolve to this release"
