@@ -82,6 +82,30 @@ jobs:
             libxdo-dev libssl-dev libayatana-appindicator3-dev \
             librsvg2-dev patchelf
 
+      # ── Windows Authenticode signing setup ──
+      # When WINDOWS_CERTIFICATE (base64 of a .pfx) is set, decodes the cert
+      # into a temporary file, imports it into the runner cert store, and
+      # exports its SHA1 thumbprint via an env var that Tauri's bundler
+      # reads. When the secret is absent the step no-ops and the .exe ships
+      # unsigned (SmartScreen warning shown to users). End-to-end setup
+      # documented in docs/WINDOWS_SIGNING.md.
+      - name: Import Windows code-signing certificate
+        if: matrix.os == 'windows-latest' && env.WINDOWS_CERTIFICATE != ''
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $certPath = Join-Path $env:RUNNER_TEMP "syntha-codesign.pfx"
+          [System.IO.File]::WriteAllBytes($certPath, [System.Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
+          $securePwd = ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText
+          $cert = Import-PfxCertificate -FilePath $certPath -CertStoreLocation Cert:\CurrentUser\My -Password $securePwd
+          $thumbprint = $cert.Thumbprint
+          Write-Host "✓ Imported certificate $thumbprint"
+          "TAURI_BUNDLER_WINDOWS_CERTIFICATE_THUMBPRINT=$thumbprint" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Remove-Item $certPath -Force
+
       # ── macOS code signing setup ──
       # On macOS, import the Developer ID Application certificate from a GitHub
       # secret into a temporary keychain so codesign can find it during the
