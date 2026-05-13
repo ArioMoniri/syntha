@@ -114,3 +114,29 @@ jobs:
           test -s dist/index.html
           ls -lh dist/assets/ | head -10
           echo "✓ TS frontend builds cleanly on ${{ matrix.os }}"
+
+      - name: Set up Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Linux deps for Tauri
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev \
+            librsvg2-dev patchelf
+
+      - name: Cache cargo target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            app/src-tauri/target
+          key: cargo-check-${{ matrix.os }}-${{ hashFiles('app/src-tauri/Cargo.toml') }}
+
+      - name: cargo check (fast Rust type-check of the Tauri shell)
+        shell: bash
+        run: cargo check --manifest-path app/src-tauri/Cargo.toml

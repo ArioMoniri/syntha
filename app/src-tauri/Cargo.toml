@@ -7,9 +7,8 @@ license = "Apache-2.0"
 edition = "2021"
 rust-version = "1.75"
 
-[lib]
-name = "syntha_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
+# Single-binary desktop app (Tauri 2's recommended split into lib + bin is
+# only needed if we ever target mobile; for now main.rs is self-contained).
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
