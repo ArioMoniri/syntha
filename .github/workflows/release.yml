@@ -61,14 +61,16 @@ jobs:
         with:
           targets: ${{ matrix.rust-target }}
 
-      - name: Cache cargo registry & target
-        uses: actions/cache@v4
+      - name: Cache cargo registry & target (Swatinem)
+        # Smarter than raw actions/cache: keys on Cargo.lock + auto-restores
+        # incremental builds, and prunes stale crates. Typical macOS Tauri
+        # build drops from ~6 min to ~2 min on a warm cache.
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            app/src-tauri/target
-          key: ${{ matrix.label }}-cargo-${{ hashFiles('app/src-tauri/Cargo.lock') }}
+          workspaces: "app/src-tauri -> target"
+          key: ${{ matrix.label }}-${{ hashFiles('app/src-tauri/Cargo.lock') }}
+          shared-key: tauri-build
+          save-if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') }}
 
       - name: Linux deps
         if: matrix.os == 'ubuntu-22.04'
@@ -313,6 +315,24 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: latest.json
+          fail_on_unmatched_files: true
+
+      # ── SBOM generation ──
+      # Software Bill of Materials in SPDX format. Many regulated environments
+      # (some health-IT procurement teams, FDA-precert programs) require an
+      # SBOM for every release. anchore/sbom-action runs syft against the repo
+      # and writes spdx-json. Attached to the release as syntha-sbom.spdx.json.
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          artifact-name: syntha-sbom.spdx.json
+          output-file: syntha-sbom.spdx.json
+
+      - name: Attach SBOM to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: syntha-sbom.spdx.json
           fail_on_unmatched_files: true
 
       # ── Install-button URL guard ──

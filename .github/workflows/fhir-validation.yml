@@ -1,0 +1,93 @@
+name: FHIR conformance validation
+
+# Runs the official HL7 FHIR validator on the committed sample bundles
+# (examples/sample_output/sample_bundles.ndjson). Catches StructureDefinition
+# / value-set / cardinality violations that our hand-rolled sanity checks
+# would miss. Heavy but valuable — runs only on push to main + manually,
+# not on every PR.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/syntha/fhir/**"
+      - "examples/sample_output/sample_bundles.ndjson"
+      - ".github/workflows/fhir-validation.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 17 (HAPI validator requirement)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Cache HAPI validator JAR
+        id: cache-validator
+        uses: actions/cache@v4
+        with:
+          path: ~/hapi-validator
+          key: hapi-validator-6.4.4
+
+      - name: Download HAPI FHIR validator CLI
+        if: steps.cache-validator.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/hapi-validator
+          # Pin to a known-working release. Per HL7 release cadence the URL
+          # below is stable; bump the version when HAPI ships new releases
+          # we want to track.
+          curl -L -o ~/hapi-validator/validator_cli.jar \
+            "https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.4.4/validator_cli.jar"
+          ls -lh ~/hapi-validator/
+
+      - name: Split NDJSON into per-bundle files
+        run: |
+          mkdir -p /tmp/bundles
+          python3 - <<'PY'
+          import json, pathlib
+          src = pathlib.Path("examples/sample_output/sample_bundles.ndjson")
+          out = pathlib.Path("/tmp/bundles")
+          # Validate the first 10 bundles (HAPI is heavy — ~10s per bundle).
+          # A representative sample is enough to catch StructureDefinition bugs.
+          with src.open() as f:
+              for i, line in enumerate(f):
+                  if i >= 10:
+                      break
+                  (out / f"bundle_{i:03d}.json").write_text(line)
+          print(f"wrote {len(list(out.glob('*.json')))} bundles for validation")
+          PY
+          ls /tmp/bundles/
+
+      - name: Run HAPI validator (FHIR R4)
+        run: |
+          set -euo pipefail
+          # The validator returns non-zero on any ERROR-level issue. WARNINGs
+          # (e.g. terminology server unreachable for SNOMED code lookup) are
+          # tolerated — we accept their existence rather than spin up a
+          # terminology server in CI.
+          java -jar ~/hapi-validator/validator_cli.jar \
+              -version 4.0.1 \
+              -output-style compact \
+              /tmp/bundles/*.json 2>&1 | tee /tmp/hapi-output.txt
+
+          # Surface error count even if exit code already failed.
+          errors=$(grep -cE '^[^:]*: ERROR:' /tmp/hapi-output.txt || echo 0)
+          warnings=$(grep -cE '^[^:]*: WARNING:' /tmp/hapi-output.txt || echo 0)
+          informations=$(grep -cE '^[^:]*: INFORMATION:' /tmp/hapi-output.txt || echo 0)
+
+          echo ""
+          echo "═════════════════════════════════════════════════════════"
+          echo "HAPI validation summary"
+          echo "  ERRORs:        $errors  (any > 0 → CI fail)"
+          echo "  WARNINGs:      $warnings"
+          echo "  INFORMATIONs:  $informations"
+          echo "═════════════════════════════════════════════════════════"
+
+          if [[ "$errors" -gt 0 ]]; then
+            exit 1
+          fi

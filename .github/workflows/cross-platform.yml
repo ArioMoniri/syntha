@@ -128,14 +128,12 @@ jobs:
             libxdo-dev libssl-dev libayatana-appindicator3-dev \
             librsvg2-dev patchelf
 
-      - name: Cache cargo target
-        uses: actions/cache@v4
+      - name: Cache cargo target (Swatinem)
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            app/src-tauri/target
-          key: cargo-check-${{ matrix.os }}-${{ hashFiles('app/src-tauri/Cargo.toml') }}
+          workspaces: "app/src-tauri -> target"
+          key: cargo-check-${{ matrix.os }}-${{ hashFiles('app/src-tauri/Cargo.lock') }}
+          shared-key: tauri-check
 
       - name: cargo check (fast Rust type-check of the Tauri shell)
         shell: bash
