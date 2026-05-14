@@ -1,0 +1,96 @@
+name: Privacy audit
+
+# Runs membership-inference + attribute-inference attacks against
+# syntha-generated synthetic data and fails CI if MIA AUC exceeds 0.60.
+# This is the G2 guardrail mandated by the CMO + ML-engineer joint
+# review — formal evidence the copula doesn't memorize training data.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/syntha/generator/**"
+      - "src/syntha/privacy.py"
+      - ".github/workflows/privacy-audit.yml"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run privacy audit on committed sample
+        run: |
+          mkdir -p out
+          python -c "
+          import json
+          import numpy as np
+          import pandas as pd
+          from syntha.generator.copula import GaussianCopulaGenerator
+          from syntha.privacy import run_privacy_audit, DEFAULT_MIA_THRESHOLD
+
+          df = pd.read_csv('examples/sample_output/sample_episodes.csv')
+          rng = np.random.default_rng(42)
+          idx = rng.permutation(len(df))
+          n_train = int(0.8 * len(df))
+          train_idx, holdout_idx = idx[:n_train], idx[n_train:]
+
+          feature_cols = [c for c in [
+              'age','bp_systolic','bp_diastolic','hdl_latest','ldl_direct_latest',
+              'creatinine_latest','egfr_latest','hemoglobin_latest','wbc_latest',
+              'glucose_fasting_latest','gender_is_male','Hipertansiyon',
+              'DM_Tum','Hiperlipidemi','Tiroid',
+          ] if c in df.columns]
+          binary_cols = [c for c in ['gender_is_male','Hipertansiyon','DM_Tum',
+                                      'Hiperlipidemi','Tiroid'] if c in df.columns]
+          continuous_cols = [c for c in feature_cols if c not in binary_cols]
+
+          real_train = df.iloc[train_idx][feature_cols].copy()
+          real_holdout = df.iloc[holdout_idx][feature_cols].copy()
+
+          gen = GaussianCopulaGenerator(random_seed=0).fit(
+              real_train, binary_cols, continuous_cols,
+          )
+          syn = gen.sample(len(real_train))
+
+          report = run_privacy_audit(
+              real_train, real_holdout, syn,
+              feature_cols=feature_cols,
+              sensitive_targets=['Hipertansiyon','DM_Tum','Hiperlipidemi'],
+          )
+          summary = report.summary()
+          with open('out/privacy_audit.json','w') as f:
+              json.dump(summary, f, indent=2)
+          print(json.dumps(summary, indent=2))
+
+          if report.membership_inference_auc > DEFAULT_MIA_THRESHOLD:
+              raise SystemExit(
+                  f'MIA AUC {report.membership_inference_auc:.3f} > '
+                  f'{DEFAULT_MIA_THRESHOLD} - possible memorization'
+              )
+          "
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: privacy-audit-report
+          path: out/privacy_audit.json
+          retention-days: 90

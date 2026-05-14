@@ -7,7 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.5.0-dev] — 2026-05-13 (in progress)
+## [0.5.0] — 2026-05-14
+
+### Added — v0.5 scientific-correctness sprint (signed off by CMO + ML engineer in docs/REVIEW_v0.5_FINAL.md)
+
+- 🧮 **5.2 Joint + comorbidity-conditional missingness** (`src/syntha/generator/missingness.py`, 4 tests). Fits P(missing | comorbidity_flags); at sample time, panel co-missingness (lipid, CBC, CMP) is propagated with 85% probability. Fixes the Swiss-cheese pattern from v0.4 column-independent missingness.
+- ⏱️ **5.5 Lab time-series + intra-encounter BP** (`src/syntha/longitudinal_labs.py`, 10 tests). AR(1) trajectory of 2–4 prior measurements per lab over 6–24 months with column-specific biological variation (eGFR 6% CV + 1%/yr decline, HbA1c 0.2–0.5% σ, Hb 2% CV, …) drawn from Westgard QC literature. Plus 3 intra-encounter BP measurements ~5 min apart with the standard white-coat decline pattern.
+- 🛡️ **G2 Privacy audit** (`src/syntha/privacy.py`, 5 tests, `.github/workflows/privacy-audit.yml`). Stadler 2022 nearest-neighbor membership-inference attack + logistic-regression attribute-inference attack. CI gates on MIA AUC ≤ 0.60 per SynQP threshold — formal evidence the model doesn't memorize training data.
+- 🧾 **Charlson CCI as FHIR `RiskAssessment`** (`src/syntha/fhir/clinical_extras.py`). LOINC 75618-7 with qualitative-risk binning + 10-year-mortality probability estimate.
+- 🧠 **PHQ-9 + GAD-7 + FamilyMemberHistory** (`src/syntha/fhir/clinical_extras.py`, 7 tests). PHQ-9 (LOINC 44261-6) for `Depresyon`-flagged patients, GAD-7 (LOINC 70274-6) for `Anksiyete`-flagged, FamilyMemberHistory for `rf_kanser` + `rf_kronik_hastalik` family-risk flags.
+
+### Added earlier in the sprint
+
+- 🧮 **Polyserial + tetrachoric correlation** (`src/syntha/generator/mixed_corr.py`, 14 tests). The Gaussian copula now uses the **right estimator per pair type**:
+  - continuous↔continuous: Kruskal `ρ = 2 sin(π ρₛ/6)` (unchanged)
+  - continuous↔binary: **polyserial** (Olsson 1982 two-step) — recovers latent correlation directly via `ρ = r_pb · √(p(1-p)) / φ(τ)`
+  - binary↔binary: **tetrachoric** — finds the latent ρ such that the bivariate-normal CDF reproduces the observed 2×2 cell probabilities, solved by bisection
+  - dispatch via `GaussianCopulaGenerator.fit(..., corr_method="mixed")` (now default; `"spearman"` preserved for v0.4 reproducibility)
+- 🩺 **Synthetic-patient FHIR marker** (G1 from medical-officer review): every Patient resource now carries the standard `HTEST` tag (terminology.hl7.org/CodeSystem/v3-ActReason) **plus** a `syntha-copula` source tag.
+- 🧪 **Lab-panel DiagnosticReport grouping** (`src/syntha/fhir/panels.py`, 3 tests). Five panels emitted when their constituent Observations exist.
+- 🎯 **Conditional sampling CLI** (`syntha sample-conditional --condition "age > 60 & DM_Tum == 1"`, 6 tests). AST-validated safety.
+- 🌐 **Tauri Turkish UI** — full TR locale alongside English, locale switcher, persistent preference.
+- 🩹 **G3 Clinical reference ranges** (`src/syntha/reference_ranges.py`, 9 tests). Sex-specific normal intervals for 16 labs.
+
+### Engineering infrastructure (Tier 1+2+3+4 workflow roadmap)
+
+- 🤖 **Dependabot** for GitHub Actions / pip / npm / cargo
+- 🛡️ **CodeQL** SAST on Python + TypeScript
+- 📋 **PR template** + bug/feature issue templates + CODEOWNERS
+- 🪝 **pre-commit hooks** (ruff + black + safety set) + ruff config in `pyproject.toml`
+- 📊 **codecov** coverage reporting
+- 🧪 **HAPI FHIR validator** in CI on bundle changes
+- 📜 **SBOM** generation (SPDX-JSON) per release via `anchore/sbom-action`
+- ⚡ **Swatinem rust-cache** — 6 min → 2 min macOS Tauri build
+- 🚀 **release-please** automation: PR-driven semver + CHANGELOG
+- 💬 **GitHub Discussions** enabled, **all-contributors** config
+- 🐳 **Docker image** at `ghcr.io/ariomoniri/syntha:latest`, multi-platform (amd64+arm64)
+- 📦 **PyPI publish workflow** with **trusted-publisher** OIDC (no token in secrets)
+- 🪟 **Windows Authenticode signing** infrastructure (gated on `WINDOWS_CERTIFICATE`)
+- 📈 **GitHub Pages benchmark dashboard** at https://ariomoniri.github.io/syntha
+- 🏛️ **CITATION.cff** so the repo shows a "Cite this repository" button
+
+### Test totals
+
+**96/96 tests passing** (was 51 at v0.4.2).
+
+### Notes
+
+The strict cohort's `app/src/model_strict.json` was refit with the new mixed-correlation method; size unchanged (173 KB), correlations materially better. Tolerant cohort needs a fresh source CSV upload to refit (tetrachoric attacks the binary↔binary correlations that the strict cohort can't exercise — strict has ~0 prevalence on all 20 comorbidity flags by design).
+
+## [0.4.0] — 2026-05-13 (Synthea-inspired hybrid baseline, see prior log below)
+
+(Pre-0.5 entries unchanged from prior CHANGELOG; see commit history for v0.4.x details.)
 
 ### Added — scientific-correctness sprint per MO-reviewed roadmap
 
