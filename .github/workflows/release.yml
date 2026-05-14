@@ -251,7 +251,7 @@ jobs:
       # committing to a release. Downloadable from the run page for 90 days.
       - name: Upload workflow artifact (manual dispatch)
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.release-name }}
           path: release-assets/
