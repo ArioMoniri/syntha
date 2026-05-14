@@ -244,6 +244,43 @@ def episode_to_bundle(row: pd.Series, run_modules: bool = True) -> dict:
     )
     resources.extend(panel_reports)
 
+    # v0.5: clinical-realism extras — Charlson CCI as RiskAssessment, PHQ-9
+    # for depression-flagged patients, GAD-7 for anxiety-flagged, and
+    # FamilyMemberHistory for family-risk flags.
+    if run_modules:
+        from .clinical_extras import (
+            charlson_risk_assessment,
+            family_history_resources,
+            gad7_observation,
+            phq9_observation,
+        )
+
+        rng_extras = _patient_rng(row, patient_id)
+
+        cci = row.get("charlson_cci") if "charlson_cci" in row.index else None
+        if cci is not None and not pd.isna(cci):
+            ra = charlson_risk_assessment(patient_id, float(cci), effective_iso)
+            if ra:
+                resources.append(ra)
+
+        if "Depresyon" in row.index and not pd.isna(row.get("Depresyon")):
+            obs = phq9_observation(
+                patient_id, int(row.get("Depresyon")),
+                effective_iso, rng_extras,
+            )
+            if obs is not None:
+                resources.append(obs)
+
+        if "Anksiyete" in row.index and not pd.isna(row.get("Anksiyete")):
+            obs = gad7_observation(
+                patient_id, int(row.get("Anksiyete")),
+                effective_iso, rng_extras,
+            )
+            if obs is not None:
+                resources.append(obs)
+
+        resources.extend(family_history_resources(patient_id, row, effective_iso))
+
     return {
         "resourceType": "Bundle",
         "id": str(uuid.uuid4()),
