@@ -3,7 +3,11 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "syntha"
+# PyPI distribution name (`pip install syntha-ehr`) is separate from the
+# import name (`import syntha`). The plain "syntha" name was already taken
+# on PyPI when we tried to claim it. The longer name is more descriptive
+# anyway — "syntha for electronic health records".
+name = "syntha-ehr"
 version = "0.4.2"
 description = "Synthetic patient record generator (Synthea-inspired) trained on pristine-healthy episode data"
 readme = "README.md"

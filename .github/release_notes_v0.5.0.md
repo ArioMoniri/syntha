@@ -66,7 +66,7 @@ The Tauri app now ships in **English and Turkish** with a locale switcher in the
 | 🪟 Windows x64 | [`syntha_x64-setup.exe`](https://github.com/ArioMoniri/syntha/releases/download/v0.5.0/syntha_x64-setup.exe) — unsigned for now ([see docs](https://github.com/ArioMoniri/syntha/blob/v0.5.0/docs/WINDOWS_SIGNING.md)) |
 | 🐧 Linux x86_64 | [`syntha_amd64.AppImage`](https://github.com/ArioMoniri/syntha/releases/download/v0.5.0/syntha_amd64.AppImage) |
 | 🐳 Docker | `docker pull ghcr.io/ariomoniri/syntha:v0.5.0` |
-| 🐍 PyPI | `pip install syntha==0.5.0` (after first PyPI publish lands) |
+| 🐍 PyPI | `pip install syntha-ehr==0.5.0` (after first PyPI publish lands) |
 
 ## ⬆️ Upgrade path
 

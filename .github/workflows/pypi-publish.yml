@@ -5,8 +5,10 @@ name: Publish to PyPI
 # Authentication uses PyPI's "trusted publishers" mechanism — no API token
 # stored in GitHub secrets. One-time PyPI setup:
 #   1. Register the project at https://pypi.org/manage/projects/ (you must
-#      first own the name `syntha` — register a 1.0.0a0 release manually,
-#      or claim the name and let this workflow publish the first real one).
+#      first own the name `syntha-ehr` — the plain `syntha` was already
+#      taken). Add a "pending publisher" at
+#      https://pypi.org/manage/account/publishing/ pointing to this repo's
+#      pypi-publish.yml workflow + the pypi-publish environment.
 #   2. PyPI project → Settings → Publishing → Add trusted publisher:
 #        Owner:           ArioMoniri
 #        Repository:      syntha
@@ -63,7 +65,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     environment:
       name: pypi-publish
-      url: https://pypi.org/p/syntha
+      url: https://pypi.org/p/syntha-ehr
     steps:
       - name: Download distribution artifact
         uses: actions/download-artifact@v4
