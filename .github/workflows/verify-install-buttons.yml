@@ -74,7 +74,7 @@ jobs:
 
       - name: Open / update tracking issue on failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const failed = `${{ steps.check.outputs.failed }}`.trim();
@@ -119,7 +119,7 @@ jobs:
 
       - name: Auto-close tracking issue on success
         if: success()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { data: existing } = await github.rest.issues.listForRepo({
