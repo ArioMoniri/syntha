@@ -64,6 +64,27 @@ FLAG_COLUMNS = [
 ]
 
 
+# Lab panel groupings — single source of truth used by both
+# fhir.panels.PANELS (for DiagnosticReport grouping) and
+# generator.missingness.DEFAULT_PANEL_GROUPS (for panel-co-missingness
+# propagation). Each entry: (panel_id, LOINC_code, panel_display,
+# constituent-column-list).
+LAB_PANELS: list[tuple[str, str, str, list[str]]] = [
+    ("lipid", "57698-3", "Lipid panel with direct LDL — Serum or Plasma",
+     ["cholesterol_total_latest", "hdl_latest", "ldl_direct_latest",
+      "triglycerides_latest"]),
+    ("cbc", "58410-2", "Complete blood count (hemogram) panel — Blood by Automated count",
+     ["hemoglobin_latest", "wbc_latest", "platelets_latest"]),
+    ("cmp", "24323-8", "Comprehensive metabolic panel — Serum or Plasma",
+     ["glucose_fasting_latest", "creatinine_latest", "egfr_latest",
+      "alt_latest", "ast_latest"]),
+    ("iron", "24350-1", "Iron and binding capacity — Serum or Plasma",
+     ["ferritin_latest"]),
+    ("bp", "85354-9", "Blood pressure panel with all children optional",
+     ["bp_systolic", "bp_diastolic"]),
+]
+
+
 def all_modeled_columns() -> list[str]:
     return (
         DEMOGRAPHIC_COLUMNS

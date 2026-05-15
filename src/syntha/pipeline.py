@@ -13,9 +13,11 @@ from . import data, preprocess
 from .fhir.export import write_fhir_bundles
 from .generator.constraints import ConstraintConfig, PhysiologicConstraints
 from .generator.copula import GaussianCopulaGenerator
+from .generator.missingness import fit_missingness
 from .longitudinal import TrajectoryConfig, expand_to_trajectories
 from .models.registry import ModelRegistry
-from .validate import save_report, validate
+from .reference_ranges import fraction_within_reference
+from .validate import save_report, validate as _run_validate
 
 
 @dataclass
@@ -34,6 +36,10 @@ class PipelineConfig:
     constraint: ConstraintConfig = field(default_factory=ConstraintConfig)
     registry_dir: str | None = None
     write_validation: bool = True
+    # v0.5 wiring (per architecture review):
+    apply_conditional_missingness: bool = True  # joint missingness model (5.2)
+    include_clinical_normal_report: bool = True  # G3 reference-range fractions
+    include_lab_history: bool = False  # 5.5 lab time-series Observations
 
 
 def _generate_ids_and_dates(
@@ -69,6 +75,37 @@ def _sample_until(
     return pd.concat(collected, ignore_index=True).head(target).reset_index(drop=True)
 
 
+def _apply_conditional_missingness(
+    synthetic: pd.DataFrame,
+    training_df: pd.DataFrame,
+    bcols: list[str],
+    ccols: list[str],
+    seed: int,
+) -> pd.DataFrame:
+    """v0.5.2 wiring: replace copula's independent-column missingness with
+    the comorbidity-conditional + panel-co-missingness model.
+
+    The copula's sample() applies independent Bernoulli already; we OVERWRITE
+    the missingness mask using the conditional model. Values that the copula
+    drew where we now want non-missing stay as-is (we don't re-sample).
+    """
+    columns = bcols + ccols
+    miss_model = fit_missingness(training_df, columns, comorbidity_cols=bcols)
+    rng = np.random.default_rng(seed)
+    # Build a fresh mask using the conditional rates + panel propagation.
+    fresh_mask = miss_model.sample_mask(synthetic, rng)
+    out = synthetic.copy()
+    for col in columns:
+        if col not in out.columns or col not in fresh_mask.columns:
+            continue
+        # NaN where the conditional model says missing; keep existing value
+        # where it says present (this can revive copula-NaN cells, so we
+        # use the existing value if the copula has one, else leave NaN —
+        # we don't synthesize new values, that would break the joint).
+        out.loc[fresh_mask[col].to_numpy(), col] = np.nan
+    return out
+
+
 def run(input_csv, output_dir, cfg: PipelineConfig) -> dict:
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -101,6 +138,12 @@ def run(input_csv, output_dir, cfg: PipelineConfig) -> dict:
     else:
         synthetic = baselines
 
+    # v0.5.2: apply the conditional missingness model AFTER sampling.
+    if cfg.apply_conditional_missingness:
+        synthetic = _apply_conditional_missingness(
+            synthetic, modeled, bcols, ccols, seed=cfg.random_seed + 3,
+        )
+
     written: dict[str, str] = {}
     if cfg.write_csv:
         csv_path = out / f"synthetic_{cfg.cohort}_episodes.csv"
@@ -108,7 +151,9 @@ def run(input_csv, output_dir, cfg: PipelineConfig) -> dict:
         written["csv"] = str(csv_path)
     if cfg.write_fhir:
         fhir_path = write_fhir_bundles(
-            synthetic, out / "fhir", fmt=cfg.fhir_format, run_modules=cfg.run_modules,
+            synthetic, out / "fhir", fmt=cfg.fhir_format,
+            run_modules=cfg.run_modules,
+            include_lab_history=cfg.include_lab_history,
         )
         written["fhir"] = str(fhir_path)
 
@@ -123,11 +168,17 @@ def run(input_csv, output_dir, cfg: PipelineConfig) -> dict:
 
     validation_summary: dict | None = None
     if cfg.write_validation:
-        report = validate(modeled, synthetic, ccols, bcols)
+        report = _run_validate(modeled, synthetic, ccols, bcols)
+        summary = report.summary()
+        # v0.5 G3: extend the validation report with the per-column
+        # fraction of synthetic patients whose labs fall within the
+        # clinical reference interval (sex-aware where applicable).
+        if cfg.include_clinical_normal_report:
+            summary["fraction_within_reference"] = fraction_within_reference(synthetic)
         report_path = out / "validation_report.json"
         save_report(report, report_path)
         written["validation_report"] = str(report_path)
-        validation_summary = report.summary()
+        validation_summary = summary
 
     return {
         "n_requested": cfg.n,

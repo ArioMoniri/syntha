@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import click
+import numpy as np
 import pandas as pd
 
 from .generator.copula import GaussianCopulaGenerator
@@ -32,9 +33,15 @@ def main() -> None:
 @click.option("--encounters-per-patient", default=4.0, show_default=True)
 @click.option("--years-of-history", default=3.0, show_default=True)
 @click.option("--registry-dir", default=None, help="Directory for the trained-model registry (default: <output>/models)")
+@click.option("--lab-history/--no-lab-history", default=False, show_default=True,
+              help="Emit 2-4 prior measurements per lab (v0.5.5 longitudinal labs)")
+@click.option("--conditional-missingness/--no-conditional-missingness", default=True,
+              show_default=True, help="Apply comorbidity-conditional missingness (v0.5.2)")
+@click.option("--validation/--no-validation", default=True, show_default=True,
+              help="Compute KS/Wasserstein/correlation report alongside output")
 def generate(input_csv, output_dir, n, cohort, seed, csv, fhir, fhir_format,
              modules, longitudinal, encounters_per_patient, years_of_history,
-             registry_dir):
+             registry_dir, lab_history, conditional_missingness, validation):
     """Train copula, sample, run modules, write CSV + FHIR + model card."""
     cfg = PipelineConfig(
         n=n, cohort=cohort, random_seed=seed,
@@ -42,6 +49,9 @@ def generate(input_csv, output_dir, n, cohort, seed, csv, fhir, fhir_format,
         run_modules=modules, longitudinal=longitudinal,
         encounters_per_patient_mean=encounters_per_patient,
         years_of_history=years_of_history, registry_dir=registry_dir,
+        write_validation=validation,
+        apply_conditional_missingness=conditional_missingness,
+        include_lab_history=lab_history,
     )
     click.echo(json.dumps(run(input_csv, output_dir, cfg), indent=2))
 
@@ -178,12 +188,17 @@ def serve(bundles_ndjson, host, port):
     serve_forever(bundles_ndjson, host=host, port=port)
 
 
-@main.command()
+@main.command(name="validate")
 @click.option("--source", "source_csv", required=True, type=click.Path(exists=True))
 @click.option("--synthetic", "synthetic_csv", required=True, type=click.Path(exists=True))
 @click.option("--output", "report_path", required=True, type=click.Path())
-def validate(source_csv, synthetic_csv, report_path):
-    """Compute KS / Wasserstein / correlation-diff between source and synthetic."""
+def validate_cmd(source_csv, synthetic_csv, report_path):
+    """Compute KS / Wasserstein / correlation-diff between source and synthetic.
+
+    (CLI command name is `validate`; the Python function is `validate_cmd`
+    to avoid shadowing the `validate.validate` module function — per the
+    v0.5 architecture review.)
+    """
     from . import data, preprocess
     from .validate import save_report
     from .validate import validate as _v
@@ -194,6 +209,47 @@ def validate(source_csv, synthetic_csv, report_path):
     report = _v(src, syn, ccols, bcols)
     save_report(report, report_path)
     click.echo(json.dumps(report.summary(), indent=2))
+
+
+@main.command()
+@click.option("--source", "source_csv", required=True, type=click.Path(exists=True))
+@click.option("--synthetic", "synthetic_csv", required=True, type=click.Path(exists=True))
+@click.option("--output", "report_path", required=True, type=click.Path())
+@click.option("--split", default=0.8, show_default=True,
+              help="Fraction of source used as train (rest is held out for the attack)")
+def audit(source_csv, synthetic_csv, report_path, split):
+    """Run a privacy audit (membership + attribute inference attacks) against
+    a synthetic CSV and write a JSON report. CI fails on MIA AUC > 0.60."""
+    from . import data, preprocess
+    from .privacy import DEFAULT_MIA_THRESHOLD, run_privacy_audit
+
+    src = preprocess.coerce_types(data.filter_to_modeled(data.load_episodes(source_csv)))
+    syn = pd.read_csv(synthetic_csv)
+    rng = np.random.default_rng(42)
+    idx = rng.permutation(len(src))
+    n_train = int(split * len(src))
+    real_train = src.iloc[idx[:n_train]].copy()
+    real_holdout = src.iloc[idx[n_train:]].copy()
+
+    feature_cols = [c for c in src.columns if c in syn.columns
+                    and c not in ("RF_EPISODE2", "HASTA_ID", "episode_date", "gender")]
+    sensitive_targets = [c for c in ["Hipertansiyon", "DM_Tum", "Hiperlipidemi"]
+                         if c in feature_cols]
+
+    report = run_privacy_audit(
+        real_train, real_holdout, syn,
+        feature_cols=feature_cols,
+        sensitive_targets=sensitive_targets,
+    )
+    summary = report.summary()
+    Path(report_path).parent.mkdir(parents=True, exist_ok=True)
+    Path(report_path).write_text(json.dumps(summary, indent=2))
+    click.echo(json.dumps(summary, indent=2))
+    if summary["membership_inference_auc"] > DEFAULT_MIA_THRESHOLD:
+        raise click.ClickException(
+            f"membership inference AUC {summary['membership_inference_auc']:.3f} > "
+            f"{DEFAULT_MIA_THRESHOLD} — possible memorization"
+        )
 
 
 if __name__ == "__main__":

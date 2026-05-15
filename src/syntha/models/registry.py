@@ -122,11 +122,3 @@ class ModelRegistry:
 
     def list_models(self) -> list[str]:
         return sorted(p.name for p in self.root.iterdir() if (p / "model.pkl").exists())
-
-
-def save_model(path: str | Path, generator: GaussianCopulaGenerator) -> None:
-    generator.save(path)
-
-
-def load_model(path: str | Path) -> GaussianCopulaGenerator:
-    return GaussianCopulaGenerator.load(path)

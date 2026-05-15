@@ -200,7 +200,12 @@ def _wrap_entries(resources: list[dict]) -> list[dict]:
     ]
 
 
-def episode_to_bundle(row: pd.Series, run_modules: bool = True) -> dict:
+def episode_to_bundle(
+    row: pd.Series,
+    run_modules: bool = True,
+    *,
+    include_lab_history: bool = False,
+) -> dict:
     """Build one transaction Bundle for a single synthetic episode."""
     patient_id = str(uuid.uuid4())
     episode_dt = pd.to_datetime(row.get("episode_date"), errors="coerce")
@@ -295,6 +300,8 @@ def write_fhir_bundles(
     out_dir: str | Path,
     fmt: str = "ndjson",
     run_modules: bool = True,
+    *,
+    include_lab_history: bool = False,
 ) -> Path:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -302,13 +309,18 @@ def write_fhir_bundles(
         target = out / "bundles.ndjson"
         with open(target, "w", encoding="utf-8") as f:
             for _, row in df.iterrows():
-                f.write(json.dumps(episode_to_bundle(row, run_modules), ensure_ascii=False))
+                bundle = episode_to_bundle(
+                    row, run_modules, include_lab_history=include_lab_history,
+                )
+                f.write(json.dumps(bundle, ensure_ascii=False))
                 f.write("\n")
         return target
     bundles_dir = out / "bundles"
     bundles_dir.mkdir(parents=True, exist_ok=True)
     for i, (_, row) in enumerate(df.iterrows()):
-        bundle = episode_to_bundle(row, run_modules)
+        bundle = episode_to_bundle(
+            row, run_modules, include_lab_history=include_lab_history,
+        )
         with open(bundles_dir / f"patient_{i:06d}.json", "w", encoding="utf-8") as f:
             json.dump(bundle, f, ensure_ascii=False, indent=2)
     return bundles_dir

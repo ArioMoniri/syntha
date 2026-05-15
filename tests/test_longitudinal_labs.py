@@ -29,16 +29,24 @@ def test_ar1_path_stays_close_to_latest_no_trend():
 
 
 def test_ar1_path_secular_trend_decreases_egfr():
-    """eGFR has trend = -1%/year. Path going BACK 5 years should show
-    HIGHER values (eGFR was higher then)."""
+    """eGFR has trend = -1%/year (negative secular-decline coefficient).
+    Walking BACK 5 years from current eGFR=90 should land around 94.5
+    historically — explicitly above 'latest'. Tightened tolerance per
+    ML-eng review v0.5 (was ±10 = 2× expected noise budget; now expects
+    historical > latest and within ±12 of the deterministic prediction).
+    """
     rng = np.random.default_rng(3)
     latest = 90.0
-    # 5 years ago
     vals = _ar1_path(latest, [1825], 0.06, -0.010, rng)
-    # 5 years × 1% = 5% trend. Should be ~94-95 historically.
     avg_historical = vals[0]
-    # Allow for noise but trend should bias upward
-    assert avg_historical > latest - 10  # within noise envelope including ~5 trend
+    # The trend alone moves the value up by ~4.5 units; noise of 5.4
+    # units σ adds spread. Test invariants:
+    assert avg_historical > latest, (
+        f"trend = -1%/yr ⇒ historical eGFR should be > current; "
+        f"got {avg_historical:.2f} vs {latest}"
+    )
+    expected_trend_only = latest + 4.5
+    assert abs(avg_historical - expected_trend_only) < 12.0
 
 
 def test_intra_encounter_bp_count_and_white_coat_drop():

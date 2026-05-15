@@ -39,12 +39,21 @@ class AnxietyModule(SyntheaModule):
     name = "anxiety"
     triggers_on = ("Anksiyete",)
 
+    # Prescribing logic (per joint CMO + ML-eng review v0.5):
+    #   * SSRI (escitalopram) is first-line for GAD globally.
+    #   * Patients who already carry the depression flag are assumed to be
+    #     on sertraline from the Depression module. To avoid dual-SSRI
+    #     exposure, the Anxiety module emits buspirone (NaSSA non-SSRI
+    #     anxiolytic) as the second agent on top of the existing SSRI.
+    #     This is a defensible clinical pattern — SSRI continues to
+    #     address mood, buspirone supplements anxiolysis without dual
+    #     serotonergic load. Alternative patterns (single-SSRI for both
+    #     dx, or dose-escalating SSRI) are equally defensible; this is a
+    #     judgement call the CMO reviewed and accepted.
     def expand(self, row: pd.Series, ctx: ModuleContext) -> ModuleOutput:
         out = ModuleOutput()
         enc = R.encounter_resource(ctx.patient_id, ctx.episode_iso, "AMB", ANXIETY, PSYCH_VISIT)
         out.add(enc)
-        # SSRI is first-line for GAD; buspirone if SSRI contraindicated by
-        # concurrent depression (already prescribed sertraline there).
         already_on_ssri = (
             pd.notna(row.get("Depresyon")) and int(row.get("Depresyon", 0)) == 1
         )

@@ -97,11 +97,11 @@ def phq9_observation(
 
     Source-cohort flagged-depression patients have PHQ-9 in the mild-
     moderate range (5-14) per typical primary-care screening cohorts.
+    Clamped to the full PHQ-9 scale [0, 27].
     """
     if int(depression_flag) != 1:
         return None
-    # Mild-moderate range, mean ≈ 9, σ ≈ 3, clamped to [4, 22]
-    score = int(np.clip(rng.normal(9, 3), 4, 22))
+    score = int(np.clip(rng.normal(9, 3), 0, 27))
     return {
         "resourceType": "Observation",
         "id": str(uuid.uuid4()),
@@ -145,11 +145,16 @@ def gad7_observation(
     effective_iso: str,
     rng: np.random.Generator,
 ) -> dict | None:
-    """GAD-7 total score Observation, conditional on anxiety flag."""
+    """GAD-7 total score Observation, conditional on anxiety flag.
+
+    Symmetric with PHQ-9: score sampled from N(8, 2.5²) and clamped to
+    the full GAD-7 scale [0, 21] (the v0.5-dev pre-review version used
+    an asymmetric [3, 18] clamp that the joint CMO + ML-eng review
+    flagged as inconsistent).
+    """
     if int(anxiety_flag) != 1:
         return None
-    # Mild-moderate range, mean ≈ 8, σ ≈ 2.5, clamped to [3, 18]
-    score = int(np.clip(rng.normal(8, 2.5), 3, 18))
+    score = int(np.clip(rng.normal(8, 2.5), 0, 21))
     return {
         "resourceType": "Observation",
         "id": str(uuid.uuid4()),

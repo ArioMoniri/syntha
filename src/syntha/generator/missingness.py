@@ -106,16 +106,13 @@ class MissingnessModel:
         return mask
 
 
-# Panel groups for co-missingness propagation. Aligned with the DiagnosticReport
-# panel definitions in src/syntha/fhir/panels.py — same labs, same biology.
+# Panel groups for co-missingness propagation. Derived from the single
+# source of truth in syntha.schema.LAB_PANELS (also used by
+# fhir.panels.PANELS for DiagnosticReport grouping).
+from ..schema import LAB_PANELS as _LAB_PANELS
+
 DEFAULT_PANEL_GROUPS: dict[str, list[str]] = {
-    "lipid": ["cholesterol_total_latest", "hdl_latest", "ldl_direct_latest",
-              "triglycerides_latest"],
-    "cbc": ["hemoglobin_latest", "wbc_latest", "platelets_latest"],
-    "cmp": ["glucose_fasting_latest", "creatinine_latest", "egfr_latest",
-            "alt_latest", "ast_latest"],
-    "iron": ["ferritin_latest"],
-    "bp": ["bp_systolic", "bp_diastolic"],
+    panel_id: list(members) for panel_id, _code, _display, members in _LAB_PANELS
 }
 
 

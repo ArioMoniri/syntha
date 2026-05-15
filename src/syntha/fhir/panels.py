@@ -12,21 +12,11 @@ from __future__ import annotations
 
 import uuid
 
-# (panel-LOINC, display, constituent-columns).
-# The "constituent-columns" list must reference the columns in the
-# source/synthetic data; the emitter only groups observations whose
-# column key appears here.
+from ..schema import LAB_PANELS
+
+# Adapter view of schema.LAB_PANELS used by the existing emitter.
 PANELS: list[tuple[str, str, list[str]]] = [
-    ("57698-3", "Lipid panel with direct LDL — Serum or Plasma",
-     ["cholesterol_total_latest", "hdl_latest", "ldl_direct_latest", "triglycerides_latest"]),
-    ("58410-2", "Complete blood count (hemogram) panel — Blood by Automated count",
-     ["hemoglobin_latest", "wbc_latest", "platelets_latest"]),
-    ("24323-8", "Comprehensive metabolic panel — Serum or Plasma",
-     ["glucose_fasting_latest", "creatinine_latest", "egfr_latest", "alt_latest", "ast_latest"]),
-    ("24350-1", "Iron and binding capacity — Serum or Plasma",
-     ["ferritin_latest"]),
-    ("85354-9", "Blood pressure panel with all children optional",
-     ["bp_systolic", "bp_diastolic"]),
+    (code, display, members) for _id, code, display, members in LAB_PANELS
 ]
 
 

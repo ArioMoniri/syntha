@@ -132,7 +132,6 @@ def tetrachoric_correlation(
         return 0.0
     xv = df.iloc[:, 0].astype(int).to_numpy()
     yv = df.iloc[:, 1].astype(int).to_numpy()
-    len(xv)
 
     p_x = float(np.mean(xv))
     p_y = float(np.mean(yv))
