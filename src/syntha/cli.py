@@ -13,8 +13,11 @@ from .models.registry import ModelRegistry
 from .pipeline import PipelineConfig, run
 
 
+from . import __version__ as _syntha_version
+
+
 @click.group()
-@click.version_option()
+@click.version_option(_syntha_version, prog_name="syntha", package_name="syntha-ehr")
 def main() -> None:
     """syntha — synthetic patient record generator."""
 
