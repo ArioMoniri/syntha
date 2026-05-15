@@ -115,24 +115,25 @@ jobs:
           ls -lh dist/assets/ | head -10
           echo "✓ TS frontend builds cleanly on ${{ matrix.os }}"
 
-      - name: Set up Rust (stable)
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Sanity-check toolchain (macOS shim defense)
+      - name: Install Rust (bypass macOS rustup-init shim)
         # The macos-latest runner image ships a `rustup-init` shim at
-        # /usr/local/bin/{cargo,rustc} that intercepts bare invocations
-        # and even rustup's own `rustc -vV` host-detection probe. Force
-        # rustup to install + activate a real toolchain explicitly, then
-        # put $CARGO_HOME/bin in front of PATH so subsequent steps see
-        # the real binaries.
+        # /usr/local/bin/rustup that intercepts every rustup subcommand
+        # (`rustup self update`, `rustup default stable`, even
+        # `rustup which cargo` → "unexpected argument 'which' found").
+        # dtolnay/rust-toolchain@stable can't get past it on macOS.
+        #
+        # Fix: ignore whatever the runner ships, install a fresh rustup
+        # toolchain into $HOME/.cargo via the official one-liner, and
+        # call cargo + rustc by their absolute paths in every later step.
         shell: bash
         run: |
-          rustup default stable
-          rustup show active-toolchain
-          echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
-          # Confirm the real binaries respond now:
-          "$(rustup which cargo)" --version
-          "$(rustup which rustc)" --version
+          if [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+              sh -s -- -y --default-toolchain stable --no-modify-path --profile minimal
+          fi
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          "$HOME/.cargo/bin/cargo" --version
+          "$HOME/.cargo/bin/rustc" --version
 
       - name: Linux deps for Tauri
         if: matrix.os == 'ubuntu-latest'
@@ -152,9 +153,6 @@ jobs:
           shared-key: tauri-check
 
       - name: cargo check (fast Rust type-check of the Tauri shell)
-        # Use `rustup which cargo` to call the actual cargo proxy,
-        # bypassing any rustup-init shim that may still be earlier on PATH.
         shell: bash
         run: |
-          CARGO_BIN="$(rustup which cargo)"
-          "$CARGO_BIN" check --manifest-path app/src-tauri/Cargo.toml
+          "$HOME/.cargo/bin/cargo" check --manifest-path app/src-tauri/Cargo.toml
