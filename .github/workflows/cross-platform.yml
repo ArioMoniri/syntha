@@ -136,5 +136,8 @@ jobs:
           shared-key: tauri-check
 
       - name: cargo check (fast Rust type-check of the Tauri shell)
+        # Explicit `rustup run stable` so `cargo` resolves to the toolchain
+        # binary, not the `rustup-init` shim that started intercepting bare
+        # `cargo` invocations on macos-latest runner images.
         shell: bash
-        run: cargo check --manifest-path app/src-tauri/Cargo.toml
+        run: rustup run stable cargo check --manifest-path app/src-tauri/Cargo.toml
