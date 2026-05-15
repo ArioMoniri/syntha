@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6](https://github.com/ArioMoniri/syntha/compare/v0.5.0...v0.5.6) (2026-05-15)
+
+
+### Features
+
+* **app:** longitudinal-mode toggle in the desktop GUI — synthesizes multiple encounters per patient with shared HASTA_ID, age-advance, and 5%-SD multiplicative Gaussian drift on labs/vitals.
+* **app:** IDs in every downloaded CSV — `RF_EPISODE2`, `HASTA_ID`, `episode_date` are now synthesized client-side (mirrors `pipeline._generate_ids_and_dates` on the Python side).
+* **app:** preview now shows all columns × 50 rows with a sticky header and horizontal+vertical scroll.
+* **pipeline:** `PipelineConfig.include_curation_flags` (default **False**) — strips 29 source-pipeline curation flags (`pristine_*`, `berturk_*`, drug-safety, `rf_*`) from the default CSV. They're training metadata, not clinical observations, and most are degenerate (always 0 or always 1) in the pristine cohort. FHIR `FamilyMemberHistory` still consumes `rf_kanser` / `rf_kronik_hastalik` before the filter runs.
+* **cli:** `--curation-flags / --no-curation-flags` switch on `syntha generate`.
+* **model JSON:** bumped to `syntha-copula-v2`. Adds `date_lo` / `date_hi` (so the desktop app can synthesize `episode_date` without the source CSV) and `curation_columns` (Python ↔ TS share a single source of truth). v1 bundles still load (lazy fallback).
+
+
+### Bug fixes
+
+* **ci:** `cargo check` on macOS runner — switch to `rustup run stable cargo` to bypass the `rustup-init` shim that started intercepting bare `cargo` invocations on the `macos-latest` image.
+
+
+### Tests
+
+* net-new `tests/test_cli.py` (closes the v0.5 architecture-review gap).
+* `tests/test_pipeline.py` — curation-flag default drop, opt-in roundtrip, v2-metadata roundtrip.
+
+
 ## [0.5.0](https://github.com/ArioMoniri/syntha/compare/v0.4.2...v0.5.0) (2026-05-15)
 
 
