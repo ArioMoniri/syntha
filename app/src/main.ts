@@ -11,6 +11,14 @@ import {
   type CopulaModel,
   type SampleResult,
 } from "./copula";
+import {
+  claimCommentText,
+  fetchHelpWantedIssues,
+  loadHandle,
+  renderCollabList,
+  saveHandle,
+  type CollabIssue,
+} from "./collaborate";
 import { initI18n, t } from "./i18n";
 import { checkOnDemand, checkOnStartup } from "./updater";
 
@@ -228,6 +236,95 @@ refreshLongitudinalParamsVisibility();
 initI18n();
 
 setStatus(t("status_idle"));
+
+// ── Collaborate panel ─────────────────────────────────────────────
+let cachedIssues: CollabIssue[] = [];
+
+function getHandleInput(): HTMLInputElement {
+  return el<HTMLInputElement>("collab-handle");
+}
+
+async function refreshCollab(force = false) {
+  const list = el<HTMLDivElement>("collab-list");
+  list.innerHTML = `<p class="muted">${t("collab_fresh")} …</p>`;
+  const { issues, fromCache, fetchedAt, error } = await fetchHelpWantedIssues(force);
+  cachedIssues = issues;
+  renderCollabList(list, issues, fromCache, fetchedAt, error);
+  attachClaimHandlers();
+}
+
+function attachClaimHandlers() {
+  document.querySelectorAll<HTMLButtonElement>(".collab-claim").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const n = Number(btn.dataset.issue);
+      const issue = cachedIssues.find((i) => i.number === n);
+      if (!issue) return;
+      openClaimModal(issue);
+    });
+  });
+}
+
+function openClaimModal(issue: CollabIssue) {
+  const handle = getHandleInput().value.trim();
+  if (!handle) {
+    setStatus(t("collab_no_handle"), "error");
+    getHandleInput().focus();
+    return;
+  }
+  saveHandle(handle);
+  const modal = el<HTMLDivElement>("collab-modal");
+  const pre = el<HTMLPreElement>("collab-claim-text");
+  pre.textContent = claimCommentText(issue, handle);
+  modal.hidden = false;
+
+  const copyBtn = el<HTMLButtonElement>("collab-copy");
+  const openBtn = el<HTMLButtonElement>("collab-open-issue");
+  const closeBtn = el<HTMLButtonElement>("collab-close");
+
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(pre.textContent ?? "");
+      copyBtn.textContent = t("collab_claim_copied");
+      setTimeout(() => { copyBtn.textContent = t("collab_claim_copy"); }, 1500);
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(pre);
+      window.getSelection()?.removeAllRanges();
+      window.getSelection()?.addRange(range);
+    }
+  };
+  const onOpenIssue = () => window.open(issue.url, "_blank", "noopener");
+  const onClose = () => {
+    modal.hidden = true;
+    copyBtn.removeEventListener("click", onCopy);
+    openBtn.removeEventListener("click", onOpenIssue);
+    closeBtn.removeEventListener("click", onClose);
+    modal.removeEventListener("click", onBackdrop);
+  };
+  const onBackdrop = (e: MouseEvent) => {
+    if (e.target === modal) onClose();
+  };
+  copyBtn.addEventListener("click", onCopy);
+  openBtn.addEventListener("click", onOpenIssue);
+  closeBtn.addEventListener("click", onClose);
+  modal.addEventListener("click", onBackdrop);
+}
+
+// Restore handle on launch + wire save / refresh buttons.
+getHandleInput().value = loadHandle();
+el<HTMLButtonElement>("collab-handle-save").addEventListener("click", () => {
+  const v = getHandleInput().value.trim().replace(/^@+/, "");
+  saveHandle(v);
+  getHandleInput().value = v;
+  const btn = el<HTMLButtonElement>("collab-handle-save");
+  const orig = btn.textContent ?? "";
+  btn.textContent = t("collab_handle_saved");
+  setTimeout(() => { btn.textContent = orig; }, 1200);
+});
+el<HTMLButtonElement>("collab-refresh").addEventListener("click", () => {
+  void refreshCollab(true);
+});
+void refreshCollab(false);
 
 // Updater: silent check on launch + wire the footer button.
 checkOnStartup();

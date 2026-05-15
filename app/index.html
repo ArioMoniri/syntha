@@ -112,7 +112,49 @@
         </p>
         <div id="preview" class="preview"></div>
       </section>
+
+      <section class="card collab-card-section">
+        <h2 data-i18n-key="section_collaborate">Collaborate</h2>
+        <p class="hint" data-i18n-key="collab_intro">
+          syntha is open-source. Pick up a task tagged help-wanted-clinician,
+          help-wanted-dev, or help-wanted-data and ship a contribution.
+        </p>
+        <div class="collab-handle-row">
+          <label>
+            <span data-i18n-key="collab_handle_label">Your GitHub handle</span>
+            <span class="muted">— @</span>
+            <input
+              id="collab-handle"
+              type="text"
+              autocomplete="username"
+              spellcheck="false"
+              placeholder="octocat"
+              data-i18n-key="collab_handle_placeholder"
+              data-i18n-target="placeholder"
+            />
+          </label>
+          <button id="collab-handle-save" data-i18n-key="collab_handle_save">Save</button>
+          <button id="collab-refresh" data-i18n-key="collab_btn_refresh">Refresh from GitHub</button>
+        </div>
+        <div id="collab-list" class="collab-list"></div>
+      </section>
     </main>
+
+    <!-- Claim-task modal (hidden until needed) -->
+    <div id="collab-modal" class="collab-modal" hidden>
+      <div class="collab-modal__box" role="dialog" aria-modal="true" aria-labelledby="collab-modal-title">
+        <h3 id="collab-modal-title" data-i18n-key="collab_claim_modal_title">Claim a task</h3>
+        <p class="hint" data-i18n-key="collab_claim_modal_intro">
+          Copy the comment below, then open the issue and paste it.
+        </p>
+        <pre id="collab-claim-text" class="collab-claim-text"></pre>
+        <div class="actions">
+          <button id="collab-copy" class="primary" data-i18n-key="collab_claim_copy">Copy comment</button>
+          <button id="collab-open-issue" data-i18n-key="collab_claim_open_issue">Open issue on GitHub</button>
+          <button id="collab-close" data-i18n-key="collab_claim_close">Close</button>
+        </div>
+      </div>
+    </div>
 
     <footer>
       <p>

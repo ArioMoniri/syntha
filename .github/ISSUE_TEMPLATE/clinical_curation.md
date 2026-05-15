@@ -2,7 +2,7 @@
 name: 🧑‍⚕️ Clinical curation
 about: Suggest a clinical-pathway / drug / ICD-10 / Turkish-display improvement
 title: "[clinical-curation] "
-labels: ["clinical-curation"]
+labels: ["help-wanted-clinician"]
 assignees: []
 ---
 

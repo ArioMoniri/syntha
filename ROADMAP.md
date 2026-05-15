@@ -1,189 +1,123 @@
 # 🗺️ syntha roadmap
 
-A staged plan for taking syntha from a working Gaussian-copula + Synthea-style hybrid to a fully calibrated, publication-grade Turkish synthetic patient generator.
+A staged plan for taking `syntha` from a working Gaussian-copula + Synthea-style hybrid to a fully calibrated, publication-grade Turkish synthetic patient generator.
 
-Legend: ✅ shipped · 🟡 in progress · ⬜ planned · 🟣 needs clinician (medical doctor) curation
+**Legend** — ✅ shipped · 🟡 in progress · ⬜ planned · 🟣 needs clinician curation
 
-## v0.1 — Data-driven core ✅ (commit `25a1e7e`)
-
-- ✅ Gaussian copula with Spearman→Gaussian conversion, nearest-PSD projection
-- ✅ Empirical marginals (continuous via ECDF, binary via Bernoulli)
-- ✅ Independent column-wise missingness model
-- ✅ Physiologic constraints: pulse pressure ≥ 20, Friedewald coherence, eGFR/creatinine consistency
-- ✅ FHIR R4 export (Patient + Observation + Condition) with LOINC and SNOMED codes
-- ✅ CSV output matching input schema
-- ✅ click-based CLI
-
-## v0.2 — Hybrid (B) clinical-pathway layer ✅ (commit `fbd8555`)
-
-- ✅ 9 Synthea-style modules (HTN, DM, hyperlipidemia, thyroid, depression, anxiety, IHD, asthma, COPD)
-- ✅ Encounter / MedicationRequest / Procedure / CarePlan FHIR resources
-- ✅ RxNorm code table for emitted prescriptions
-- ✅ Longitudinal trajectory generator (sticky flags, lab drift, Poisson encounter counts)
-- ✅ Trained-model registry with ModelCard (source sha256, n_train, marginals, top correlations)
-- ✅ 25 passing unit + integration tests
-
-## v0.3 — Turkish localization 🟡 (this release)
-
-- 🟡 Turkish HumanName (cohort-realistic first / last name distributions)
-- 🟡 Turkish Address (Patient.address with TR city + province codes)
-- 🟡 ICD-10 codes alongside SNOMED for every Condition
-- 🟡 Multilingual displays: every clinical concept emits both English and Turkish text
-- 🟡 Patient.communication includes `tr` as the preferred language
-- 🟡 Documentation: explicit statement that the cohort represents Turkish adults
-
-## v0.4 — Validation + sample output 🟡 (this release)
-
-- 🟡 `syntha validate` — per-column KS test, Wasserstein distance, correlation-matrix Frobenius diff
-- 🟡 Sample synthetic output (100 episodes, full FHIR) committed to `examples/sample_output/`
-- 🟡 Distribution-comparison plots (PNG) generated and embedded in README
-
-## v0.5 — Project polish + CI 🟡 (this release)
-
-- 🟡 GitHub Actions: pytest matrix on Py 3.10–3.13
-- 🟡 CHANGELOG following [Keep a Changelog](https://keepachangelog.com/) + SemVer
-- 🟡 CONTRIBUTING.md (including clinician-curation workflow)
-- 🟡 ROADMAP.md (this file)
-- 🟡 LICENSE updated to "Ariorad Moniri"
-
-## v0.6 — Hand curation 🟣 needs medical doctor (Dr. Moniri)
-
-- 🟣 Calibrate disease prevalence per module to Turkish national stats (TÜİK/TURKSTAT)
-- 🟣 Review and accept/reject the default first-line drug per module (some Turkish guidelines differ from international, e.g. perindopril is widely used as a first-line ACEi)
-- 🟣 Review the comorbidity → drug class mappings (any locally unusual choices? e.g. nebivolol popularity)
-- 🟣 Author 4–6 extra modules for high-prevalence conditions not in the source flags (CKD staging, MAFLD, anemia, vitamin B12 deficiency — relevant given the lab columns present)
-- 🟣 Verify Turkish display strings match clinical-Turkish convention rather than literal translation
-- 🟣 Sanity-check the ICD-10 codes against TR-specific clinical coding practice
-
-## v0.5 — Scientific-correctness sprint 🟡 (active)
-
-Six items, each independently mergeable, closing the gap between what the May 2026 SOTA expects and what syntha currently does. Each item lists: the limitation it fixes, the reference, the implementation skeleton, and the success metric.
-
-### 5.1 — Mixed-type correlation (polyserial + tetrachoric)
-
-**Fixes:** continuous↔binary correlation magnitudes shrunk ~50%, binary↔binary ~65% (Limitation #1 in the v0.4.2 audit).
-
-**Why:** The Spearman → Pearson conversion `ρ = 2 sin(π ρₛ/6)` is exact only when both marginals are continuous. For mixed pairs, the standard fix is to estimate the latent Gaussian correlation directly under the latent-threshold model.
-
-**Method:**
-- **Polyserial** for continuous↔binary pairs. Closed-form 2-step estimator: rank-transform the continuous variable to standard normal, threshold the binary, compute the Pearson correlation of the latent normal pair from the observed point-biserial correlation via `ρ_polyserial = r_pb · √(p(1-p)) / φ(Φ⁻¹(1-p))` where `r_pb` is the point-biserial. Then full ML refinement via 1-D numerical integration of the bivariate normal CDF.
-- **Tetrachoric** for binary↔binary pairs. Compute the 2×2 contingency table; the tetrachoric correlation is the implied `ρ` of a latent bivariate normal that produces those four cell probabilities. Closed-form approximation (Bonett & Price 2005) or Cholesky-iterated ML.
-
-**References:**
-- Olsson (1982), *Maximum likelihood estimation of the polychoric correlation coefficient*, Psychometrika
-- Größer (2022), *Copulae: An overview and recent developments*, WIREs Computational Statistics
-- Genest & Nešlehová (2007), *A primer on copulas for count data*
-
-**Implementation:** new module `src/syntha/generator/mixed_corr.py` (~150 LOC). Update `GaussianCopulaGenerator.fit()` to dispatch by pair-type. `R` reference is the `polycor` package — port the two-step algorithm.
-
-**Success metric:** on the held-out 20% of source, the synthetic Spearman correlation magnitude for each continuous↔binary pair should be ≥ 0.9 × the source magnitude (currently ~0.5).
-
-### 5.2 — Joint missingness model
-
-**Fixes:** Missingness applied independently per column produces "Swiss cheese" patterns that don't match real EHR (Limitation #2).
-
-**Method:** Train a separate Bernoulli MVN copula on the **missingness mask** `M_i = 1[column i is missing]`. Sample the mask first, then sample the value matrix from the conditional copula given the mask. The empirical evidence: in `pristine_tolerant_episodes.csv`, the four lipid-panel columns are missing together >95% of the time — a single binary "lipid panel ordered" indicator drives all four.
-
-**Implementation:** new module `src/syntha/generator/missingness.py` (~120 LOC).
-
-**Success metric:** on held-out source, the Jaccard similarity between the panel-co-missingness sets in synthetic vs source ≥ 0.85 (currently ~0.0 because each column missing independently).
-
-### 5.3 — Differential privacy wrapper
-
-**Fixes:** No formal privacy guarantee (Limitation #4).
-
-**Method:** Add Gaussian noise calibrated to (ε, δ) to:
-- Each empirical-quantile value before serializing the marginal
-- Each Spearman/polyserial estimate before assembling the correlation matrix
-- Each Bernoulli probability
-
-Then project the noisy correlation matrix back to nearest PSD (we already do this).
-
-**Reference:** [Frontiers in Digital Health 2025](https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2025.1576290/full) shows DP-Gaussian-copula stays usable at ε ≈ 1.0.
-
-**Implementation:** `syntha fit --epsilon 1.0` flag; ~80 LOC added to `copula.py`.
-
-**Success metric:** at ε = 1.0, fidelity (max KS across continuous) ≤ 0.05; membership-inference ROC-AUC ≤ 0.55.
-
-### 5.4 — Lab-panel grouping → FHIR `DiagnosticReport`
-
-**Fixes:** Currently every lab is a standalone `Observation`. Real EHR consumers expect ordered-together labs to be grouped under a `DiagnosticReport` resource referring to the constituent `Observation`s.
-
-**Method:** Hard-coded panel definitions:
-- Lipid panel (LOINC `57698-3`): total chol + HDL + LDL + triglycerides
-- CBC (LOINC `58410-2`): hemoglobin + WBC + platelets
-- Basic metabolic panel (LOINC `24323-8`): glucose + creatinine + eGFR
-- Hepatic function panel (LOINC `24325-3`): ALT + AST
-- Iron studies (LOINC `24350-1`): ferritin
-- Vitamin B12 (LOINC `2132-9` solo)
-
-For each panel where ≥1 constituent observation is non-null, emit a `DiagnosticReport` whose `result` references the Observations and whose `effectiveDateTime` matches.
-
-**Implementation:** new module `src/syntha/fhir/panels.py` (~100 LOC). Called from `fhir/export.py`.
-
-### 5.5 — Lab time-series + intra-encounter vital trajectories
-
-**Fixes:** Single snapshot per lab is unrealistic (the source `_latest` suffix proves there were historical values).
-
-**Method:** For each non-null lab, generate 2–4 prior measurements over the preceding 6–24 months with AR(1)-style drift around the `_latest` value. Use lab-specific drift rates from clinical literature (eGFR declines ~1 mL/min/year normally; HbA1c noise σ ≈ 0.3% over 3 months).
-
-For vitals within one encounter: emit 2–3 BP measurements 5 min apart (a typical clinical practice).
-
-**Implementation:** extend `longitudinal.py` (~80 LOC additions).
-
-### 5.6 — SynthEHRella benchmark integration
-
-**Fixes:** No TSTR validation (Limitation #5).
-
-**Method:** Use the standardized [SynthEHRella](https://github.com/chenxran/synthEHRella) framework:
-1. 80/20 random split of source by `HASTA_ID`
-2. Train syntha on the 80%, generate equal-sized synthetic dataset
-3. Train a hypertension-risk model (logistic regression + XGBoost) on each
-4. Score both on the held-out 20% real test set
-5. Report ROC-AUC, Brier score, calibration plot
-
-**Implementation:** new `benchmarks/synthehrella_run.py` (~150 LOC). Output goes to `benchmarks/results/v0.5.json` and is regenerated on each release.
-
-**Success metric:** TSTR ROC-AUC within 0.02 of TRTR (train-on-real, test-on-real).
+For *what* is needed and *how* to help, see [COLLABORATE.md](COLLABORATE.md). The desktop app's **Collaborate** panel surfaces the same task list live from GitHub Issues.
 
 ---
 
-## v0.4 — Mixed-type correlation fix 🟢 (subsumed by v0.5.1 above)
+## Shipped
 
-## v0.5 — Signed desktop installers ⬜
+### v0.1 — Data-driven core ✅ (`25a1e7e`)
 
-- ⬜ Apple Developer ID notarization for the `.dmg`
-- ⬜ Microsoft Authenticode signing for `-setup.exe`
-- ⬜ AppImage signature
-- ⬜ Auto-update via Tauri's updater plugin
+- Gaussian copula with Spearman → Gaussian conversion, nearest-PSD projection
+- Empirical marginals (continuous via ECDF, binary via Bernoulli)
+- Independent column-wise missingness
+- Physiologic constraints: pulse pressure ≥ 20, Friedewald, eGFR ↔ creatinine
+- FHIR R4 export (Patient + Observation + Condition) with LOINC + SNOMED
+- CSV output matching input schema
+- click-based CLI
 
-## v0.7 — Advanced generative models ⬜
+### v0.2 — Clinical-pathway layer ✅ (`fbd8555`)
 
-- ⬜ Optional CTGAN/TVAE backend behind a `--engine ctgan` flag (heavier dependency, similar API)
-- ⬜ Conditional generation: "give me 1000 synthetic 60+ year old males with DM" via SDV-style conditioning
-- ⬜ Differential-privacy guarantees (DP-CTGAN or DP synthetic data)
+- 9 Synthea-style modules: HTN, DM, hyperlipidemia, thyroid, depression, anxiety, IHD, asthma, COPD
+- Encounter / MedicationRequest / Procedure / CarePlan FHIR resources
+- RxNorm code table
+- Longitudinal trajectory generator (sticky flags, lab drift, Poisson encounter counts)
+- Trained-model registry with ModelCard (`source_sha256`, `n_train`, marginals, top correlations)
 
-## v0.8 — Disease-progression state machines ⬜
+### v0.3 — Turkish localization ✅
 
-- ⬜ True longitudinal state machines (Synthea PADM-style) for the four highest-impact chronic conditions
-- ⬜ Time-to-event modeling for cardiovascular complications
+- Turkish HumanName from cohort-realistic given/family distributions
+- Turkish Address with ISO 3166-2:TR province codes
+- ICD-10 alongside SNOMED for every Condition
+- Multilingual displays (English + clinical-Turkish text on every concept)
+- `Patient.communication.language = tr`
+- Source-cohort representativeness documented
 
-## v0.9 — Benchmarks ⬜
+### v0.4 — Validation + sample output ✅
 
-- ⬜ Train a downstream risk model on synthetic data; evaluate on the held-out real test set
-- ⬜ Publish a "train on synthetic, test on real" (TSTR) benchmark vs the source CSV split
+- `syntha validate` — per-column KS, Wasserstein, correlation-Frobenius
+- Committed sample output (100 episodes + full FHIR Bundle) in `examples/sample_output/`
+- Distribution-comparison plots regenerated on each release
 
-## v1.0 — Stable release ⬜
+### v0.5 — Scientific-correctness sprint ✅ (`v0.5.0` → `v0.5.6`)
 
-- ⬜ All v0.6 hand-curation merged
-- ⬜ Calibrated to TR national stats and validated on a holdout
-- ⬜ Published to PyPI
-- ⬜ Companion methods paper / data descriptor
+- **5.1** Mixed-type correlation: polyserial (continuous↔binary, Olsson 1982) + tetrachoric (binary↔binary, Bonett & Price; Drezner 1978 BVN CDF). Fixed the ~50% magnitude attenuation.
+- **5.2** Joint missingness model — conditional rates + panel-co-missingness propagation (lipid, CBC, CMP, iron, BP).
+- **5.3** Privacy audit — Stadler 2022 nearest-neighbor MIA + attribute-inference attack via `syntha audit`. CI fails on MIA AUC > 0.60.
+- **5.4** FHIR `DiagnosticReport` grouping for ordered-together labs (lipid, CBC, CMP, iron, BP panels).
+- **5.5** Lab time-series (AR(1) drift with column-specific Westgard CV) + intra-encounter BP trajectory.
+- **5.6** Reference-range coverage report — fraction of synthetic patients with labs within sex-aware reference intervals.
+
+Plus engineering polish: signed installers for all 3 OSes (macOS notarized, Windows code-signed), Tauri 2 auto-updater (minisign), PyPI OIDC trusted-publisher, Docker image on ghcr.io, SBOM, CodeQL, daily install-button verification, Codecov, release-please, [all-contributors](https://allcontributors.org/), and a [test_cli.py](tests/test_cli.py) smoke-test suite.
+
+### v0.5.6 — Curation cleanup + collaboration platform ✅ (current)
+
+- 29 source-pipeline curation flags dropped from default CSV (BERTurk score, `pristine_*`, drug-safety, `rf_*`). Opt back in with `--curation-flags`.
+- Desktop app **longitudinal-mode** toggle — multiple encounters per patient with shared HASTA_ID, age-advance, multiplicative Gaussian lab drift.
+- Desktop app **Collaborate** panel — pulls live `help-wanted-clinician` / `help-wanted-dev` issues from the GitHub API and lets contributors claim them with their GitHub handle.
+- Model JSON bumped to `syntha-copula-v2`: adds `date_lo`, `date_hi`, `curation_columns`; v1 still loads (lazy fallback).
+- Identifiers (`RF_EPISODE2`, `HASTA_ID`, `episode_date`) synthesized client-side in the desktop app.
+- Preview shows all columns × 50 rows with sticky header and h+v scroll.
+
+---
+
+## Queued
+
+### v0.6 — Clinical curation 🟣 (needs clinician input — see [COLLABORATE.md](COLLABORATE.md))
+
+- 🟣 Calibrate disease prevalence per module to TÜİK national figures so `syntha` can serve as a Turkish-population baseline, not just a healthy baseline
+- 🟣 Review and accept/reject the default first-line drug per module against Turkish primary-care reality (e.g. perindopril vs lisinopril, nebivolol vs metoprolol)
+- 🟣 Author 4–6 additional modules for high-prevalence conditions not in the source flags: CKD staging (eGFR-driven), MAFLD (ALT/AST + obesity), anemia (Hb-driven), B12 deficiency (vit B12 directly available)
+- 🟣 Verify Turkish display strings against `Türk Tabipleri Birliği` / TR-specific clinical usage rather than literal translation
+- 🟣 Increase ICD-10 specificity — current mapping uses unspecified `.9` forms; many flags carry enough information to specify further (`E11.65`, `I50.32`, etc.)
+- 🟣 Confirm comorbidity → drug class mappings match TR clinical convention
+
+### v0.7 — Advanced generative engines ⬜
+
+- Optional CTGAN / TVAE backend behind a `--engine ctgan` flag (heavier dependency, similar API)
+- Differential-privacy wrapper: Gaussian noise calibrated to (ε, δ) on the empirical-quantile marginals, the polyserial/tetrachoric estimates, and the Bernoulli probabilities, with nearest-PSD reprojection ([Frontiers DH 2025](https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2025.1576290/full) shows DP-Gaussian-copula stays usable at ε ≈ 1.0)
+- Conditional generation via SDV-style conditioning rather than rejection (current `sample-conditional` does AST-validated rejection)
+
+### v0.8 — Disease-progression state machines ⬜
+
+- True longitudinal PADM-style state machines for the four highest-impact chronic conditions (HTN, DM, hyperlipidemia, IHD)
+- Time-to-event modeling for cardiovascular complications
+
+### v0.9 — Downstream benchmarks ⬜
+
+- TSTR (Train-on-Synthetic, Test-on-Real) ROC-AUC and Brier-score benchmark via the [SynthEHRella](https://github.com/chenxran/synthEHRella) framework: 80/20 split by `HASTA_ID`, train hypertension-risk model (LR + XGBoost) on each, score on the held-out 20% real test set
+- Calibration plots; target TSTR within 0.02 ROC-AUC of TRTR
+
+### v1.0 — Stable release ⬜
+
+- All v0.6 hand curation merged and tagged
+- Prevalence calibrated to TÜİK and validated on a TR holdout
+- DP-wrapped variant published alongside the standard one
+- Companion methods paper / data descriptor on arXiv + Zenodo DOI
+
+---
 
 ## How to request curation work
 
-If you're Dr. Moniri (or a collaborating clinician) and want to provide hand curation:
+If you're a clinician (Dr. Moniri or a collaborator) and want to provide curation:
 
-1. Pick a 🟣 task from v0.6.
-2. Open an issue using the *Clinical curation* template (see `.github/ISSUE_TEMPLATE/clinical_curation.md` once added).
-3. Either edit the relevant Python module / code table directly and open a PR, or paste the Turkish clinical guidance into the issue and request implementation.
+1. Pick a 🟣 task above (or any open issue with the `help-wanted-clinician` label).
+2. **Easiest path:** open the desktop app, hit the **Collaborate** panel, click "Claim this" on the task. The app pre-fills a GitHub Issue comment with your handle so the maintainers know you've started.
+3. **Or:** open an issue using the [🧑‍⚕️ Clinical curation template](https://github.com/ArioMoniri/syntha/issues/new?template=clinical_curation.md&labels=help-wanted-clinician&title=%5Bclinical-curation%5D%20).
+4. **Or:** paste the clinical Turkish guidance into the issue and the maintainers will implement.
+5. **Or:** edit the relevant Python module directly and open a PR (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+
+Most-likely-to-change files for clinical curation:
+
+| Change | Edit |
+|---|---|
+| Drug a module prescribes | `src/syntha/modules/<condition>.py` |
+| RxNorm code / dose text | `src/syntha/fhir/rxnorm.py` |
+| SNOMED / ICD-10 code for a Condition | `src/syntha/fhir/codes.py` |
+| Turkish display strings | `src/syntha/locale/turkish.py` |
+| Prevalence calibration / disease progression | `src/syntha/longitudinal.py`, `src/syntha/generator/missingness.py` |
+| Reference ranges (sex-aware) | `src/syntha/reference_ranges.py` |

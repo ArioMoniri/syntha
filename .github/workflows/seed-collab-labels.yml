@@ -1,0 +1,34 @@
+name: Seed collaboration labels
+
+# Ensures the three "help wanted" labels exist on the repo so the desktop
+# app's Collaborate panel can filter against them. Idempotent — running
+# repeatedly is fine.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/seed-collab-labels.yml'
+
+permissions:
+  issues: write
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure labels exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          ensure() {
+            name="$1"; color="$2"; desc="$3"
+            gh label create "$name" --color "$color" --description "$desc" --repo "${{ github.repository }}" 2>/dev/null \
+              || gh label edit "$name" --color "$color" --description "$desc" --repo "${{ github.repository }}"
+          }
+          ensure "help-wanted-clinician" "8b5cf6" "Needs a clinician (Turkish primary-care, internal med, family med)."
+          ensure "help-wanted-dev"       "0e8a16" "Needs a Python / TypeScript / Rust developer."
+          ensure "help-wanted-data"      "1d76db" "Needs a data scientist or statistician."
+          ensure "good-first-issue"      "7057ff" "Good entry point for a new contributor."

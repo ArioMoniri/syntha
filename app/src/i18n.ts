@@ -42,6 +42,31 @@ interface Translation {
   // Preview
   section_preview: string;
   preview_hint: string;
+  // Collaborate panel
+  section_collaborate: string;
+  collab_intro: string;
+  collab_handle_label: string;
+  collab_handle_placeholder: string;
+  collab_handle_save: string;
+  collab_handle_saved: string;
+  collab_btn_refresh: string;
+  collab_btn_claim: string;
+  collab_badge_clinician: string;
+  collab_badge_dev: string;
+  collab_badge_data: string;
+  collab_empty: string;
+  collab_no_body: string;
+  collab_opened_by: string;
+  collab_offline: string;
+  collab_fresh: string;
+  collab_browse_github: string;
+  collab_claim_modal_title: string;
+  collab_claim_modal_intro: string;
+  collab_claim_copy: string;
+  collab_claim_copied: string;
+  collab_claim_open_issue: string;
+  collab_claim_close: string;
+  collab_no_handle: string;
   // Footer
   footer_license: string;
   footer_github: string;
@@ -79,6 +104,32 @@ const EN: Translation = {
   status_idle: "Idle. Pick a cohort and parameters, then click Generate.",
   section_preview: "Preview",
   preview_hint: "Showing all columns; scroll horizontally for full width.",
+  section_collaborate: "Collaborate",
+  collab_intro:
+    "syntha is open-source. Pick up a task tagged help-wanted-clinician, help-wanted-dev, or help-wanted-data and ship a contribution. Your GitHub handle is remembered locally so claim comments come from you.",
+  collab_handle_label: "Your GitHub handle",
+  collab_handle_placeholder: "octocat",
+  collab_handle_save: "Save",
+  collab_handle_saved: "Saved",
+  collab_btn_refresh: "Refresh from GitHub",
+  collab_btn_claim: "Claim this",
+  collab_badge_clinician: "clinician",
+  collab_badge_dev: "developer",
+  collab_badge_data: "data / stats",
+  collab_empty: "No open help-wanted tasks right now. Check back later, or browse the full repo on GitHub.",
+  collab_no_body: "(no description yet)",
+  collab_opened_by: "opened by",
+  collab_offline: "Offline — last fetched",
+  collab_fresh: "Fetched",
+  collab_browse_github: "Browse all help-wanted issues on GitHub →",
+  collab_claim_modal_title: "Claim a task",
+  collab_claim_modal_intro:
+    "Copy the comment below, then open the issue and paste it. The maintainers will see your handle and follow up.",
+  collab_claim_copy: "Copy comment",
+  collab_claim_copied: "Copied!",
+  collab_claim_open_issue: "Open issue on GitHub",
+  collab_claim_close: "Close",
+  collab_no_handle: "Add your GitHub handle above first so the comment carries your identity.",
   footer_license:
     "Apache 2.0 · trained on open clinical standards (LOINC / SNOMED CT / ICD-10 / RxNorm) ·",
   footer_github: "GitHub",
@@ -116,6 +167,32 @@ const TR: Translation = {
   status_idle: "Bekliyor. Bir kohort ve parametre seçin, sonra Üret'e tıklayın.",
   section_preview: "Önizleme",
   preview_hint: "Tüm sütunlar gösteriliyor; tam genişlik için yatay kaydırın.",
+  section_collaborate: "Birlikte çalışın",
+  collab_intro:
+    "syntha açık kaynaklıdır. help-wanted-clinician, help-wanted-dev veya help-wanted-data etiketli bir görevi alın ve katkıda bulunun. GitHub kullanıcı adınız yerel olarak hatırlanır.",
+  collab_handle_label: "GitHub kullanıcı adınız",
+  collab_handle_placeholder: "octocat",
+  collab_handle_save: "Kaydet",
+  collab_handle_saved: "Kaydedildi",
+  collab_btn_refresh: "GitHub'dan yenile",
+  collab_btn_claim: "Bu görevi al",
+  collab_badge_clinician: "klinisyen",
+  collab_badge_dev: "geliştirici",
+  collab_badge_data: "veri / ist.",
+  collab_empty: "Şu an açık 'yardım aranıyor' görevi yok. Daha sonra tekrar bakın veya GitHub'da tüm depoyu inceleyin.",
+  collab_no_body: "(açıklama yok)",
+  collab_opened_by: "açan",
+  collab_offline: "Çevrimdışı — son alındı",
+  collab_fresh: "Alındı",
+  collab_browse_github: "Yardım istenen tüm konuları GitHub'da inceleyin →",
+  collab_claim_modal_title: "Görevi al",
+  collab_claim_modal_intro:
+    "Aşağıdaki yorumu kopyalayın, konuyu açın ve yapıştırın. Bakımcılar kullanıcı adınızı görüp size dönüş yapacak.",
+  collab_claim_copy: "Yorumu kopyala",
+  collab_claim_copied: "Kopyalandı!",
+  collab_claim_open_issue: "Konuyu GitHub'da aç",
+  collab_claim_close: "Kapat",
+  collab_no_handle: "Yorumun size atfedilmesi için önce GitHub kullanıcı adınızı ekleyin.",
   footer_license:
     "Apache 2.0 · açık klinik standartlar üzerinde eğitildi (LOINC / SNOMED CT / ICD-10 / RxNorm) ·",
   footer_github: "GitHub",
