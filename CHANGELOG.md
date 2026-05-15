@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.7](https://github.com/ArioMoniri/syntha/compare/v0.5.6...v0.5.7) (2026-05-15)
+
+
+### Features
+
+* **app:** in-app **Collaborate** panel — pulls live `help-wanted-clinician`, `help-wanted-dev`, and `help-wanted-data` issues from the GitHub API and lets contributors claim a task with their GitHub handle. No backend: GitHub IS the platform (identity = handle, tasks = issues, claiming = pre-filled comment). 15-min `localStorage` cache so the panel stays useful offline.
+* **app:** "claim" modal — copy-to-clipboard of the pre-filled comment + one-click deep-link to the issue.
+* **docs:** README rewritten — strictly *what syntha is* and *how to use it* (install, quick start, output schema, CLI reference, fidelity, plots). All forward-looking content moved out.
+* **docs:** `ROADMAP.md` consolidated — no duplicate v0.4 / v0.5 sections; single shipped log + queued plan; the 🟣 clinical-curation items live here.
+* **docs:** new `COLLABORATE.md` — live list of clinician + dev + data tasks, who can help with what, and how to claim.
+* **repo:** new labels — `help-wanted-clinician` (#8b5cf6), `help-wanted-dev` (#0e8a16), `help-wanted-data` (#1d76db). Bootstrapped via the new `seed-collab-labels.yml` workflow so forks get them too.
+* **repo:** new issue templates for `help-wanted-dev` and `help-wanted-data`. The existing clinical-curation template retargeted from the old `clinical-curation` label to the new `help-wanted-clinician`.
+* **repo:** 12 seed issues opened across the three categories so the in-app panel has content from launch.
+* **plots:** `docs/figures/{distributions,correlations,prevalence}.png` regenerated from a fresh v0.5.6 strict-cohort sample (n = 500, seed = 42).
+
+
+### Bug fixes
+
+* **ci(cross-platform):** the `macos-latest` runner's brew-installed `rustup-init` shim intercepts every rustup subcommand — even `rustup which cargo` errors with *"unexpected argument 'which' found"*. Switch to the official `rustup.rs` one-liner installer into `$HOME/.cargo` and call cargo by its absolute path in every later step. Removed `dtolnay/rust-toolchain@stable` since it can't get past the shim on macOS.
+
+
 ## [0.5.6](https://github.com/ArioMoniri/syntha/compare/v0.5.0...v0.5.6) (2026-05-15)
 
 
