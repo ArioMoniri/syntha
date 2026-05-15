@@ -268,41 +268,6 @@ https://github.com/ArioMoniri/syntha
 | 💊 | [**RxNorm**](https://www.nlm.nih.gov/research/umls/rxnorm/) | Medication coding |
 | 📊 | **Turkish-cohort EHR data steward** | De-identified retrospective episodes (anonymized upstream; never redistributed by this repo) |
 
-## Contributors
-
-Want to be on this list? See [**COLLABORATE.md**](COLLABORATE.md) or pick a card in the in-app **Collaborate** panel.
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%">
-        <a href="https://github.com/ArioMoniri">
-          <img src="https://avatars.githubusercontent.com/u/92126657?v=4&s=80" width="80px;" alt="Ariorad Moniri"/>
-          <br /><sub><b>Ariorad Moniri</b></sub>
-        </a><br />
-        <span title="Maintainer">🧑‍💼</span>
-        <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Code">💻</a>
-        <a href="#design-ArioMoniri" title="Design">🎨</a>
-        <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Documentation">📖</a>
-        <a href="#maintenance-ArioMoniri" title="Maintenance">🚧</a>
-        <a href="#ideas-ArioMoniri" title="Ideas & Planning">🤔</a>
-        <a href="https://github.com/ArioMoniri/syntha/pulls?q=is%3Apr+reviewed-by%3AArioMoniri" title="Reviewed Pull Requests">👀</a>
-        <a href="#infra-ArioMoniri" title="Infrastructure">🚇</a>
-        <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Tests">⚠️</a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-Powered by [all-contributors](https://allcontributors.org/) — comment `@all-contributors please add @username for code,doc` on any issue or PR to nominate someone.
-
 ## Community
 
 <table>
