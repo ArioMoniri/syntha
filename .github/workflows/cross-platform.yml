@@ -155,4 +155,6 @@ jobs:
         # Use `rustup which cargo` to call the actual cargo proxy,
         # bypassing any rustup-init shim that may still be earlier on PATH.
         shell: bash
-        run: "$(rustup which cargo)" check --manifest-path app/src-tauri/Cargo.toml
+        run: |
+          CARGO_BIN="$(rustup which cargo)"
+          "$CARGO_BIN" check --manifest-path app/src-tauri/Cargo.toml
