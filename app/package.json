@@ -1,6 +1,6 @@
 {
   "name": "syntha-app",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Desktop GUI for syntha — generate synthetic patient records from a trained copula and download as CSV.",
   "private": true,
   "type": "module",

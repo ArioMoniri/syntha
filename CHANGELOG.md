@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.8](https://github.com/ArioMoniri/syntha/compare/v0.5.7...v0.5.8) (2026-05-15)
+
+
+### Bug fixes
+
+* **plots:** previous figures were sampled at n=500 from the strict cohort, which (a) made the discrete BP source distribution look like the synthetic only hit 2-3 modes (sampling aliasing, not a model bug — source BP is dominated by integer multiples of 10 mmHg with frequencies 1650/1613/1348/912/371 at 110/100/120/90/130), and (b) produced an empty prevalence bar chart because every comorbidity is literally 0% in pristine-strict by construction. Switched to the tolerant cohort at n=5000, sourced from the bundled `app/src/model_tolerant.json` so the script no longer needs the source CSV on disk.
+* **scripts/make_plots.py:** rewritten — reads source marginals (continuous quantile grids + binary prevalences) straight out of the v2 model JSON; samples 5000 synthetic via the registered model; prevalence chart now sorted descending, annotates each bar with its exact percentage, and uses 10 comorbidities with real variance.
+* **README:** Contributors avatar URL fixed (used `u/ArioMoniri` instead of the numeric `u/92126657`; also had `?v=4?s=80` → second `?` should have been `&`).
+
+
+### Features
+
+* **README:** redesigned Acknowledgements section as a captioned table (project · what it gives us). Community section is now a 6-cell grid (Discussions / Issues / Collaborate · Contributing / Roadmap / Changelog) with one-line captions.
+
+
 ## [0.5.7](https://github.com/ArioMoniri/syntha/compare/v0.5.6...v0.5.7) (2026-05-15)
 
 

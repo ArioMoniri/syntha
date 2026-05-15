@@ -259,11 +259,18 @@ https://github.com/ArioMoniri/syntha
 
 ## Acknowledgements
 
-- 🩺 [Synthea](https://github.com/synthetichealth/synthea) — inspiration for the clinical-module layer and FHIR output format.
-- 🌐 [LOINC](https://loinc.org/), [SNOMED CT](https://www.snomed.org/), [ICD-10](https://icd.who.int/browse10/), [RxNorm](https://www.nlm.nih.gov/research/umls/rxnorm/) — open clinical terminologies.
-- 📊 The anonymized Turkish-cohort EHR data steward (de-identified upstream; never redistributed here).
+| | Project | What it gives us |
+|---|---|---|
+| 🩺 | [**Synthea**](https://github.com/synthetichealth/synthea) | Inspiration for the clinical-module layer and FHIR output format |
+| 🧪 | [**LOINC**](https://loinc.org/) | Lab and observation codes |
+| 🧬 | [**SNOMED CT**](https://www.snomed.org/) | Condition, procedure, encounter, and care-plan terminology |
+| 📑 | [**ICD-10**](https://icd.who.int/browse10/) | Diagnosis coding alongside SNOMED |
+| 💊 | [**RxNorm**](https://www.nlm.nih.gov/research/umls/rxnorm/) | Medication coding |
+| 📊 | **Turkish-cohort EHR data steward** | De-identified retrospective episodes (anonymized upstream; never redistributed by this repo) |
 
-### Contributors
+## Contributors
+
+Want to be on this list? See [**COLLABORATE.md**](COLLABORATE.md) or pick a card in the in-app **Collaborate** panel.
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -271,7 +278,21 @@ https://github.com/ArioMoniri/syntha
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ArioMoniri"><img src="https://avatars.githubusercontent.com/u/ArioMoniri?v=4?s=80" width="80px;" alt="Ariorad Moniri"/><br /><sub><b>Ariorad Moniri</b></sub></a><br /><a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Code">💻</a> <a href="#design-ArioMoniri" title="Design">🎨</a> <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Documentation">📖</a> <a href="#maintenance-ArioMoniri" title="Maintenance">🚧</a> <a href="#ideas-ArioMoniri" title="Ideas & Planning">🤔</a> <a href="https://github.com/ArioMoniri/syntha/pulls?q=is%3Apr+reviewed-by%3AArioMoniri" title="Reviewed Pull Requests">👀</a> <a href="#infra-ArioMoniri" title="Infrastructure">🚇</a> <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%">
+        <a href="https://github.com/ArioMoniri">
+          <img src="https://avatars.githubusercontent.com/u/92126657?v=4&s=80" width="80px;" alt="Ariorad Moniri"/>
+          <br /><sub><b>Ariorad Moniri</b></sub>
+        </a><br />
+        <span title="Maintainer">🧑‍💼</span>
+        <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Code">💻</a>
+        <a href="#design-ArioMoniri" title="Design">🎨</a>
+        <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Documentation">📖</a>
+        <a href="#maintenance-ArioMoniri" title="Maintenance">🚧</a>
+        <a href="#ideas-ArioMoniri" title="Ideas & Planning">🤔</a>
+        <a href="https://github.com/ArioMoniri/syntha/pulls?q=is%3Apr+reviewed-by%3AArioMoniri" title="Reviewed Pull Requests">👀</a>
+        <a href="#infra-ArioMoniri" title="Infrastructure">🚇</a>
+        <a href="https://github.com/ArioMoniri/syntha/commits?author=ArioMoniri" title="Tests">⚠️</a>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -280,10 +301,43 @@ https://github.com/ArioMoniri/syntha
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-[all-contributors](https://allcontributors.org/) — comment `@all-contributors please add @username for code,doc` on any issue or PR to nominate someone.
+Powered by [all-contributors](https://allcontributors.org/) — comment `@all-contributors please add @username for code,doc` on any issue or PR to nominate someone.
 
-### Community
+## Community
 
-- 🗨️ [GitHub Discussions](https://github.com/ArioMoniri/syntha/discussions)
-- 🐛 [Issues](https://github.com/ArioMoniri/syntha/issues)
-- 📖 [Contributing](CONTRIBUTING.md) · [Collaborate](COLLABORATE.md) · [Roadmap](ROADMAP.md)
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <a href="https://github.com/ArioMoniri/syntha/discussions">
+        <strong>💬 Discussions</strong>
+      </a><br />
+      <sub>Open questions, "is this the right tool for X?", show-and-tell</sub>
+    </td>
+    <td align="center" width="33%">
+      <a href="https://github.com/ArioMoniri/syntha/issues">
+        <strong>🐛 Issues</strong>
+      </a><br />
+      <sub>Bug reports + feature requests + clinical curation</sub>
+    </td>
+    <td align="center" width="34%">
+      <a href="COLLABORATE.md">
+        <strong>🤝 Collaborate</strong>
+      </a><br />
+      <sub>Live list of clinician + dev + data tasks · also surfaced in the desktop app</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="CONTRIBUTING.md"><strong>📖 Contributing</strong></a><br />
+      <sub>Dev setup, commit conventions, test matrix</sub>
+    </td>
+    <td align="center">
+      <a href="ROADMAP.md"><strong>🗺️ Roadmap</strong></a><br />
+      <sub>Shipped + queued + what needs a clinician</sub>
+    </td>
+    <td align="center">
+      <a href="CHANGELOG.md"><strong>📋 Changelog</strong></a><br />
+      <sub>Semver, Keep-a-Changelog, generated by release-please</sub>
+    </td>
+  </tr>
+</table>
