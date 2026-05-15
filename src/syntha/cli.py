@@ -42,9 +42,18 @@ def main() -> None:
               show_default=True, help="Apply comorbidity-conditional missingness (v0.5.2)")
 @click.option("--validation/--no-validation", default=True, show_default=True,
               help="Compute KS/Wasserstein/correlation report alongside output")
+@click.option(
+    "--curation-flags/--no-curation-flags", default=False, show_default=True,
+    help=(
+        "Include source-pipeline curation flags (pristine_*, berturk_*, "
+        "drug-safety flags, rf_*) in the CSV. Off by default — these are "
+        "training metadata, not clinical observations."
+    ),
+)
 def generate(input_csv, output_dir, n, cohort, seed, csv, fhir, fhir_format,
              modules, longitudinal, encounters_per_patient, years_of_history,
-             registry_dir, lab_history, conditional_missingness, validation):
+             registry_dir, lab_history, conditional_missingness, validation,
+             curation_flags):
     """Train copula, sample, run modules, write CSV + FHIR + model card."""
     cfg = PipelineConfig(
         n=n, cohort=cohort, random_seed=seed,
@@ -55,6 +64,7 @@ def generate(input_csv, output_dir, n, cohort, seed, csv, fhir, fhir_format,
         write_validation=validation,
         apply_conditional_missingness=conditional_missingness,
         include_lab_history=lab_history,
+        include_curation_flags=curation_flags,
     )
     click.echo(json.dumps(run(input_csv, output_dir, cfg), indent=2))
 
@@ -97,9 +107,21 @@ def list_models(registry_dir):
 @click.option("--quantiles", default=200, show_default=True, help="Order statistics per continuous marginal")
 def export_model(registry_dir, name, output_path, quantiles):
     """Export a registered copula to JSON for use by the Tauri desktop app."""
+    from . import data, preprocess
     from .export_model import export_model_to_json
     gen, card = ModelRegistry(registry_dir).load(name)
-    path = export_model_to_json(gen, output_path, n_quantiles=quantiles)
+    date_lo: str | None = None
+    date_hi: str | None = None
+    try:
+        src = preprocess.coerce_types(data.load_episodes(card.source_csv))
+        lo, hi = data.date_range(src)
+        date_lo, date_hi = lo.strftime("%Y-%m-%d"), hi.strftime("%Y-%m-%d")
+    except Exception:
+        pass
+    path = export_model_to_json(
+        gen, output_path, n_quantiles=quantiles,
+        date_lo=date_lo, date_hi=date_hi,
+    )
     click.echo(json.dumps({
         "path": str(path), "cohort": card.cohort,
         "n_train": card.n_train, "size_kb": path.stat().st_size // 1024,

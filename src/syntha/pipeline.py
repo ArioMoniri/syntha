@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import data, preprocess
+from . import data, preprocess, schema
 from .fhir.export import write_fhir_bundles
 from .generator.constraints import ConstraintConfig, PhysiologicConstraints
 from .generator.copula import GaussianCopulaGenerator
@@ -40,6 +40,12 @@ class PipelineConfig:
     apply_conditional_missingness: bool = True  # joint missingness model (5.2)
     include_clinical_normal_report: bool = True  # G3 reference-range fractions
     include_lab_history: bool = False  # 5.5 lab time-series Observations
+    # v0.5.6: cohort-curation flags (BERTurk score, pristine_*, drug-safety
+    # flags, rf_*, etc.) are source-pipeline metadata, not clinical
+    # observations. Off by default in CSV output so downstream consumers see
+    # only medically-meaningful columns. FHIR FamilyMemberHistory still
+    # consumes rf_kanser/rf_kronik_hastalik before this filter runs.
+    include_curation_flags: bool = False
 
 
 def _generate_ids_and_dates(
@@ -147,9 +153,14 @@ def run(input_csv, output_dir, cfg: PipelineConfig) -> dict:
     written: dict[str, str] = {}
     if cfg.write_csv:
         csv_path = out / f"synthetic_{cfg.cohort}_episodes.csv"
-        synthetic.to_csv(csv_path, index=False)
+        csv_df = synthetic if cfg.include_curation_flags else synthetic.drop(
+            columns=[c for c in schema.CURATION_COLUMNS if c in synthetic.columns],
+        )
+        csv_df.to_csv(csv_path, index=False)
         written["csv"] = str(csv_path)
     if cfg.write_fhir:
+        # FHIR consumes rf_kanser / rf_kronik_hastalik for FamilyMemberHistory
+        # so we pass the full DataFrame (curation flags included) here.
         fhir_path = write_fhir_bundles(
             synthetic, out / "fhir", fmt=cfg.fhir_format,
             run_modules=cfg.run_modules,

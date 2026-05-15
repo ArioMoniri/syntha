@@ -65,6 +65,34 @@
               <span data-i18n-key="param_missingness">Reproduce source-data missingness pattern</span>
             </label>
           </div>
+          <div>
+            <label class="checkbox">
+              <input id="clinical-only" type="checkbox" checked />
+              <span data-i18n-key="param_clinical_only">Clinical columns only (drop curation flags)</span>
+              <span class="muted" data-i18n-key="param_clinical_only_hint">(hides BERTurk score, pristine_*, drug-safety flags, rf_* — training metadata, not real clinical signal)</span>
+            </label>
+          </div>
+          <div>
+            <label class="checkbox">
+              <input id="longitudinal" type="checkbox" />
+              <span data-i18n-key="param_longitudinal">Longitudinal mode (multiple encounters per patient)</span>
+              <span class="muted" data-i18n-key="param_longitudinal_hint">(synthesizes a shared HASTA_ID across episodes spread over several years; labs drift between visits)</span>
+            </label>
+          </div>
+        </div>
+        <div class="grid" id="longitudinal-params" hidden>
+          <div>
+            <label>
+              <span data-i18n-key="param_encounters_per_patient">Encounters per patient (Poisson mean)</span>
+              <input id="encounters-per-patient" type="number" min="1" max="30" step="0.5" value="4" />
+            </label>
+          </div>
+          <div>
+            <label>
+              <span data-i18n-key="param_years_of_history">Years of history</span>
+              <input id="years-of-history" type="number" min="0.25" max="20" step="0.25" value="3" />
+            </label>
+          </div>
         </div>
       </section>
 
@@ -79,6 +107,9 @@
 
       <section class="card" id="preview-card" hidden>
         <h2 data-i18n-key="section_preview">Preview</h2>
+        <p class="hint" data-i18n-key="preview_hint">
+          Showing all columns; scroll horizontally for full width.
+        </p>
         <div id="preview" class="preview"></div>
       </section>
     </main>

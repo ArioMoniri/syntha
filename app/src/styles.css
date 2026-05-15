@@ -163,18 +163,33 @@ button.primary:hover { background: var(--primary-hover); border-color: var(--pri
 .status.error   { color: #dc2626; }
 
 .preview {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 480px;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 11.5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
-.preview table { border-collapse: collapse; }
+.preview table { border-collapse: separate; border-spacing: 0; }
 .preview th, .preview td {
   border-bottom: 1px solid var(--border);
   padding: 4px 8px;
   white-space: nowrap;
 }
-.preview th { text-align: left; color: var(--muted); }
+.preview th {
+  text-align: left;
+  color: var(--muted);
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  z-index: 1;
+  box-shadow: 0 1px 0 var(--border);
+}
+.preview tbody tr:nth-child(even) td { background: rgba(0, 0, 0, 0.02); }
+@media (prefers-color-scheme: dark) {
+  .preview tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.03); }
+}
 
 footer {
   padding: 16px 32px 24px;

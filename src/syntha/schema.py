@@ -85,6 +85,35 @@ LAB_PANELS: list[tuple[str, str, str, list[str]]] = [
 ]
 
 
+# Source-cohort curation flags carried through the copula but stripped from
+# the default CSV/preview output. These are training-pipeline metadata
+# (cohort gating, drug-safety pre-filters, text-NLP screening) rather than
+# real clinical observations — keeping them in the default output confuses
+# downstream consumers (e.g. every synthetic row has ``pristine_strict=1``
+# because the model was *trained on* pristine rows). Two of them
+# (rf_kanser, rf_kronik_hastalik) are still consumed by the FHIR exporter
+# to emit FamilyMemberHistory resources, so the drop happens AFTER FHIR
+# in the pipeline.
+CURATION_COLUMNS = [
+    # Cohort-tier flags
+    "pristine_strict", "pristine_tolerant",
+    "tier_healthy_episode", "tier_healthy_patient",
+    "is_cancer", "is_ex", "is_cancer_or_ex",
+    # Drug-safety / pharmacovigilance pipeline flags
+    "drug_safe", "has_rx_data", "has_blacklist_drug",
+    "polypharmacy_flag", "high_risk_drug_flag",
+    "max_ilac_onem", "mean_ilac_onem",
+    # Text-NLP screening (BERTurk + keyword + rule)
+    "rule_clean", "keyword_clean", "berturk_clean", "berturk_similarity",
+    "text_available", "nlp_filter_pass", "keyword_total_flags",
+    # ICD progression flags
+    "has_nontolerable_icd_30d", "any_worsening",
+    # Risk-factor source flags (also drive FHIR FamilyMemberHistory)
+    "rf_kanser", "rf_kronik_hastalik", "rf_akut_ciddi",
+    "rf_psikiyatri_ciddi", "rf_ilac_risk_metin", "rf_fonksiyon_kaybi",
+]
+
+
 def all_modeled_columns() -> list[str]:
     return (
         DEMOGRAPHIC_COLUMNS

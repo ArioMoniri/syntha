@@ -1,5 +1,10 @@
 import {
+  addIdentifiers,
   applyPhysiologicConstraints,
+  curationColumns,
+  dropCurationFlags,
+  expandToTrajectories,
+  ID_COLUMNS,
   INT_CAST_COLUMNS,
   sample,
   toCsv,
@@ -41,6 +46,14 @@ function readParams() {
     seed: parseInt(el<HTMLInputElement>("seed").value || "42") | 0,
     applyConstraints: el<HTMLInputElement>("apply-constraints").checked,
     applyMissingness: el<HTMLInputElement>("include-missingness").checked,
+    clinicalOnly: el<HTMLInputElement>("clinical-only").checked,
+    longitudinal: el<HTMLInputElement>("longitudinal").checked,
+    encountersPerPatient: Math.max(1, parseFloat(
+      el<HTMLInputElement>("encounters-per-patient").value || "4",
+    )),
+    yearsOfHistory: Math.max(0.25, parseFloat(
+      el<HTMLInputElement>("years-of-history").value || "3",
+    )),
   };
 }
 
@@ -54,30 +67,70 @@ async function generate(): Promise<SampleResult | null> {
     setStatus(`Could not load model: ${(e as Error).message}. Did you run scripts/refresh_app_model.sh?`, "error");
     return null;
   }
-  setStatus(`Sampling ${p.n.toLocaleString()} episodes from ${p.cohort} cohort (n_train = ${model.n_train.toLocaleString()})…`);
 
-  // Oversample to make up for constraint rejection.
-  const target = p.n;
+  // In longitudinal mode `n` is the target *total encounter* count; we draw
+  // fewer baselines and expand each into ~encountersPerPatient encounters.
+  const targetEncounters = p.n;
+  const baselineTarget = p.longitudinal
+    ? Math.max(1, Math.round(targetEncounters / p.encountersPerPatient))
+    : targetEncounters;
+
+  setStatus(
+    p.longitudinal
+      ? `Sampling ~${baselineTarget.toLocaleString()} baselines × ~${p.encountersPerPatient.toFixed(1)} encounters from ${p.cohort} cohort (n_train = ${model.n_train.toLocaleString()})…`
+      : `Sampling ${p.n.toLocaleString()} episodes from ${p.cohort} cohort (n_train = ${model.n_train.toLocaleString()})…`,
+  );
+
+  // 1) Copula sample → physiologic constraint filter (oversample to recover).
   const factor = p.applyConstraints ? 1.5 : 1.0;
-  let result = sample(model, {
-    n: Math.ceil(target * factor),
+  let baselines = sample(model, {
+    n: Math.ceil(baselineTarget * factor),
     seed: p.seed,
     applyMissingness: p.applyMissingness,
   });
   if (p.applyConstraints) {
-    result = applyPhysiologicConstraints(result);
-    if (result.rows.length < target) {
+    baselines = applyPhysiologicConstraints(baselines);
+    if (baselines.rows.length < baselineTarget) {
       const extra = sample(model, {
-        n: Math.ceil((target - result.rows.length) * 2),
+        n: Math.ceil((baselineTarget - baselines.rows.length) * 2),
         seed: p.seed + 1,
         applyMissingness: p.applyMissingness,
       });
       const more = applyPhysiologicConstraints(extra);
-      result = { columns: result.columns, rows: result.rows.concat(more.rows) };
+      baselines = { columns: baselines.columns, rows: baselines.rows.concat(more.rows) };
     }
   }
-  result = { columns: result.columns, rows: result.rows.slice(0, target) };
-  setStatus(`✓ Generated ${result.rows.length.toLocaleString()} rows from ${p.cohort} cohort.`, "success");
+  baselines = { columns: baselines.columns, rows: baselines.rows.slice(0, baselineTarget) };
+
+  // 2) Synthesize identifiers (RF_EPISODE2, HASTA_ID, episode_date).
+  baselines = addIdentifiers(baselines, model, p.seed + 2);
+
+  // 3) Longitudinal expansion (one row per encounter).
+  let result: SampleResult;
+  if (p.longitudinal) {
+    result = expandToTrajectories(baselines, model, {
+      encountersPerPatientMean: p.encountersPerPatient,
+      yearsOfHistory: p.yearsOfHistory,
+      labDriftScale: 0.05,
+      ageAdvance: true,
+      seed: p.seed + 3,
+    });
+    if (p.applyConstraints) result = applyPhysiologicConstraints(result);
+    // Trim to the user's target encounter count (Poisson can overshoot).
+    result = { columns: result.columns, rows: result.rows.slice(0, targetEncounters) };
+  } else {
+    result = baselines;
+  }
+
+  // 4) Drop curation-flag columns from the CSV/preview output by default.
+  if (p.clinicalOnly) {
+    result = dropCurationFlags(result, curationColumns(model));
+  }
+
+  const status = p.longitudinal
+    ? `✓ Generated ${result.rows.length.toLocaleString()} encounters across ~${baselineTarget.toLocaleString()} patients (${p.cohort}).`
+    : `✓ Generated ${result.rows.length.toLocaleString()} rows from ${p.cohort} cohort.`;
+  setStatus(status, "success");
   return result;
 }
 
@@ -95,27 +148,37 @@ function downloadCsv(result: SampleResult, cohort: string) {
   URL.revokeObjectURL(url);
 }
 
+const ID_COLUMN_SET = new Set<string>(ID_COLUMNS);
+
+function formatCell(col: string, v: number | string | null | undefined): string {
+  if (v === null || v === undefined) {
+    return "<td><span class='muted'>—</span></td>";
+  }
+  if (typeof v === "string") {
+    return `<td>${escapeHtml(v)}</td>`;
+  }
+  if (Number.isNaN(v)) {
+    return "<td><span class='muted'>—</span></td>";
+  }
+  if (INT_CAST_COLUMNS.has(col) || ID_COLUMN_SET.has(col)) {
+    return `<td>${Math.round(v)}</td>`;
+  }
+  return `<td>${Number.isInteger(v) ? v : v.toFixed(2)}</td>`;
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"]/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] as string
+  ));
+}
+
 function renderPreview(result: SampleResult) {
   const card = el<HTMLElement>("preview-card");
   const container = el<HTMLDivElement>("preview");
-  const previewCols = [
-    "HASTA_ID", "age", "gender_is_male",
-    "bp_systolic", "bp_diastolic",
-    "glucose_fasting_latest", "hdl_latest", "ldl_direct_latest",
-    "hemoglobin_latest", "egfr_latest",
-    "Hipertansiyon", "DM_Tum", "Hiperlipidemi",
-  ];
-  // HASTA_ID isn't in model columns; generate one on the fly for preview.
-  const colIdx = previewCols.map((c) => ({ c, i: result.columns.indexOf(c) }));
-  const head = "<thead><tr>" + previewCols.map((c) => `<th>${c}</th>`).join("") + "</tr></thead>";
-  const body = result.rows.slice(0, 10).map((row, r) => {
-    const cells = colIdx.map(({ c, i }) => {
-      if (c === "HASTA_ID") return `<td>SYN_${(r + 1).toString().padStart(6, "0")}</td>`;
-      const v = i >= 0 ? row[i] : null;
-      if (v === null || v === undefined) return "<td><span class='muted'>—</span></td>";
-      const cast = INT_CAST_COLUMNS.has(c) ? Math.round(v as number) : (v as number);
-      return `<td>${typeof cast === "number" && !Number.isInteger(cast) ? cast.toFixed(2) : cast}</td>`;
-    });
+  const cols = result.columns;
+  const head = "<thead><tr>" + cols.map((c) => `<th>${escapeHtml(c)}</th>`).join("") + "</tr></thead>";
+  const body = result.rows.slice(0, 50).map((row) => {
+    const cells = cols.map((c, i) => formatCell(c, row[i]));
     return "<tr>" + cells.join("") + "</tr>";
   }).join("");
   container.innerHTML = `<table>${head}<tbody>${body}</tbody></table>`;
@@ -147,6 +210,15 @@ el<HTMLButtonElement>("preview-btn").addEventListener("click", async () => {
     el<HTMLButtonElement>("preview-btn").disabled = false;
   }
 });
+
+// Toggle visibility of the longitudinal sub-parameters when the checkbox flips.
+const longitudinalToggle = el<HTMLInputElement>("longitudinal");
+const longitudinalParams = el<HTMLDivElement>("longitudinal-params");
+function refreshLongitudinalParamsVisibility() {
+  longitudinalParams.hidden = !longitudinalToggle.checked;
+}
+longitudinalToggle.addEventListener("change", refreshLongitudinalParamsVisibility);
+refreshLongitudinalParamsVisibility();
 
 // Initialize i18n before any user-facing strings are emitted. Sets
 // document.documentElement.lang + walks [data-i18n-key] and substitutes

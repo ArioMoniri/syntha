@@ -28,6 +28,12 @@ interface Translation {
   param_constraints: string;
   param_constraints_hint: string;
   param_missingness: string;
+  param_longitudinal: string;
+  param_longitudinal_hint: string;
+  param_encounters_per_patient: string;
+  param_years_of_history: string;
+  param_clinical_only: string;
+  param_clinical_only_hint: string;
   // Section 3 — actions
   section_generate: string;
   btn_generate: string;
@@ -35,6 +41,7 @@ interface Translation {
   status_idle: string;
   // Preview
   section_preview: string;
+  preview_hint: string;
   // Footer
   footer_license: string;
   footer_github: string;
@@ -58,11 +65,20 @@ const EN: Translation = {
   param_constraints_hint:
     "(pulse pressure, Friedewald, eGFR ↔ creatinine)",
   param_missingness: "Reproduce source-data missingness pattern",
+  param_longitudinal: "Longitudinal mode (multiple encounters per patient)",
+  param_longitudinal_hint:
+    "(synthesizes a shared HASTA_ID across episodes spread over several years; labs drift between visits)",
+  param_encounters_per_patient: "Encounters per patient (Poisson mean)",
+  param_years_of_history: "Years of history",
+  param_clinical_only: "Clinical columns only (drop curation flags)",
+  param_clinical_only_hint:
+    "(hides BERTurk score, pristine_*, drug-safety flags, rf_* — training metadata, not real clinical signal)",
   section_generate: "3 · Generate",
   btn_generate: "Generate & download CSV",
-  btn_preview: "Preview first 10 rows",
+  btn_preview: "Preview first 50 rows",
   status_idle: "Idle. Pick a cohort and parameters, then click Generate.",
   section_preview: "Preview",
+  preview_hint: "Showing all columns; scroll horizontally for full width.",
   footer_license:
     "Apache 2.0 · trained on open clinical standards (LOINC / SNOMED CT / ICD-10 / RxNorm) ·",
   footer_github: "GitHub",
@@ -86,11 +102,20 @@ const TR: Translation = {
   param_constraints_hint:
     "(nabız basıncı, Friedewald, eGFR ↔ kreatinin)",
   param_missingness: "Kaynak veri eksik veri desenini yeniden üret",
+  param_longitudinal: "Longitudinal mod (hasta başına birden fazla ziyaret)",
+  param_longitudinal_hint:
+    "(birkaç yıla yayılan epizotlarda ortak bir HASTA_ID üretir; ziyaretler arasında laboratuvar değerleri kayar)",
+  param_encounters_per_patient: "Hasta başına ziyaret (Poisson ortalaması)",
+  param_years_of_history: "Geçmiş yıl sayısı",
+  param_clinical_only: "Sadece klinik sütunlar (kohort etiketlerini gizle)",
+  param_clinical_only_hint:
+    "(BERTurk skoru, pristine_*, ilaç-güvenliği ve rf_* etiketleri gizlenir — bunlar eğitim meta verisi, gerçek klinik sinyal değil)",
   section_generate: "3 · Üret",
   btn_generate: "Üret ve CSV indir",
-  btn_preview: "İlk 10 satırı önizle",
+  btn_preview: "İlk 50 satırı önizle",
   status_idle: "Bekliyor. Bir kohort ve parametre seçin, sonra Üret'e tıklayın.",
   section_preview: "Önizleme",
+  preview_hint: "Tüm sütunlar gösteriliyor; tam genişlik için yatay kaydırın.",
   footer_license:
     "Apache 2.0 · açık klinik standartlar üzerinde eğitildi (LOINC / SNOMED CT / ICD-10 / RxNorm) ·",
   footer_github: "GitHub",
