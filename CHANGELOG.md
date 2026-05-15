@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://github.com/ArioMoniri/syntha/compare/v0.4.2...v0.5.0) (2026-05-15)
+
+
+### Features
+
+* **app:** Turkish (tr-TR) UI alongside English (i18n) ([cb86ba5](https://github.com/ArioMoniri/syntha/commit/cb86ba55ff3774961240977ab20d0b8be7c835cd))
+* **cli:** conditional sampling via AST-validated rejection ([c26e0b9](https://github.com/ArioMoniri/syntha/commit/c26e0b966a1cfe2691f2853a00cf0b0ae9297cf9))
+* **clinical:** G3 reference ranges (sex-specific normal intervals) ([a4eb8ec](https://github.com/ArioMoniri/syntha/commit/a4eb8ecffd2723a7f0d69f813316c852374b5d49))
+* **dashboard:** GitHub Pages benchmark dashboard at ariomoniri.github.io/syntha ([8511868](https://github.com/ArioMoniri/syntha/commit/851186886c9456d04a71299ea384a69711f4e7a9))
+* **v0.5:** joint missingness + lab time-series + privacy CI + clinical extras ([1470448](https://github.com/ArioMoniri/syntha/commit/14704487127bc0af924587eb257b6cff4204703e))
+
+
+### Documentation
+
+* archive v0.4.2 release notes under .github/ ([c341fdd](https://github.com/ArioMoniri/syntha/commit/c341fdd4f692e7231674bfea84ed3a8ac036ea49))
+* **community:** enable Discussions + all-contributors recognition ([4ee5c41](https://github.com/ArioMoniri/syntha/commit/4ee5c419c0007cd4d658e56609579543a9118ab8))
+* **readme:** add Contributors table + Community section ([82ff1e2](https://github.com/ArioMoniri/syntha/commit/82ff1e2c61589956667337687e6c88e2e577e6f7))
+* **release:** v0.5.0 release notes + CHANGELOG promote + privacy-audit workflow ([ea03f40](https://github.com/ArioMoniri/syntha/commit/ea03f409bbbec04cce7372c6c8808de95b2c4f43))
+
 ## [Unreleased]
 
 ## [0.5.0] — 2026-05-14
