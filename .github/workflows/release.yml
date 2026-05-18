@@ -233,7 +233,7 @@ jobs:
       # without overwriting an existing release body.
       - name: Upload to release (tag push)
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           # Only attach files; do not overwrite the release's name / body /
           # draft flag. Whatever was previously authored (manually or via a
@@ -336,7 +336,7 @@ jobs:
           jq empty latest.json   # syntax check
 
       - name: Attach latest.json to the release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: latest.json
           fail_on_unmatched_files: true
@@ -354,7 +354,7 @@ jobs:
           output-file: syntha-sbom.spdx.json
 
       - name: Attach SBOM to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: syntha-sbom.spdx.json
           fail_on_unmatched_files: true
