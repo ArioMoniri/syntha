@@ -36,12 +36,12 @@ Objectives: Synthetic electronic health records (EHRs) accelerate clinical infor
 
 ## Final QA
 - Ready to submit: **YES**
-- Blockers: none — both prior blockers resolved in the finalization pass.
-  - ORCIDs anchored to the real identifiers supplied by the authors: A.M. [0000-0002-5171-3532](https://orcid.org/0000-0002-5171-3532); U.K. [0009-0008-4576-8589](https://orcid.org/0009-0008-4576-8589).
-  - Seven previously orphan references now have inline citations at first body mention: [17] Friedewald — Methods §Physiologic-constraint filter; [20] Charlson 1987 — §FHIR R4 export (CCI score introduction); [22] Westgard 1981 — Methods §Longitudinal AR(1) drift (`WESTGARD_CV` table); [23] LOINC — §FHIR R4 export (first LOINC code mention); [24] SNOMED CT — §FHIR R4 export (FamilyMemberHistory codes); [25] ICD-10 — Background (Turkish locale scope gap); [26] RxNorm — Methods §Synthea-style clinical modules.
-- Word count: 1990 (target 2000 ± 15%; within bound)
-- References: 34 (unchanged; only inline anchors added)
-- Placeholder scan: zero hits for TODO / TBD / FIXME / [INSERT] / "to be added" / "to be completed" / lorem ipsum / sequential-digit ORCIDs.
+- Blockers: none.
+  - **ORCIDs**: real identifiers in place — A.M. [0000-0002-5171-3532](https://orcid.org/0000-0002-5171-3532); U.K. [0009-0008-4576-8589](https://orcid.org/0009-0008-4576-8589).
+  - **Reference anchoring**: all 34 references now cited inline at least once. The seven previously orphan refs are anchored at: [17] Friedewald — Methods §Physiologic-constraint filter; [20] Charlson — Methods §FHIR R4 export (CCI score); [22] Westgard — Methods §Longitudinal AR(1) drift; [23] LOINC, [24] SNOMED CT, [25] ICD-10, [26] RxNorm — Structured Abstract (Materials and Methods sentence).
+- Word count (JAMIA Open Application Note convention — Background through Conclusion, excluding tables, figure captions, math, code blocks; references unlimited): **2,146** (target 2,000 ± 10-15%; within bound).
+- References: 34, all cited inline.
+- Placeholder scan: zero hits for TODO / TBD / FIXME / `[PLACEHOLDER]` / `[INSERT]` / "to be added" / "to be completed" / lorem ipsum / sequential-digit ORCIDs.
 
 ## Revision history
 Five expert reviews integrated by the senior author:
