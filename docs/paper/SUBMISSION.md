@@ -34,14 +34,20 @@ syntha: A Hybrid Gaussian-Copula Generator for FHIR R4-Coded, Turkish-Locale Syn
 ## Abstract
 Objectives: Synthetic electronic health records (EHRs) accelerate clinical informatics research, but existing generators are predominantly calibrated to United States cohorts and either rely on rules-based modules (Synthea) or on opaque deep generative models that require large training sets and lack interpretable privacy guarantees. No openly available generator targets the Turkish locale with end-to-end Fast Healthcare Interoperability Resources (FHIR) R4 coding. Materials and Methods: We present syntha (v0.5.8), an open-source Python and TypeScript toolkit trained on an anonymized retrospective pristine-healthy Turkish cohort (n=135,569 tolerant; n=55,141 strict). syntha couples a mixed-type Gaussian copula — using Olsson polyserial and Bonett-Price tetrachoric estimators with a Drezner bivariate-normal kernel — to a Synthea-inspired nine-module clinical layer and exports FHIR R4 transaction Bundles dual-coded in LOINC, SNOMED CT, ICD-10, and RxNorm with full Turkish localization. Privacy is audited under the Stadler 2022 nearest-neighbor membership-inference attack. Results: Mean Kolmogorov-Smirnov distance was 0.058 (max 0.124), maximum binary-prevalence error 0.055, and correlation Frobenius difference 2.94. Privacy gate held at MIA AUC ≤ 0.60. The release ships 102+ tests, a signed cross-OS desktop app, a PyPI package, and a Docker image. Discussion: syntha occupies an under-served niche between rules-based and deep generators, providing analytic, clinician-auditable parameters at single-hospital cohort sizes. Conclusion: syntha enables FHIR-native, Turkish-locale synthetic EHR research without patient-data redistribution.
 
-## Final QA
+## Final QA (after fact-audit watchdog pass)
 - Ready to submit: **YES**
-- Blockers: none.
-  - **ORCIDs**: real identifiers in place — A.M. [0000-0002-5171-3532](https://orcid.org/0000-0002-5171-3532); U.K. [0009-0008-4576-8589](https://orcid.org/0009-0008-4576-8589).
-  - **Reference anchoring**: all 34 references now cited inline at least once. The seven previously orphan refs are anchored at: [17] Friedewald — Methods §Physiologic-constraint filter; [20] Charlson — Methods §FHIR R4 export (CCI score); [22] Westgard — Methods §Longitudinal AR(1) drift; [23] LOINC, [24] SNOMED CT, [25] ICD-10, [26] RxNorm — Structured Abstract (Materials and Methods sentence).
-- Word count (JAMIA Open Application Note convention — Background through Conclusion, excluding tables, figure captions, math, code blocks; references unlimited): **2,146** (target 2,000 ± 10-15%; within bound).
-- References: 34, all cited inline.
-- Placeholder scan: zero hits for TODO / TBD / FIXME / `[PLACEHOLDER]` / `[INSERT]` / "to be added" / "to be completed" / lorem ipsum / sequential-digit ORCIDs.
+- Blockers: none. Both prior blockers resolved; in addition, hostile fact-audit found and removed several specific items that could not be verified against the repo or against external sources:
+  - **Affiliation cleaned**: "Department of Medical Informatics" prefix was a hallucination — removed; affiliation is now strictly `Acibadem University School of Medicine, Istanbul, Turkey` as supplied by the authors.
+  - **ORCIDs**: real identifiers — A.M. [0000-0002-5171-3532](https://orcid.org/0000-0002-5171-3532); U.K. [0009-0008-4576-8589](https://orcid.org/0009-0008-4576-8589).
+  - **Reference Yıldız 2022 [19] removed**: the cited DOI `10.55730/1300-0144.5527` resolves to an unrelated rabbit-bladder pharmacology paper, not to a synthetic-cohort paper. Both inline citations and the bibliography entry removed; references 20–34 renumbered to 19–33.
+  - **Fabricated Zenodo DOI removed**: `10.5281/zenodo.14600001` returns HTTP 404; the "Archived release" line was deleted from Data and Code Availability.
+  - **Commit SHA corrected**: `f3a91d2` (hallucinated) → `5d3cd6b` (the real short SHA of `git rev-parse v0.5.8`).
+  - **Ethics section honest-downgraded**: invented "ATADEK approval #2024-15/07, dated 2024-09-19", invented KVKK Article 28(1)(c) precise wording, and the "institutional data steward" named role were removed. The section now states only what is verifiably true: secondary use of an upstream-de-identified dataset, no linkage key, no patient interaction, no re-identification, consistent with secondary-use research under KVKK.
+  - **"Acibadem University data steward" named role removed** from Source-cohort and Acknowledgments — replaced with a generic upstream-data-custodian statement.
+- Word count (JAMIA Open Application Note convention — Background through Conclusion, excluding tables, figure captions, math, code blocks; references unlimited): ~2,100 (within ±15% of the 2,000 target).
+- References: **33** (was 34; one fabricated reference removed; bibliography renumbered; all 33 cited inline).
+- Placeholder / fabrication scan: zero hits for TODO / TBD / FIXME / `[PLACEHOLDER]` / `[INSERT]` / "to be added" / "to be completed" / "to be supplied" / lorem ipsum / sequential-digit ORCIDs / former-fabricated SHA / former-fabricated Zenodo DOI / "ATADEK" / "data steward" / "Department of Medical Informatics".
+- Reference-integrity sweep: inline citation set = bibliography set = {1, …, 33}; zero dangling, zero orphan.
 
 ## Revision history
 Five expert reviews integrated by the senior author:
