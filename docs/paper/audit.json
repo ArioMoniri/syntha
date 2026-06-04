@@ -1,0 +1,773 @@
+{
+  "flags_by_category": {
+    "irb-legal": [],
+    "numbers": [
+      {
+        "quote": "tolerant n=135,569; strict n=55,141",
+        "category": "cohort size",
+        "verdict": "VERIFIED",
+        "evidence": "examples/sample_output/sample_model_card.json line 6: n_train=135569; .github/release_notes_v0.5.0.md mentions 55,141-row strict cohort.",
+        "recommended_action": "keep",
+        "replacement": ""
+      },
+      {
+        "quote": "Mean Kolmogorov–Smirnov (KS) distance 0.058 (max 0.124)",
+        "category": "validation metric",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "examples/sample_output/sample_validation_report.json is computed against n_synthetic=100 (not n=135,569). Sample max KS is 0.1235 (vitamin B12); other KS values vary 0–0.108. The 'mean 0.058 / max 0.124' figures cannot be reproduced from the committed sample report. No artifact recording the n=135,569 synthetic validation is in the repo.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "On a 100-row synthetic sample validated against the tolerant source (n_source=135,569), per-column KS distances ranged from 0 (keyword_total_flags) to 0.124 (vitamin B12); full per-column table in examples/sample_output/sample_validation_report.json. A full-scale n=135,569 synthetic validation has not been committed to the repository."
+      },
+      {
+        "quote": "maximum binary-prevalence error 0.055",
+        "category": "validation metric",
+        "verdict": "VERIFIED",
+        "evidence": "sample_validation_report.json: has_rx_data abs_error = 0.05531176006314126 ≈ 0.055, which is the maximum binary error in the report.",
+        "recommended_action": "keep",
+        "replacement": ""
+      },
+      {
+        "quote": "Spearman correlation Frobenius difference 2.94 over the 37-column analyte–comorbidity matrix (relative Frobenius $\\|R_{\\mathrm{src}}-R_{\\mathrm{syn}}\\|_F / \\|R_{\\mathrm{src}}\\|_F = 0.071$; root-mean-square per-cell error 0.045)",
+        "category": "validation metric",
+        "verdict": "AMBIGUOUS",
+        "evidence": "sample_validation_report.json line 4: correlation_frobenius=2.9448 confirms the 2.94 number. The relative-Frobenius ratio 0.071 and RMSE 0.045 are NOT present in any committed report and cannot be reconciled or recomputed without the source. The reported 2.94 also comes from a 100-row synthetic sample, not the n=135,569 claimed in the prose.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "Spearman correlation Frobenius difference 2.94 (examples/sample_output/sample_validation_report.json, n_synthetic=100). Relative-Frobenius ratio and per-cell RMSE are not currently recorded in the repository; to be added in the validation artifact for v0.6."
+      },
+      {
+        "quote": "Stadler 2022 nearest-synthetic-neighbor MIA, run nightly in CI on the strict-cohort shadow holdout (n_shadow=11,029; 30 replicates), gave mean AUROC 0.58 (95% CI 0.55–0.61)",
+        "category": "privacy audit",
+        "verdict": "FABRICATED",
+        "evidence": "Repository grep for '11029', '11,029', 'n_shadow', '30 replicat', 'n_replicates' returns no hits in src/syntha/privacy.py or .github/workflows/privacy-audit.yml. The committed CI gate operates on examples/sample_output/sample_episodes.csv (101 rows, 80/20 split → ~80 train, ~20 holdout), not an 11,029-record shadow cohort. No replicate loop, no CI bootstrap, no AUROC=0.58 result is committed anywhere. The audit code only computes a single AUROC and compares it to DEFAULT_MIA_THRESHOLD=0.60.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "A Stadler-style nearest-synthetic-neighbor MIA is exercised by .github/workflows/privacy-audit.yml on the committed sample (examples/sample_output/sample_episodes.csv, 80/20 split); the CI gate fails the build at AUROC > 0.60 (DEFAULT_MIA_THRESHOLD in src/syntha/privacy.py). A full-scale strict-cohort shadow-holdout audit with replicate-level confidence intervals has not been committed to the repository."
+      },
+      {
+        "quote": "The logistic AIA on HTN, DM, and hyperlipidemia targets gave AUROCs of 0.62, 0.58, and 0.61 respectively",
+        "category": "privacy audit",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "No committed artifact (JSON, log, or fixture) contains these AIA AUROC values. .github/workflows/privacy-audit.yml only runs run_privacy_audit on the 101-row sample and writes to out/privacy_audit.json which is not committed. The targets ['Hipertansiyon','DM_Tum','Hiperlipidemi'] are in the workflow, but the reported numbers are not reproducible from any committed input.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "The logistic AIA on HTN, DM, and hyperlipidemia targets is run by syntha.privacy.run_privacy_audit and gated at AUROC > 0.70; the exact AUROCs depend on the cohort used and are emitted to out/privacy_audit.json at CI time."
+      },
+      {
+        "quote": "97.4% across the three constraints on v0.5.8",
+        "category": "physiologic filter",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "Grep across the repo finds no '97.4', '0.974', or recorded first-round acceptance rate. The constraint code in src/syntha/generator/constraints.py returns drop_rate per call but no aggregate 97.4% figure is committed anywhere.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "First-round acceptance rates are computed at runtime by PhysiologicConstraints.apply (src/syntha/generator/constraints.py) and returned in the stats dict; a representative aggregate is not currently committed."
+      },
+      {
+        "quote": "post-filter marginals matched drawn marginals to KS ≤ 0.004",
+        "category": "physiologic filter",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "No 'KS ≤ 0.004' or post-filter-vs-pre-filter comparison artifact exists in the repository. This specific number cannot be traced to any committed validation output.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "panel indicator $B \\sim \\mathrm{Bernoulli}(0.85)$ selects an all-co-miss branch within each `schema.LAB_PANELS` group; the 0.85 was tuned so that the synthetic four-of-four lipid co-miss rate (TC, HDL, LDL, TG) matches the >95% source rate",
+        "category": "missingness model",
+        "verdict": "VERIFIED",
+        "evidence": "src/syntha/generator/missingness.py line 95: 'CO_MISS_PROB = 0.85'. The 0.85 panel-co-miss probability is in code as claimed.",
+        "recommended_action": "keep",
+        "replacement": ""
+      },
+      {
+        "quote": "Curation flags (29 columns",
+        "category": "schema count",
+        "verdict": "VERIFIED",
+        "evidence": "src/syntha/schema.py CURATION_COLUMNS contains exactly 29 entries (manually counted from lines 97–114).",
+        "recommended_action": "keep",
+        "replacement": ""
+      },
+      {
+        "quote": "91% line coverage across 102 test cases in 19 modules",
+        "category": "engineering metric",
+        "verdict": "FABRICATED",
+        "evidence": "`ls tests/test_*.py | wc -l` returns 19 (modules ✓). But `grep -c '^def test_\\|^    def test_' tests/test_*.py` totals 92 test cases, not 102. Coverage 91% is not committed in any badge/JSON in the repo (only referenced as 'Codecov badge in README').",
+        "recommended_action": "replace_with_verified",
+        "replacement": "92 test cases across 19 test modules; line coverage is reported via Codecov (badge in repository README)."
+      },
+      {
+        "quote": "nine signed release artifacts",
+        "category": "release artifact count",
+        "verdict": "AMBIGUOUS",
+        "evidence": ".github/workflows/release.yml uploads 3 main installers (.dmg, .exe, .AppImage), 3 corresponding .sig files (4 .sig including the .app.tar.gz.sig), 1 .app.tar.gz, plus latest.json and SBOM. Depending on how you count, this is 8–9 artifacts; an exact 9 is plausible but not unambiguous from the workflow.",
+        "recommended_action": "soften",
+        "replacement": "all signed release artifacts (macOS .dmg + .sig, Windows -setup.exe + .sig, Linux .AppImage + .sig, the macOS .app.tar.gz auto-updater payload + .sig, plus latest.json and the SBOM)"
+      },
+      {
+        "quote": "We use intra-individual biological CVs from the Ricos database [31] (eGFR 6%, age-stratified decline 0.4%/yr <40, 0.8%/yr 40–60, 1.0%/yr >60, per KDIGO 2024; HbA1c $\\sigma$ ≈ 0.3%; Hb 2%; ALT/AST 15%; TG 15%; full table in `WESTGARD_CV` [22], `src/syntha/longitudinal_labs.py`)",
+        "category": "Westgard CV / decline trend",
+        "verdict": "FABRICATED",
+        "evidence": "src/syntha/longitudinal_labs.py contains no `WESTGARD_CV` identifier — the CV table is named `COLUMN_DRIFT`. There is no age-stratified eGFR decline (0.4/0.8/1.0%/yr); the code applies a single -0.010 (~1%/yr) trend to all ages. HbA1c is not in COLUMN_DRIFT at all (only mentioned in the docstring). No KDIGO 2024 reference exists in code. eGFR 6% ✓ (0.060), Hb 2% ✓ (0.020), ALT/AST 15% ✓ (0.150), TG 15% ✓ (0.150) are accurate.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "Per-column biological coefficients of variation follow the Westgard QC literature [22] (eGFR 6%, Hb 2%, ALT/AST 15%, TG 15%; full table in `COLUMN_DRIFT`, src/syntha/longitudinal_labs.py). eGFR has a single secular decline of ~1%/year applied uniformly; HbA1c short-term variability is documented in the module docstring but is not currently a separate AR(1) channel. Age-stratified eGFR decline and per-KDIGO refinements are queued for a future release."
+      },
+      {
+        "quote": "Intra-encounter blood pressure is three measurements 4–6 minutes apart with a 4/2 mmHg systolic/diastolic white-coat decline and σ ≈ 3 mmHg jitter",
+        "category": "intra-encounter BP",
+        "verdict": "VERIFIED",
+        "evidence": "src/syntha/longitudinal_labs.py: intra_encounter_bp_count=3, intra_encounter_bp_gap_min_s=240 (4 min), intra_encounter_bp_gap_max_s=360 (6 min), bp_white_coat_drop_mmHg=4.0 with diastolic *0.5 = 2.0, rng.normal(0.0, 3.0) for systolic jitter.",
+        "recommended_action": "keep",
+        "replacement": ""
+      },
+      {
+        "quote": "HT ≈ 7.5% vs PatenT-2 ≈ 30%; DM ≈ 4.8% vs TURDEP-II ≈ 13.7% [34]; hyperlipidemia ≈ 12% vs TEKHARF >40% above age 40; depression ≈ 0.22% vs Turkish primary-care 10–20%",
+        "category": "epidemiology comparison",
+        "verdict": "AMBIGUOUS",
+        "evidence": "syntha-side prevalences (HT 0.0745, DM_Tum 0.0480, Hiperlipidemi 0.1196, Depresyon 0.0022) all match sample_model_card.json binary_marginals to the rounding shown. The PatenT-2 (~30%), TURDEP-II (13.7%), TEKHARF (>40%), and 'Turkish primary-care 10–20%' comparison figures are not verified against citable sources in the repository; only [34] Satman 2013 TURDEP-II is cited.",
+        "recommended_action": "soften",
+        "replacement": "HT 7.5% (vs PatenT-2; citation needed); DM 4.8% (vs TURDEP-II 13.7% [34]); hyperlipidemia 12% (vs TEKHARF; citation needed); depression 0.22% (vs Turkish primary-care prevalence estimates; citation needed)"
+      },
+      {
+        "quote": "BERTurk-base [27]",
+        "category": "model reference",
+        "verdict": "AMBIGUOUS",
+        "evidence": "BERTurk is real (Schweter 2020, Zenodo DOI 10.5281/zenodo.3770924 — verifiable). However, the repo doesn't actually use BERTurk at runtime — `berturk_clean`, `berturk_similarity`, `berturk_*` are CSV columns from upstream curation, not in-package model calls. The 'BERTurk-base' specific variant claim is not substantiated by any in-package model loader.",
+        "recommended_action": "soften",
+        "replacement": "BERTurk [27] (used upstream by the data steward; the resulting `berturk_*` flags are consumed as CSV columns, not re-invoked at sample time)"
+      },
+      {
+        "quote": "Stadler T, Oprisanu B, Troncoso C. Synthetic data — anonymisation Groundhog Day. Proc USENIX Secur Symp. 2022:1451–1468.",
+        "category": "citation page range",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "The pages 1451–1468 cannot be confirmed from the repository. The USENIX Security 2022 proceedings page numbering should be verified against the actual paper; this is a commonly-misquoted detail.",
+        "recommended_action": "soften",
+        "replacement": "Stadler T, Oprisanu B, Troncoso C. Synthetic data — anonymisation Groundhog Day. Proc 31st USENIX Secur Symp. 2022. (Page range to be verified at copyedit.)"
+      },
+      {
+        "quote": "Anxiety mapped to SNOMED 197480006 (Anxiety disorder)",
+        "category": "SNOMED code",
+        "verdict": "FABRICATED",
+        "evidence": "src/syntha/fhir/codes.py line 60: 'Anksiyete': ('48694002', 'Anxiety (finding)'). The actual SNOMED code used is 48694002, NOT 197480006. The manuscript code is wrong.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "Anxiety mapped to SNOMED CT 48694002 (Anxiety (finding))"
+      },
+      {
+        "quote": "FamilyMemberHistory resources (SNOMED CT 363346000 / 237603008)",
+        "category": "SNOMED code",
+        "verdict": "VERIFIED",
+        "evidence": "src/syntha/fhir/clinical_extras.py _FAMILY_HISTORY_CODES: rf_kanser → 363346000 (Malignant neoplastic disease), rf_kronik_hastalik → 237603008 (Disorder of long duration). Both codes confirmed.",
+        "recommended_action": "keep",
+        "replacement": ""
+      },
+      {
+        "quote": "ATADEK approval #2024-15/07, dated 2024-09-19",
+        "category": "ethics approval",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "docs/paper/reviews.json line 980 explicitly states 'ATADEK approval date (2024-09-19) should be re-verified against the actual deposit/approval records before submission.' SUBMISSION.md line 152 calls this 'as provided by the corresponding author; final journal copy-editing should confirm both against the authors' institutional records before publication.' Number was inserted as a placeholder fill.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "[ATADEK approval number and date to be supplied at submission; pending verification against institutional records — see docs/paper/SUBMISSION.md]"
+      },
+      {
+        "quote": "Zenodo, DOI 10.5281/zenodo.14600001 (v0.5.8, deposited 2026-01-15)",
+        "category": "archival deposit",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "docs/paper/reviews.json line 920: '10.5281/zenodo.14600001 as the v0.5.8 archived deposit per author records' — this is reported as a fill, not as a verified resolved DOI. No CITATION.cff or .zenodo.json in the repo confirms this concord number. Deposit date in the future relative to most repo activity but consistent with stated date.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "Zenodo, DOI to be minted and registered at v0.5.8 tag time (deposit DOI to be inserted at proof stage)"
+      },
+      {
+        "quote": "commit SHA `f3a91d2`",
+        "category": "commit SHA",
+        "verdict": "FABRICATED",
+        "evidence": "`git log --all --oneline | grep f3a91d2` returns no hits. The HEAD commit is 528c9e5 ('docs(paper): real ORCIDs for both authors; ready for JAMIA Open submission'); v0.5.8 tag SHA must be looked up explicitly. f3a91d2 does not exist in this repository.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "commit SHA to be replaced with the real v0.5.8 tag SHA (e.g. `git rev-parse v0.5.8` at submission time)"
+      },
+      {
+        "quote": "(v0.5.8)",
+        "category": "version",
+        "verdict": "AMBIGUOUS",
+        "evidence": "examples/sample_output/sample_model_card.json line 8 shows syntha_version '0.1.0' (not 0.5.8). The repo refers to v0.5.x in release notes but the committed model card is from an older version. Whether the actual code is at v0.5.8 requires checking pyproject.toml.",
+        "recommended_action": "keep",
+        "replacement": ""
+      },
+      {
+        "quote": "n_train=135569",
+        "category": "cohort size",
+        "verdict": "VERIFIED",
+        "evidence": "examples/sample_output/sample_model_card.json line 6: n_train=135569.",
+        "recommended_action": "keep",
+        "replacement": ""
+      },
+      {
+        "quote": "The v0.5.8 release ships with 91% line coverage across 102 test cases in 19 modules",
+        "category": "engineering metric",
+        "verdict": "FABRICATED",
+        "evidence": "Test case count is 92 (grep -c def test_ across tests/test_*.py), not 102. 19 test modules ✓. The 91% coverage figure has no committed source in the repository.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "The v0.5.8 release ships with 92 test cases across 19 test modules; line coverage is reported by Codecov via the README badge."
+      }
+    ],
+    "references": [],
+    "artifacts": [
+      {
+        "quote": "commit `f3a91d2`",
+        "category": "fabricated_commit_sha",
+        "verdict": "FABRICATED",
+        "evidence": "Ran `git rev-parse v0.5.8` which returned 5d3cd6bc1775de3ad448a1165dc7078d6838ab56. The SHA f3a91d2 does not match the actual tag SHA. The prefix would be 5d3cd6b, not f3a91d2.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "commit `5d3cd6b`"
+      },
+      {
+        "quote": "(commit SHA `f3a91d2`)",
+        "category": "fabricated_commit_sha",
+        "verdict": "FABRICATED",
+        "evidence": "Actual v0.5.8 tag points at SHA 5d3cd6bc1775de3ad448a1165dc7078d6838ab56 (short: 5d3cd6b). f3a91d2 is not present in `git log --oneline`.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "(commit SHA `5d3cd6b`)"
+      },
+      {
+        "quote": "Zenodo, DOI 10.5281/zenodo.14600001 (v0.5.8, deposited 2026-01-15)",
+        "category": "fabricated_doi",
+        "verdict": "FABRICATED",
+        "evidence": "`curl -sI https://doi.org/10.5281/zenodo.14600001` returned HTTP/2 404. No such Zenodo record exists. The deposit date (2026-01-15) is also unverifiable.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "Zenodo archival deposit DOI to be assigned at submission"
+      },
+      {
+        "quote": "(`polyserial_corr`, `src/syntha/generator/copula.py`)",
+        "category": "wrong_file_and_function_name",
+        "verdict": "FABRICATED",
+        "evidence": "The function is named `polyserial_correlation` (not `polyserial_corr`) and lives in `src/syntha/generator/mixed_corr.py` (not `copula.py`). Verified with grep: src/syntha/generator/mixed_corr.py:48: def polyserial_correlation(...)",
+        "recommended_action": "replace_with_verified",
+        "replacement": "(`polyserial_correlation`, `src/syntha/generator/mixed_corr.py`)"
+      },
+      {
+        "quote": "see `tetrachoric_corr` and `_drezner_bvn_cdf` in `src/syntha/generator/copula.py`",
+        "category": "wrong_file_and_function_name",
+        "verdict": "FABRICATED",
+        "evidence": "The functions are `tetrachoric_correlation` (not `tetrachoric_corr`) and `_bvn_cdf` (not `_drezner_bvn_cdf`), both in `src/syntha/generator/mixed_corr.py`. Also, the in-source docstring cites \"Drezner's 1978 approximation\" rather than the manuscript's claimed Drezner & Wesolowsky 1990.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "see `tetrachoric_correlation` and `_bvn_cdf` in `src/syntha/generator/mixed_corr.py`"
+      },
+      {
+        "quote": "(implemented in `_charlson_risk`, `src/syntha/fhir/risk.py`)",
+        "category": "wrong_file_and_function_name",
+        "verdict": "FABRICATED",
+        "evidence": "No file `src/syntha/fhir/risk.py` exists. The Charlson logic is implemented in `src/syntha/fhir/clinical_extras.py` via `charlson_risk_assessment`, `_qualitative_charlson`, and `_charlson_to_probability`. No function literally named `_charlson_risk` exists.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "(implemented in `charlson_risk_assessment`, `src/syntha/fhir/clinical_extras.py`)"
+      },
+      {
+        "quote": "full table in `WESTGARD_CV` [22], `src/syntha/longitudinal_labs.py`",
+        "category": "fabricated_identifier",
+        "verdict": "FABRICATED",
+        "evidence": "grep for `WESTGARD_CV` in src/ returned no matches. The CV table exists in `src/syntha/longitudinal_labs.py` but as an inline dict, not a constant named WESTGARD_CV.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "full table in the per-analyte CV dictionary in `src/syntha/longitudinal_labs.py`"
+      },
+      {
+        "quote": "Drezner & Wesolowsky 1990 8-point Gauss–Legendre quadrature (with the $|\\rho|$-branched kernel of [13])",
+        "category": "ambiguous_citation",
+        "verdict": "AMBIGUOUS",
+        "evidence": "Source comment in `src/syntha/generator/mixed_corr.py` (line 98) says: \"Uses Drezner's 1978 approximation via Gauss–Legendre quadrature.\" The manuscript cites Drezner & Wesolowsky 1990. The implementation cited reference does not match the manuscript.",
+        "recommended_action": "soften",
+        "replacement": "Drezner-style Gauss–Legendre quadrature for the BVN CDF (see implementation note in `mixed_corr.py`)"
+      },
+      {
+        "quote": "ATADEK approval #2024-15/07, dated 2024-09-19",
+        "category": "unverifiable_ethics_approval",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "The repo contains no document, README, or workflow attesting to this ethics approval number or date. Per the user's instruction in the task brief, a specific approval number should not be invented; a verifiable replacement is to state exemption status and KVKK basis with the approval number to be supplied at submission.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "IRB review by the Acibadem University Medical Research Ethics Committee (ATADEK) was deemed exempt as secondary use of de-identified data, in keeping with KVKK Article 28(1)(c); approval number to be supplied at submission."
+      },
+      {
+        "quote": "deposited 2026-01-15",
+        "category": "fabricated_date",
+        "verdict": "FABRICATED",
+        "evidence": "Tied to the non-existent Zenodo DOI above (404). The deposit date cannot be verified because the record does not exist.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "n_shadow=11,029, 30 replicates",
+        "category": "unverifiable_numeric_claim",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "The privacy-audit workflow file exists (.github/workflows/privacy-audit.yml) and `DEFAULT_MIA_THRESHOLD = 0.60` is verified in src/syntha/privacy.py, and the manuscript states n_shadow = 20% of 55,141 (which is 11,028.2 ≈ 11,028, not 11,029). The 30-replicates figure is not directly verifiable from a grep of the repo without running the workflow.",
+        "recommended_action": "soften",
+        "replacement": "n_shadow=11,028 (20% of strict), 30 replicates"
+      },
+      {
+        "quote": "MIA AUROC) 0.58 (95% CI 0.55–0.61, n_shadow=11,029, 30 replicates)",
+        "category": "unverifiable_numeric_claim",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "n_shadow 11,029 does not match 20% of the strict cohort (55,141 × 0.2 = 11,028.2). CI privacy-audit workflow exists but the specific AUROC point estimate and CI cannot be checked without re-running the audit.",
+        "recommended_action": "soften",
+        "replacement": "MIA AUROC) 0.58 (95% CI 0.55–0.61, n_shadow=11,028, 30 replicates)"
+      }
+    ],
+    "methods": [
+      {
+        "quote": "we estimate the threshold $\\hat\\tau = \\Phi^{-1}(1-\\hat p)$ from the binary marginal, then maximize the conditional log-likelihood ... over $\\rho$ (`polyserial_corr`, `src/syntha/generator/copula.py`)",
+        "category": "methodological-detail-mismatch",
+        "verdict": "FABRICATED",
+        "evidence": "src/syntha/generator/mixed_corr.py polyserial_correlation does NOT perform numerical MLE over rho. It uses the closed-form normal-scores point-biserial estimator: rho = r_pb * sqrt(p(1-p)) / phi(tau). No log-likelihood is constructed; no optimization is performed. Also the function is named `polyserial_correlation` (not `polyserial_corr`) and lives in mixed_corr.py (not copula.py).",
+        "recommended_action": "replace_with_verified",
+        "replacement": "we estimate the threshold $\\hat\\tau = \\Phi^{-1}(1-\\hat p)$ from the binary marginal, rank-transform $y_i$ to normal scores $z_i = \\Phi^{-1}((\\mathrm{rank}(y_i)-0.5)/n)$, and use the closed-form biserial-style estimator $\\hat\\rho = r_{pb}\\sqrt{\\hat p(1-\\hat p)}/\\varphi(\\hat\\tau)$, where $r_{pb}$ is the Pearson correlation between $z_i$ and $x_i$ (`polyserial_correlation`, `src/syntha/generator/mixed_corr.py`). This is exact when the latent-bivariate-normal assumption holds and avoids the cost of full MLE."
+      },
+      {
+        "quote": "For binary–binary pairs we solve the tetrachoric estimating equation by Brent bisection on $[-0.999, 0.999]$, evaluating the BVN-CDF with the Drezner & Wesolowsky 1990 8-point Gauss–Legendre quadrature (with the $|\\rho|$-branched kernel of [13]) and applying the Bonett–Price small-sample correction [12] (see `tetrachoric_corr` and `_drezner_bvn_cdf` in `src/syntha/generator/copula.py`).",
+        "category": "methodological-detail-mismatch",
+        "verdict": "FABRICATED",
+        "evidence": "src/syntha/generator/mixed_corr.py: (1) function is `tetrachoric_correlation` in mixed_corr.py, not `tetrachoric_corr` in copula.py; (2) helper is `_bvn_cdf` not `_drezner_bvn_cdf`; (3) the docstring of _bvn_cdf cites Drezner 1978, not Drezner & Wesolowsky 1990; (4) there is NO |ρ|-branched kernel — a single arcsin/Gauss-Legendre branch is used unconditionally; (5) NO Bonett–Price small-sample correction is applied anywhere — the function just brentq-solves the BVN tail equation. `grep` for 'Bonett' returns hits only in docs/ROADMAP and the docstring header, never in implementation code.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "For binary–binary pairs we solve the tetrachoric estimating equation by Brent's method on $[-0.999, 0.999]$ (`scipy.optimize.brentq`, xtol $10^{-5}$), evaluating the bivariate-normal CDF with an 8-point Gauss–Legendre quadrature of Drezner's 1978 arcsin transform (see `tetrachoric_correlation` and `_bvn_cdf` in `src/syntha/generator/mixed_corr.py`). The Bonett–Price small-sample correction is not currently applied; at the n>10^4 cohort sizes used here the unadjusted ML estimate is essentially unbiased."
+      },
+      {
+        "quote": "A polycor (R; Fox) head-to-head simulation with known-truth $R$ (n=1000) gave mean absolute off-diagonal error 0.018 (syntha) versus 0.021 (polycor) (Supplementary Table S1).",
+        "category": "fabricated-benchmark",
+        "verdict": "FABRICATED",
+        "evidence": "No code, script, or output file in the repo runs a polycor comparison. `grep -r polycor src tests scripts` returns only roadmap/review/comment mentions. COLLABORATE.md explicitly lists 'Validate the polyserial / tetrachoric implementation against R's polycor' as an open task. No Supplementary Table S1 file ships with the manuscript.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "$\\hat R$ is projected to a valid correlation matrix by clipping negative eigenvalues to $\\varepsilon = 10^{-8}$, reconstructing, and rescaling to unit diagonal via $D^{-1/2}\\tilde R D^{-1/2}$ (Higham 2002 [28]); PSD-ness is verified by a second eigendecomposition.",
+        "category": "methodological-detail-mismatch",
+        "verdict": "FABRICATED",
+        "evidence": "src/syntha/generator/copula.py `_nearest_psd` clips eigenvalues to eps=1e-6 (default), not 1e-8. It does perform the D^{-1/2} \\tilde R D^{-1/2} rescaling. However, it does NOT perform a second eigendecomposition to verify PSD-ness afterwards — there is no verification step. It is also a single eigenvalue-clip projection, not Higham's alternating-projection algorithm.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "$\\hat R$ is projected to a valid correlation matrix by symmetrizing, clipping negative eigenvalues to $\\varepsilon = 10^{-6}$, reconstructing, and rescaling to unit diagonal via $D^{-1/2}\\tilde R D^{-1/2}$ (`_nearest_psd`, `src/syntha/generator/copula.py`). This is a single-pass eigenvalue-clipping projection rather than Higham's alternating-projection algorithm [28]; the Cholesky step at sample time fails fast if the result is not PSD."
+      },
+      {
+        "quote": "A Poisson encounter process (mean configurable) generates two to four additional encounters per patient with shared `HASTA_ID`, age-advance per offset, and sticky comorbidity flags. Per-lab time series are reconstructed by an autoregressive-order-one (AR(1)) process $X_t = \\mu_t + \\phi(X_{t-1} - \\mu_{t-1}) + \\varepsilon_t$ with default $\\phi = 0.7$, $\\mu_t$ encoding any secular trend, and $\\varepsilon_t \\sim \\mathcal{N}(0, \\sigma^2)$.",
+        "category": "methodological-detail-mismatch",
+        "verdict": "FABRICATED",
+        "evidence": "src/syntha/longitudinal.py TrajectoryConfig.encounters_per_patient_mean defaults to 4.0 (Poisson mean), not 'two to four'. The lab time-series in `_ar1_path` (src/syntha/longitudinal_labs.py) is NOT an AR(1) with autoregressive coefficient phi — it is an unconditional random walk: `current = current + noise + trend` (i.e. phi is implicitly 1). There is no parameter phi=0.7 anywhere in the code (`grep -n 'phi' src/syntha/longitudinal*.py` returns no results).",
+        "recommended_action": "replace_with_verified",
+        "replacement": "A Poisson encounter process (default mean = 4 encounters over a configurable history window) generates additional encounters per patient with shared `HASTA_ID`, age-advance per offset, and sticky comorbidity flags. Per-lab history is reconstructed by a backward random walk anchored at the latest value, $X_{t-1} = X_t + \\varepsilon_t - \\mathrm{trend}\\cdot\\Delta t$, with $\\varepsilon_t \\sim \\mathcal{N}(0,\\sigma^2)$ and column-specific $\\sigma$ taken from clinical biological-variation tables (`COLUMN_DRIFT`, `src/syntha/longitudinal_labs.py`)."
+      },
+      {
+        "quote": "full table in `WESTGARD_CV` [22], `src/syntha/longitudinal_labs.py`",
+        "category": "methodological-detail-mismatch",
+        "verdict": "FABRICATED",
+        "evidence": "There is no `WESTGARD_CV` symbol in src/syntha/longitudinal_labs.py or anywhere else in the repo. The actual constant is named `COLUMN_DRIFT`.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "full table in `COLUMN_DRIFT`, `src/syntha/longitudinal_labs.py`"
+      },
+      {
+        "quote": "We use intra-individual biological CVs from the Ricos database [31]",
+        "category": "methodological-detail-mismatch",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "src/syntha/longitudinal_labs.py docstring attributes the CV table to the 'Westgard QC database, May 2026', not the Ricós/EFLM biological-variation database. Reference [31] in the manuscript cites Ricós 1999, but the code does not load Ricós values.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "We use intra-individual biological CVs from Westgard QC summaries [22]"
+      },
+      {
+        "quote": "Headline Results numbers use `syntha sample --n 135569 --seed 42 --model tolerant`; Frobenius and KS are reported as mean ± SD over five seeds (42–46).",
+        "category": "methodological-detail-mismatch",
+        "verdict": "FABRICATED",
+        "evidence": "The CLI `sample` subcommand in src/syntha/cli.py takes --registry, --name, --output, --n — there is no `--model` and no `--seed` option on `sample`. No script or test iterates over seeds 42–46 to aggregate Frobenius/KS as mean ± SD; the manuscript itself reports point estimates (e.g. 0.058) not mean ± SD.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "Headline Results numbers are produced by `syntha generate --input <tolerant CSV> --n 135569 --seed 42 --cohort tolerant`, with a single SEED=42 realization. Multi-seed variability reporting is queued for v0.6."
+      },
+      {
+        "quote": "CI matrix: Python 3.10–3.13 across Ubuntu, macOS, Windows; coverage at Codecov (badge in repository README).",
+        "category": "methodological-detail-mismatch",
+        "verdict": "AMBIGUOUS",
+        "evidence": ".github/workflows/ci.yml runs Python 3.10–3.13 on ubuntu-latest only; .github/workflows/cross-platform.yml runs Python 3.12 across ubuntu/macos/windows. The cross-product 'Python 3.10–3.13 × {Ubuntu, macOS, Windows}' claimed in Table 2 is not actually executed — only the union of (3.10–3.13 × Ubuntu) and (3.12 × {Ubuntu, macOS, Windows}) is. Codecov badge and workflow upload step do exist in README.md and ci.yml.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "CI matrix: Python 3.10–3.13 on Ubuntu; Python 3.12 cross-tested on Ubuntu, macOS, and Windows; coverage uploaded to Codecov (badge in repository README)."
+      },
+      {
+        "quote": "(vi) Reference-range coverage uses two sex-stratified analytes (hemoglobin, creatinine) and 12 sex-agnostic analytes with sex-specific notes (HDL, LDL, TC, TG, ALT, AST, platelets, WBC, ferritin, vitamin B12, fasting glucose, TSH)",
+        "category": "methodological-detail-mismatch",
+        "verdict": "FABRICATED",
+        "evidence": "src/syntha/reference_ranges.py defines 2 sex-stratified entries in BY_SEX (hemoglobin, creatinine) and 13 entries in COMMON: glucose_fasting, hdl, ldl_direct, cholesterol_total, triglycerides, alt, ast, platelets, wbc, ferritin, vitamin_b12, bp_systolic, bp_diastolic, egfr. TSH is NOT in COMMON (or anywhere) — `grep -in tsh src/syntha/reference_ranges.py` returns nothing. The manuscript also omits bp_systolic, bp_diastolic, and eGFR which ARE in the file.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "(vi) Reference-range coverage uses two sex-stratified analytes (hemoglobin, creatinine) and 13 sex-agnostic analytes (HDL, LDL, total cholesterol, triglycerides, ALT, AST, platelets, WBC, ferritin, vitamin B12, fasting glucose, systolic BP, diastolic BP, eGFR); TSH is currently outside the reference-range checker and is queued"
+      },
+      {
+        "quote": "(Supplementary Figure S1)",
+        "category": "missing-supplement",
+        "verdict": "FABRICATED",
+        "evidence": "No supplementary file is shipped with the manuscript directory (docs/paper/ contains only SUBMISSION.md, manuscript.md, reviews.json). The §S1–S6 Supplementary Material section at the end of the manuscript only enumerates sections by title; no content, figures, or tables are provided.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "(Supplementary Table S1)",
+        "category": "missing-supplement",
+        "verdict": "FABRICATED",
+        "evidence": "No supplementary file containing Table S1 ships with the manuscript. docs/paper/ has no supplement; the §S1–S6 stub at the end is a list of titles only.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "(Supplementary Table S2)",
+        "category": "missing-supplement",
+        "verdict": "FABRICATED",
+        "evidence": "No supplementary file ships. No 97.4% acceptance-rate table exists in the repo; `grep -rn '97.4' src tests scripts` returns nothing.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "(Supplementary Table S3)",
+        "category": "missing-supplement",
+        "verdict": "FABRICATED",
+        "evidence": "No supplementary file ships with the manuscript. The 0.85 panel-co-miss probability is in code (src/syntha/generator/missingness.py CO_MISS_PROB = 0.85) but there is no Table S3.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "(Supplementary §S4)",
+        "category": "missing-supplement",
+        "verdict": "FABRICATED",
+        "evidence": "No supplementary file ships; §S4 is named only in the §S1–S6 stub at the end of the manuscript, with no content.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "Lower triangle, polyserial/tetrachoric copula recovers off-diagonal lipid–lipid, BP–BP, and liver-enzyme blocks attenuated ≈50% by naive Pearson-on-codes (Supplementary Figure S1).",
+        "category": "missing-supplement",
+        "verdict": "FABRICATED",
+        "evidence": "Supplementary Figure S1 does not exist in the repo.",
+        "recommended_action": "soften",
+        "replacement": "Lower triangle, polyserial/tetrachoric copula recovers off-diagonal lipid–lipid, BP–BP, and liver-enzyme blocks attenuated by naive Pearson-on-codes (see ROADMAP §5.1 for the simulation rationale)."
+      },
+      {
+        "quote": "(S1) Extended derivations of Olsson polyserial and Bonett–Price tetrachoric estimators with the Drezner & Wesolowsky 1990 BVN-CDF kernel ... (S6) BERTurk-base clinical-relevance fine-tune details.",
+        "category": "missing-supplement",
+        "verdict": "FABRICATED",
+        "evidence": "This is a list of supplementary sections with no actual content. No PDF, markdown, or other supplementary artefact ships with the manuscript (docs/paper/ contains only SUBMISSION.md, manuscript.md, reviews.json). All six listed sections are unaccompanied stubs.",
+        "recommended_action": "remove",
+        "replacement": ""
+      },
+      {
+        "quote": "This secondary use of de-identified data was reviewed by the Acibadem University Medical Research Ethics Committee (ATADEK approval #2024-15/07, dated 2024-09-19) and deemed exempt from informed consent",
+        "category": "unverified-identifier",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "No ATADEK approval document, scan, or correspondence is checked into the repo. docs/paper/reviews.json explicitly flags this as a placeholder that 'should be re-verified against the actual ... approval records before submission'. The number was originally inserted as #XXXX/YYYY-MM-DD in the reviewer fix-list and then replaced with a specific value with no provenance.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "This secondary use of de-identified data was reviewed by the Acibadem University Medical Research Ethics Committee and deemed exempt as secondary use of fully de-identified data, consistent with Türkiye Kişisel Verileri Koruma Kanunu (KVKK) Article 28(1)(c); the formal approval letter and number will be provided at submission"
+      },
+      {
+        "quote": "**Archived release**: Zenodo, DOI 10.5281/zenodo.14600001 (v0.5.8, deposited 2026-01-15)",
+        "category": "unverified-identifier",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "No Zenodo deposit confirmation, .zenodo.json, or DOI metadata file is present in the repo. docs/paper/reviews.json line 980 explicitly states the Zenodo deposit date '2026-01-15 ... should be re-verified against the actual deposit ... records before submission'.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "**Archived release**: Zenodo deposit for v0.5.8 (DOI to be added upon acceptance)"
+      },
+      {
+        "quote": "`ghcr.io/ariomoniri/syntha:v0.5.8` (commit SHA `f3a91d2`)",
+        "category": "unverified-identifier",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "No tagged container image manifest or build artefact in the repo confirms commit SHA f3a91d2 corresponds to v0.5.8. Recent git log (commit 0300b54 on main) does not match. reviews.json flags repo pubkey/DOI/dates as 'should be re-verified ... before submission'.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "`ghcr.io/ariomoniri/syntha:v0.5.8` (commit SHA pinned at the v0.5.8 git tag)"
+      },
+      {
+        "quote": "minisign pubkey `B9D5DA5050FA66E1`",
+        "category": "unverified-identifier",
+        "verdict": "UNVERIFIABLE",
+        "evidence": "No minisign public-key file (pubkey.b64, minisign.pub) is committed in the repo root or release assets that I can verify; the 16-hex-character string has the right shape for a minisign key ID but cannot be confirmed against any artefact in this checkout.",
+        "recommended_action": "replace_with_verified",
+        "replacement": "minisign pubkey published on the GitHub release page for v0.5.8"
+      }
+    ]
+  },
+  "edits_applied": [
+    {
+      "quote": "Mean Kolmogorov–Smirnov (KS) distance 0.058 (max 0.124)",
+      "action_taken": "Replaced abstract Results with verified range over the 100-row sample; noted full-scale validation not committed.",
+      "replacement": "On a 100-row synthetic sample validated against the tolerant source (n_source=135,569), per-column Kolmogorov–Smirnov (KS) distances ranged from 0 to 0.124"
+    },
+    {
+      "quote": "Stadler 2022 membership-inference-attack area under the ROC curve (MIA AUROC) 0.58 (95% CI 0.55–0.61, n_shadow=11,029, 30 replicates)",
+      "action_taken": "Replaced abstract MIA claim with verified CI-gate description; removed AUROC point estimate / CI / shadow size.",
+      "replacement": "A Stadler-style nearest-synthetic-neighbor membership-inference attack is exercised in CI on the committed sample with the build gated at AUROC > 0.60"
+    },
+    {
+      "quote": "(and ≈65% for binary–binary pairs; Supplementary Figure S1)",
+      "action_taken": "Removed dead supplementary cross-reference and the unsupported attenuation magnitude.",
+      "replacement": "which substantially underestimate the latent-Gaussian correlation"
+    },
+    {
+      "quote": "polyserial conditional log-likelihood MLE block and `polyserial_corr`/`src/syntha/generator/copula.py`",
+      "action_taken": "Replaced with code-accurate closed-form biserial-style estimator and correct path/function name.",
+      "replacement": "closed-form biserial-style estimator with polyserial_correlation in src/syntha/generator/mixed_corr.py"
+    },
+    {
+      "quote": "tetrachoric estimating equation ... |ρ|-branched kernel ... Bonett–Price small-sample correction ... `tetrachoric_corr` and `_drezner_bvn_cdf` in `src/syntha/generator/copula.py`",
+      "action_taken": "Replaced with code-accurate description: brentq, single Drezner 1978 arcsin kernel, no Bonett–Price correction; correct path/function names.",
+      "replacement": "Brent's method on [-0.999, 0.999] with scipy.optimize.brentq, xtol 1e-5; tetrachoric_correlation and _bvn_cdf in src/syntha/generator/mixed_corr.py; Bonett–Price correction not applied"
+    },
+    {
+      "quote": "A polycor (R; Fox) head-to-head simulation with known-truth $R$ (n=1000) gave mean absolute off-diagonal error 0.018 (syntha) versus 0.021 (polycor) (Supplementary Table S1).",
+      "action_taken": "Removed entirely (fabricated benchmark, no supplementary table).",
+      "replacement": ""
+    },
+    {
+      "quote": "$\\hat R$ is projected to a valid correlation matrix by clipping negative eigenvalues to $\\varepsilon = 10^{-8}$, reconstructing, and rescaling to unit diagonal via $D^{-1/2}\\tilde R D^{-1/2}$ (Higham 2002 [28]); PSD-ness is verified by a second eigendecomposition.",
+      "action_taken": "Replaced with code-accurate eps=1e-6, _nearest_psd reference, and removed the false second-eigendecomposition verification claim.",
+      "replacement": "single-pass eigenvalue-clipping projection rather than Higham's alternating-projection algorithm; the Cholesky step at sample time fails fast if the result is not positive semi-definite."
+    },
+    {
+      "quote": "empirical first-round acceptance was 97.4% across the three constraints on v0.5.8 (Supplementary Table S2) and post-filter marginals matched drawn marginals to KS ≤ 0.004",
+      "action_taken": "Removed the 97.4% and KS ≤ 0.004 figures (unverifiable) and the supplementary table reference; replaced with a description of where the metric is computed in code.",
+      "replacement": "First-round acceptance rates are computed at runtime by PhysiologicConstraints.apply and returned in the stats dict; a representative aggregate is not currently committed."
+    },
+    {
+      "quote": "(Supplementary Table S3)",
+      "action_taken": "Removed supplementary reference; inlined CO_MISS_PROB=0.85 from code.",
+      "replacement": "CO_MISS_PROB = 0.85 in src/syntha/generator/missingness.py"
+    },
+    {
+      "quote": "AR(1) process with phi=0.7, Ricos database, age-stratified eGFR decline, KDIGO 2024, WESTGARD_CV",
+      "action_taken": "Replaced with code-accurate backward random walk, COLUMN_DRIFT, Westgard citation; removed phi=0.7 and KDIGO 2024.",
+      "replacement": "backward random walk anchored at the latest observed value; Westgard QC summaries [21]; full table in COLUMN_DRIFT"
+    },
+    {
+      "quote": "implemented in `_charlson_risk`, `src/syntha/fhir/risk.py`",
+      "action_taken": "Replaced with correct function name and file path.",
+      "replacement": "implemented in charlson_risk_assessment, src/syntha/fhir/clinical_extras.py"
+    },
+    {
+      "quote": "(Supplementary §S4)",
+      "action_taken": "Removed dead supplementary cross-reference.",
+      "replacement": ""
+    },
+    {
+      "quote": "Anxiety mapped to SNOMED 197480006 (Anxiety disorder)",
+      "action_taken": "Replaced with correct SNOMED CT code from code.",
+      "replacement": "Anxiety mapped to SNOMED CT 48694002 (Anxiety (finding))"
+    },
+    {
+      "quote": "n_shadow=11,029 (20% of strict)",
+      "action_taken": "Softened to match 20% of 55,141.",
+      "replacement": "n_shadow≈11,028 (20% of strict)"
+    },
+    {
+      "quote": "(commit SHA `f3a91d2`) ... minisign pubkey `B9D5DA5050FA66E1`",
+      "action_taken": "Removed fabricated SHA and pubkey; replaced with verifiable wording.",
+      "replacement": "(commit SHA pinned at the v0.5.8 git tag); minisign public key published on the GitHub release page for v0.5.8"
+    },
+    {
+      "quote": "CI matrix: Python 3.10–3.13 across Ubuntu, macOS, Windows",
+      "action_taken": "Replaced with the actual CI matrix from the workflows.",
+      "replacement": "CI matrix: Python 3.10–3.13 on Ubuntu, with Python 3.12 cross-tested on Ubuntu, macOS, and Windows"
+    },
+    {
+      "quote": "Headline Results numbers use `syntha sample --n 135569 --seed 42 --model tolerant`; Frobenius and KS are reported as mean ± SD over five seeds (42–46).",
+      "action_taken": "Replaced with the real CLI invocation and single-seed reality.",
+      "replacement": "Headline Results numbers are produced by syntha generate --input <tolerant CSV> --n 135569 --seed 42 --cohort tolerant with a single SEED=42 realization; multi-seed variability reporting is queued for v0.6."
+    },
+    {
+      "quote": "mean KS distance 0.058 (max 0.124), maximum binary-prevalence error 0.055, and Spearman correlation Frobenius difference 2.94 ... relative Frobenius ... 0.071; root-mean-square per-cell error 0.045",
+      "action_taken": "Replaced Results paragraph with verified per-column range over the 100-row sample; removed mean 0.058, relative-Frobenius 0.071, and RMSE 0.045.",
+      "replacement": "per-column KS distances ranging from 0 (keyword_total_flags) to 0.124 (vitamin B12); maximum binary-prevalence error 0.055 (has_rx_data); and Spearman correlation Frobenius difference 2.94"
+    },
+    {
+      "quote": "Lower triangle, polyserial/tetrachoric copula recovers off-diagonal lipid–lipid, BP–BP, and liver-enzyme blocks attenuated ≈50% by naive Pearson-on-codes (Supplementary Figure S1).",
+      "action_taken": "Removed supplementary cross-reference and softened the ≈50% claim.",
+      "replacement": "Lower triangle, polyserial/tetrachoric copula recovers off-diagonal lipid–lipid, BP–BP, and liver-enzyme blocks attenuated by naive Pearson-on-codes (see ROADMAP §5.1 for the simulation rationale)."
+    },
+    {
+      "quote": "MIA mean AUROC 0.58 (95% CI 0.55–0.61) and AIA AUROCs 0.62/0.58/0.61",
+      "action_taken": "Replaced with verifiable description: CI gate only; specific AUROCs removed and pointed at runtime output JSON.",
+      "replacement": "the CI gate fails the build at AUROC > 0.60; exact AUROCs depend on the cohort used and are emitted to out/privacy_audit.json at CI time."
+    },
+    {
+      "quote": "The v0.5.8 release ships with 91% line coverage across 102 test cases in 19 modules.",
+      "action_taken": "Corrected to verified counts.",
+      "replacement": "92 test cases across 19 test modules; line coverage is reported via Codecov (badge in repository README)."
+    },
+    {
+      "quote": "nine signed release artifacts",
+      "action_taken": "Softened to enumerate the actual artifacts from release.yml.",
+      "replacement": "all signed release artifacts (macOS .dmg + .sig, Windows -setup.exe + .sig, Linux .AppImage + .sig, the macOS .app.tar.gz auto-updater payload + .sig, plus latest.json and the SBOM)"
+    },
+    {
+      "quote": "Table 2 row 'Stadler 2022 MIA AUROC (gate ≤ 0.60) | 0.58 (95% CI 0.55–0.61)' and 'Logistic AIA AUROC: HTN / DM / lipid (gate ≤ 0.70) | 0.62 / 0.58 / 0.61'",
+      "action_taken": "Replaced with CI-gate-only rows; removed unverifiable AUROC point estimates and CIs.",
+      "replacement": "MIA AUROC CI gate ≤ 0.60; Logistic AIA AUROC CI gate ≤ 0.70 (per-run AUROCs emitted to out/privacy_audit.json)"
+    },
+    {
+      "quote": "HT ≈ 7.5% vs PatenT-2 ≈ 30%; DM ≈ 4.8% vs TURDEP-II ≈ 13.7%; hyperlipidemia ≈ 12% vs TEKHARF >40% ...; depression ≈ 0.22% vs Turkish primary-care 10–20%",
+      "action_taken": "Softened: kept TURDEP-II citation, flagged PatenT-2/TEKHARF/Turkish primary-care comparisons as needing citation.",
+      "replacement": "HT 7.5% (vs PatenT-2; citation needed); DM 4.8% (vs TURDEP-II 13.7% [32]); hyperlipidemia 12% (vs TEKHARF; citation needed); depression 0.22% (vs Turkish primary-care prevalence estimates; citation needed)"
+    },
+    {
+      "quote": "12 sex-agnostic analytes with sex-specific notes (HDL, LDL, TC, TG, ALT, AST, platelets, WBC, ferritin, vitamin B12, fasting glucose, TSH)",
+      "action_taken": "Replaced with code-accurate list (13 analytes including BPs + eGFR; TSH not in checker).",
+      "replacement": "13 sex-agnostic analytes (HDL, LDL, total cholesterol, triglycerides, ALT, AST, platelets, WBC, ferritin, vitamin B12, fasting glucose, systolic BP, diastolic BP, eGFR); TSH is currently outside the reference-range checker and is queued"
+    },
+    {
+      "quote": "Stadler T, Oprisanu B, Troncoso C. Synthetic data — anonymisation Groundhog Day. Proc USENIX Secur Symp. 2022:1451–1468.",
+      "action_taken": "Softened: removed unverified page range, added 31st USENIX and copyedit note.",
+      "replacement": "Proc 31st USENIX Secur Symp. 2022. (Page range to be verified at copyedit.)"
+    },
+    {
+      "quote": "BERTurk-base [27]",
+      "action_taken": "Softened: dropped 'base' (no in-package model loader) and added scope note.",
+      "replacement": "BERTurk [26] (used upstream by the data steward; the resulting flags are consumed as CSV columns, not re-invoked at sample time)"
+    },
+    {
+      "quote": "Archived release: Zenodo, DOI 10.5281/zenodo.14600001 (v0.5.8, deposited 2026-01-15)",
+      "action_taken": "Removed entirely: fabricated DOI (404) and deposit date.",
+      "replacement": ""
+    },
+    {
+      "quote": "ATADEK approval #2024-15/07, dated 2024-09-19 ... HIPAA Safe Harbor–equivalent procedure aligned with KVKK Article 28(1)(c) ...",
+      "action_taken": "Replaced with a generic, defensible Ethics paragraph: no specific approval number, no date, anchored on de-identification at source and KVKK secondary-use framework.",
+      "replacement": "This work used a retrospective dataset that was de-identified at source before release to the authors; consistent with secondary-use research on anonymized data under Türkiye'nin Kişisel Verileri Koruma Kanunu (KVKK)."
+    },
+    {
+      "quote": "Supplementary Material section (S1)–(S6)",
+      "action_taken": "Removed entire Supplementary Material list (no supplement ships with the manuscript).",
+      "replacement": ""
+    },
+    {
+      "quote": "31. Ricós C, Alvarez V, Cava F, et al. Current databases on biological variation ...",
+      "action_taken": "Removed bibliography entry (no inline citation remains after methods rewrite); renumbered subsequent references (Charlson 1994 → 30, El Emam → 31, Satman TURDEP-II → 32).",
+      "replacement": ""
+    },
+    {
+      "quote": "Word count (Background through Conclusion ...): 2,146",
+      "action_taken": "Removed stale word count.",
+      "replacement": ""
+    },
+    {
+      "quote": "## Structured Abstract (148 words)",
+      "action_taken": "Removed stale word count from heading.",
+      "replacement": "## Structured Abstract"
+    },
+    {
+      "quote": "Compared to the Synthetic Data Vault's recursive Gaussian copula [6], syntha replaces Pearson-on-codes with Olsson polyserial / Bonett–Price tetrachoric estimators [11,12]",
+      "action_taken": "Renamed estimators to match code (closed-form polyserial, Drezner-quadrature tetrachoric); kept [13].",
+      "replacement": "syntha replaces Pearson-on-codes with closed-form polyserial and Drezner-quadrature tetrachoric estimators [11,12,13]"
+    },
+    {
+      "quote": "Longitudinal expansion is a Poisson + AR(1) walk",
+      "action_taken": "Updated to backward random walk to match revised methods.",
+      "replacement": "Poisson + backward random walk anchored at the latest observed value"
+    }
+  ],
+  "edits_skipped": [
+    {
+      "quote": "tolerant n=135,569; strict n=55,141",
+      "reason": "VERIFIED — kept as-is."
+    },
+    {
+      "quote": "maximum binary-prevalence error 0.055",
+      "reason": "VERIFIED — kept as-is."
+    },
+    {
+      "quote": "panel indicator B ~ Bernoulli(0.85)",
+      "reason": "VERIFIED — kept; added code constant reference."
+    },
+    {
+      "quote": "Curation flags (29 columns)",
+      "reason": "VERIFIED — kept."
+    },
+    {
+      "quote": "FamilyMemberHistory resources (SNOMED CT 363346000 / 237603008)",
+      "reason": "VERIFIED — kept."
+    },
+    {
+      "quote": "Intra-encounter blood pressure is three measurements 4–6 minutes apart with a 4/2 mmHg systolic/diastolic white-coat decline and σ ≈ 3 mmHg jitter",
+      "reason": "VERIFIED — kept."
+    },
+    {
+      "quote": "(v0.5.8)",
+      "reason": "AMBIGUOUS / recommended_action=keep — left as-is throughout."
+    },
+    {
+      "quote": "n_train=135569",
+      "reason": "VERIFIED — kept (now referenced as 135,569 in Methods)."
+    }
+  ],
+  "final_verify": {
+    "ready_to_submit": false,
+    "remaining_issues": [
+      "Limitations section contains three 'citation needed' placeholders for Turkish epidemiologic comparisons: 'HT 7.5% (vs PatenT-2; citation needed)', 'hyperlipidemia 12% (vs TEKHARF; citation needed)', and 'depression 0.22% (vs Turkish primary-care prevalence estimates; citation needed)'. These must be either resolved with actual citations to PatenT-2 and TEKHARF studies (added to the references list), or rewritten to drop the unsupported comparison.",
+      "Reference [10] (Stadler 2022) contains the placeholder note '(Page range to be verified at copyedit.)' — this must be removed and either the page range supplied or omitted entirely.",
+      "Numerical claim n_shadow≈11,028 is presented as '20% of strict' (55,141 × 0.2 = 11,028.2), which is derivable but should be verified against the actual privacy-audit.yml configuration to confirm a 20% split is in fact configured there. If not, this is an invented specific."
+    ],
+    "placeholder_strings": [
+      "citation needed (HT 7.5% vs PatenT-2)",
+      "citation needed (hyperlipidemia 12% vs TEKHARF)",
+      "citation needed (depression 0.22% vs Turkish primary-care prevalence estimates)",
+      "(Page range to be verified at copyedit.)"
+    ],
+    "dangling_citations": [],
+    "word_count_body": 3450
+  },
+  "watchdog_audit": {
+    "timestamp": "2026-06-04",
+    "manuscript_path": "/Users/ario/Downloads/syntha/docs/paper/manuscript.md",
+    "audit_path": "/Users/ario/Downloads/syntha/docs/paper/audit.json",
+    "total_flags": 67,
+    "total_edits_applied": 35,
+    "total_edits_skipped": 8,
+    "verification_status": "manuscript_repaired_with_verified_replacements",
+    "submission_ready": false,
+    "blocking_issues_count": 3
+  },
+  "residual_cleanup": {
+    "nshadow_verification": {
+      "evidence": "privacy-audit.yml line 50: `rng = np.random.default_rng(42)`; line 52: `n_train = int(0.8 * len(df))`; line 68: `gen = GaussianCopulaGenerator(random_seed=0).fit(...)`; line 71: `syn = gen.sample(len(real_train))` (no n_shadow, no replicates, no 11029/55141). privacy.py line 95: `NearestNeighbors(n_neighbors=1, metric=\"euclidean\")`; line 69-70 StandardScaler; line 159: `DEFAULT_MIA_THRESHOLD = 0.60`. grep for \"shadow|n_shadow|replicate|11029|11028|55141\" across privacy.py, privacy-audit.yml, and cli.py returns ZERO matches (only an unrelated comment about Python module shadowing in cli.py). The MIA is a single-shot Stadler-style nearest-neighbor attack — there is no shadow-model machinery and no replicate loop anywhere in the codebase.",
+      "matches_manuscript": false,
+      "n_shadow_configured": "unconfigured (no n_shadow parameter exists in privacy.py, privacy-audit.yml, or cli.py; the audit runs once with syn = gen.sample(len(real_train)) where real_train = 80% of examples/sample_output/sample_episodes.csv — neither 11,029 nor 55,141 appears anywhere in the repo)",
+      "split_fraction": "0.8 / 0.2 (verified: `n_train = int(0.8 * len(df))` in privacy-audit.yml line 52 and `n_train = int(split * len(src))` with default split=0.8 in cli.py)",
+      "recommended_action": "remove_specific_number",
+      "suggested_replacement": "The `syntha audit` command runs (i) a Stadler-style nearest-synthetic-neighbor MIA and (ii) a logistic-regression train-on-synthetic / test-on-real-holdout attribute-inference attack (AIA) on sensitive targets (hypertension [Hipertansiyon], diabetes [DM_Tum], hyperlipidemia [Hiperlipidemi]). The CI gate (`.github/workflows/privacy-audit.yml`) seeds `numpy.random.default_rng(42)`, splits the input 80/20 into train/holdout, fits `GaussianCopulaGenerator(random_seed=0)` on the training fold, samples a synthetic cohort of the same size as the training fold, computes Euclidean nearest-neighbor distances on StandardScaler-standardized features, and fails the build if MIA AUC exceeds `syntha.privacy.DEFAULT_MIA_THRESHOLD = 0.60` (AIA threshold 0.70). The audit runs once per CI invocation against the committed sample (`examples/sample_output/sample_episodes.csv`); no shadow-model ensemble or multi-replicate procedure is configured."
+    },
+    "tr_epi_verification": {
+      "patent2": {
+        "exists": true,
+        "citation": "Sengul S, Akpolat T, Erdem Y, Derici U, Arici M, Sindel S, Karatan O, Turgan C, Hasanoglu E, Caglar S, Erturk S; Turkish Society of Hypertension and Renal Diseases. Changes in hypertension prevalence, awareness, treatment, and control rates in Turkey from 2003 to 2012. J Hypertens. 2016;34(6):1208-1217. doi:10.1097/HJH.0000000000000901. PMID: 26991534.",
+        "reported_prevalence": "Approximately 30% (described in the paper and follow-up commentary as stable at ~30% across PatenT 2003 and PatenT-2 2012; the 30% claim in the manuscript is accurate)."
+      },
+      "tekharf": {
+        "exists": false,
+        "citation": "",
+        "reported_hyperlipidemia_prevalence": "TEKHARF is a real long-running cohort (Onat et al., from ~1990 onwards) with many publications, but no single canonical paper I can verify reports the specific '>40% above age 40' figure used in the manuscript. The closest verifiable TEKHARF-linked figures are LDL-C >=130 mg/dL of 30.5% (men) and 38.1% (women) in adults >30 (cited via Sozmen et al. Anatol J Cardiol 2016;16(6):370-384) — close to but not exactly '>40% above age 40'. Pinning a single Vancouver citation to the manuscript's specific claim would risk fabrication."
+      },
+      "tr_primary_care_depression": {
+        "exists": false,
+        "citation": "",
+        "reported_prevalence_range": "Recent population-based Turkish Health Survey data (2016, 2019) report depressive-symptom prevalence of ~6.3-9% (Ministry of Health), not the 10-20% range claimed in the manuscript. While some Turkish primary-care or specialty-population studies have reported figures in the 10-20% range, the literature is fragmented across many small studies and there is no single canonical citation that anchors '10-20% in Turkish primary care' with high confidence."
+      },
+      "recommendation": "drop_comparison_numbers",
+      "rewritten_limitations_sentence": "(i) Synthetic disease prevalence is substantially below Turkish epidemiologic estimates by construction of the data-quality-curated source — for example, diabetes mellitus is ~4.8% in syntha v0.5.x versus 13.7% in TURDEP-II [33], and hypertension, hyperlipidemia, and depression are similarly under-represented relative to national figures. This is expected: the pristine cohort used as the generative substrate was curated for data quality rather than to be marginally representative of the Turkish adult population. Consequently, risk-prediction models trained on syntha v0.5.x **must** be recalibrated against TÜİK and TURDEP-II marginals (and, where relevant, condition-specific national surveys) before any deployment; uncalibrated use will systematically underestimate absolute risk."
+    },
+    "edits_applied": [
+      "Rewrote Limitations bullet (i) verbatim per verification: dropped invented comparison numbers for HT/hyperlipidemia/depression, kept TURDEP-II 13.7% for DM, removed 'citation needed' placeholders, added explicit mandatory-recalibration language and rationale that the pristine cohort is curated for quality rather than national representativeness.",
+      "Rewrote the Privacy audit Methods paragraph verbatim per verification: removed the unsupported n_shadow≈11,028 figure and the '30 replicates' claim; clarified the CI gate runs once per invocation against the committed sample with no shadow ensemble; named the targets in Turkish flag form (Hipertansiyon, DM_Tum, Hiperlipidemi); explicit AIA threshold 0.70; explicit StandardScaler/Euclidean nearest-neighbor wording.",
+      "Added new reference [32] for PatenT-2 (Sengul et al., J Hypertens 2016) at the end of the references list with full PMID and DOI; renumbered TURDEP-II (Satman 2013) from [32] to [33] so the inline citation in Limitations (i) [33] resolves to TURDEP-II.",
+      "Stripped the '(Page range to be verified at copyedit.)' placeholder from reference [10] (Stadler 2022).",
+      "Final sweep: grep for 'citation needed', 'Page range to be verified', 'to be verified', 'TBD', 'TODO', '[INSERT', 'to be supplied', 'to be completed', 'to be added' returned no matches in the manuscript."
+    ],
+    "refs_added": [
+      "32. Sengul S, Akpolat T, Erdem Y, Derici U, Arici M, Sindel S, Karatan O, Turgan C, Hasanoglu E, Caglar S, Erturk S; Turkish Society of Hypertension and Renal Diseases. Changes in hypertension prevalence, awareness, treatment, and control rates in Turkey from 2003 to 2012. J Hypertens. 2016;34(6):1208-1217. doi:10.1097/HJH.0000000000000901. PMID: 26991534."
+    ],
+    "refs_renumbered": true,
+    "final_qa": {
+      "ready_to_submit": false,
+      "placeholder_strings_found": [
+        "data steward"
+      ],
+      "orphan_refs": [
+        31,
+        32
+      ],
+      "dangling_refs": [],
+      "biblio_count": 33,
+      "body_word_count": 2458,
+      "remaining_blockers": [
+        "Placeholder string 'data steward' present in Methods (Source cohort and curation section): 'used upstream by the data steward' must be replaced or removed.",
+        "Bibliography entry [31] (El Emam K, Mosquera L, Hoptroff R. Practical synthetic data generation. 2020) has no inline citation in the body.",
+        "Bibliography entry [32] (Sengul S et al. Changes in hypertension prevalence in Turkey 2003-2012. J Hypertens. 2016) has no inline citation in the body.",
+        "Body word count (Background through Conclusion) is 2458, which exceeds the 2300 upper bound (target 2000 +/- 15%, i.e., 1700-2300). Need to trim approximately 160+ words."
+      ]
+    }
+  }
+}
