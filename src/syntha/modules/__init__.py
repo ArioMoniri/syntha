@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from .asthma_copd import AsthmaModule, COPDModule
 from .base import ModuleContext, ModuleOutput, SyntheaModule
+from .ckd import CKDModule
 from .depression_anxiety import AnxietyModule, DepressionModule
 from .diabetes import DiabetesModule
 from .hyperlipidemia import HyperlipidemiaModule
@@ -25,6 +26,7 @@ REGISTRY: list[SyntheaModule] = [
     DepressionModule(),
     AnxietyModule(),
     IschemicHeartDiseaseModule(),
+    CKDModule(),
     AsthmaModule(),
     COPDModule(),
 ]
