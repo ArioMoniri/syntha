@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.9](https://github.com/ArioMoniri/syntha/compare/v0.5.8...v0.5.9) (2026-06-05)
+
+
+### Documentation
+
+* **paper:** JAMIA Open manuscript — real ORCIDs, all references anchored ([c23a3c4](https://github.com/ArioMoniri/syntha/commit/c23a3c4af50bb779b709f6ab0d447614820bc3a4))
+* **paper:** purge hallucinated specifics; affiliation per author request ([384ecd1](https://github.com/ArioMoniri/syntha/commit/384ecd1f461eede14e33377c180ac2b0c61c2278))
+* **paper:** real ORCIDs for both authors; ready for JAMIA Open submission ([528c9e5](https://github.com/ArioMoniri/syntha/commit/528c9e5e574a5d3723ba8df020bbcba2cbeeaa2e))
+* **paper:** residual cleanup pass — n_shadow / PatenT-2 / orphan refs purged ([345c015](https://github.com/ArioMoniri/syntha/commit/345c0158b9f36c5415fc2e9d515eb6ba590ff524))
+
 ## [0.5.8](https://github.com/ArioMoniri/syntha/compare/v0.5.7...v0.5.8) (2026-05-15)
 
 
