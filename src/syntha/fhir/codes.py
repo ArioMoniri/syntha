@@ -85,6 +85,57 @@ CONDITION_ICD10: dict[str, tuple[str, str]] = {
     "Anksiyete": ("F41.9", "Anxiety disorder, unspecified"),
 }
 
+# --- CKD staging (KDIGO G1–G5, eGFR-driven) -------------------------------
+# Stage-specific SNOMED CT + ICD-10 used by the CKD module. eGFR thresholds
+# follow KDIGO 2024 (mL/min/1.73 m²). ICD-10 N18.x maps 1:1 onto the KDIGO
+# stages; SNOMED CT has dedicated stage concepts.
+#
+# CLINICAL CONFIRMATION NEEDED (see PR checklist): KDIGO is the international
+# standard and TR primary-care follows it, but the nephrology-referral stage
+# (G3b vs G4) should be confirmed against TR practice.
+#
+# Each entry: (eGFR low-inclusive, eGFR high-exclusive, stage label,
+#              (SNOMED code, SNOMED display), (ICD-10 code, ICD-10 display)).
+CKD_STAGES: list[tuple[float, float, str, tuple[str, str], tuple[str, str]]] = [
+    (90.0, float("inf"), "G1",
+     ("431855005", "Chronic kidney disease stage 1 (disorder)"),
+     ("N18.1", "Chronic kidney disease, stage 1")),
+    (60.0, 90.0, "G2",
+     ("431856006", "Chronic kidney disease stage 2 (disorder)"),
+     ("N18.2", "Chronic kidney disease, stage 2 (mild)")),
+    (45.0, 60.0, "G3a",
+     ("700378005", "Chronic kidney disease stage 3A (disorder)"),
+     ("N18.3", "Chronic kidney disease, stage 3 (moderate)")),
+    (30.0, 45.0, "G3b",
+     ("700379002", "Chronic kidney disease stage 3B (disorder)"),
+     ("N18.3", "Chronic kidney disease, stage 3 (moderate)")),
+    (15.0, 30.0, "G4",
+     ("431857002", "Chronic kidney disease stage 4 (disorder)"),
+     ("N18.4", "Chronic kidney disease, stage 4 (severe)")),
+    (0.0, 15.0, "G5",
+     ("433146000", "Chronic kidney disease stage 5 (disorder)"),
+     ("N18.5", "Chronic kidney disease, stage 5")),
+]
+
+
+def ckd_stage_for_egfr(egfr: float | None) -> tuple[str, tuple[str, str], tuple[str, str]] | None:
+    """Map an eGFR (mL/min/1.73 m²) to its KDIGO stage + SNOMED/ICD-10 codes.
+
+    Returns ``(stage_label, snomed, icd10)`` or ``None`` when eGFR is missing
+    (no staging possible — caller falls back to the generic ``N18.9``).
+    """
+    if egfr is None:
+        return None
+    try:
+        v = float(egfr)
+    except (TypeError, ValueError):
+        return None
+    for lo, hi, label, snomed, icd10 in CKD_STAGES:
+        if lo <= v < hi:
+            return label, snomed, icd10
+    return None
+
+
 GENDER_MAP = {1: "male", 0: "female"}
 
 
