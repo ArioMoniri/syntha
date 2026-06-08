@@ -46,7 +46,7 @@ Bu tablo hekim içindir; teknik jargon en aza indirilmiştir. Lütfen yalnızca
 
 | Klinik Başlık | Sistem Şu An Ne Varsayıyor? | Hekime Sorulan Soru | Hekimin Cevabı | Kaynak / Kılavuz Önerisi | Not |
 |---|---|---|---|---|---|
-| Tiroid hastalığının otomatik hipotiroidi sayılması | "Tiroid hastalığı" işareti olan **her** hasta otomatik olarak hipotiroidi kabul edilip levotiroksin (50 mcg/gün) başlatılıyor; hipertiroidi/guatr hiç ele alınmıyor | Tiroid bozukluğu olan hastaların hepsini hipotiroidi varsaymak doğru mu; hipertiroidi ayrımı modellenmeli mi? | | | **Öncelik: Yüksek.** En riskli sessiz varsayım. Ayrıca GitHub Issue açıldı: bkz. Bölüm 3 |
+| Tiroid hastalığının otomatik hipotiroidi sayılması | "Tiroid hastalığı" işareti olan **her** hasta otomatik olarak hipotiroidi kabul edilip levotiroksin (50 mcg/gün) başlatılıyor; hipertiroidi/guatr hiç ele alınmıyor | Tiroid bozukluğu olan hastaların hepsini hipotiroidi varsaymak doğru mu; hipertiroidi ayrımı modellenmeli mi? | | | **Öncelik: Yüksek.** En riskli sessiz varsayım. Ayrıca GitHub Issue açıldı: #54 |
 | Diyabette insülin başlama eşiği | Açlık kan şekeri ≥ 250 mg/dL ise veya "komplikasyonlu diyabet" işaretliyse insülin (glarjin) ekleniyor; ayrıca herkese metformin veriliyor | İnsülini başlatan eşik ve "komplikasyonlu" tanımı Türkiye pratiğine uygun mu? | | | Öncelik: Orta |
 | Anksiyete + depresyon birlikteyken ilaç seçimi | Hasta hem depresyon hem anksiyete işaretliyse, çift SSRI'dan kaçınmak için anksiyeteye buspiron veriliyor | Eşzamanlı depresyon + anksiyetede bu yaklaşım uygun mu, yoksa tek bir SSRI'ın dozunu artırmak mı tercih edilmeli? | | | Öncelik: Orta. Kod yorumunda "klinik onaylı" yazıyor ancak kayıtlı bir klinisyen onayı bulunmuyor |
 | Hiperlipidemide yüksek-yoğunluklu statin eşiği | LDL ≥ 190 mg/dL ise rosuvastatin, değilse atorvastatin başlatılıyor | LDL ≥ 190 eşiği ve statin seçimi Türkiye pratiğine uygun mu? | | | Öncelik: Orta |
@@ -71,7 +71,7 @@ Bu tablo hekim içindir; teknik jargon en aza indirilmiştir. Lütfen yalnızca
 | #20 | — | `locale/turkish.py:CONDITION_DISPLAY_TR` | Replace flagged TR strings (see Ek A) | Low | Open |
 | #21 | — | new `modules/anemia.py` | Author anemia module | Medium | Open |
 | #22 | — | new `modules/b12_deficiency.py` | Author B12 module; align with `reference_ranges.py` B12 band | Medium | Open |
-| (no issue) | — | `modules/thyroid.py` | Model hyper- vs hypothyroid split | High | Code-derived; **new issue opened** (see Bölüm 3 / aggregate PR) |
+| (no issue) | — | `modules/thyroid.py` | Model hyper- vs hypothyroid split | High | Code-derived; **new issue opened: #54** |
 | (no issue) | — | `modules/diabetes.py` | Confirm insulin trigger (glucose ≥ 250 / complicated) | Medium | Code-derived |
 | (no issue) | — | `modules/depression_anxiety.py:AnxietyModule` | Confirm buspirone-on-existing-SSRI pattern | Medium | Code-derived |
 | (no issue) | — | `modules/hyperlipidemia.py` | Confirm LDL ≥ 190 high-intensity statin rule | Medium | Code-derived |
