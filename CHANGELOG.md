@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0](https://github.com/ArioMoniri/syntha/compare/v0.5.9...v0.6.0) (2026-06-28)
+
+
+### Features
+
+* **mcp:** Claude/MCP connector — `pip install "syntha-ehr[mcp]"` ([cf8672b](https://github.com/ArioMoniri/syntha/commit/cf8672b88fe262004f3c3070f18d5ff3fea72cfc))
+* **mcp:** expand to 34 tools + full marketplace-submission package ([a9d4c4e](https://github.com/ArioMoniri/syntha/commit/a9d4c4ed477131774e9e3663b6956bdd75c7519c))
+* **modules:** add CKD-staging module (eGFR-driven, KDIGO G1-G5) ([#46](https://github.com/ArioMoniri/syntha/issues/46)) ([8629cdf](https://github.com/ArioMoniri/syntha/commit/8629cdf292a38f4438f0aa2583b535628a5204c7)), closes [#17](https://github.com/ArioMoniri/syntha/issues/17)
+
 ## [0.5.9](https://github.com/ArioMoniri/syntha/compare/v0.5.8...v0.5.9) (2026-06-05)
 
 
