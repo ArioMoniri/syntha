@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.10](https://github.com/ArioMoniri/syntha/compare/v0.5.9...v0.5.10) (2026-06-28)
+
+
+### Features
+
+* **mcp:** expand the Claude Connector to **34 tools** (was 8). Generation: cross-sectional CSV + FHIR R4 + longitudinal CSV + longitudinal FHIR + AR(1) lab time-series + standalone clinical-assessment resources + AST-validated conditional rejection sampling. Validation & privacy: KS / Wasserstein / Frobenius reports, MIA + AIA audits, reference-range coverage, per-row reference checks, physiologic-coherence filter, KDIGO CKD staging, condition-expression validator. Introspection: model cards, correlation pairs, clinical-module detail, PipelineConfig docs, condition codes, LOINC catalog, RxNorm catalog, Turkish locale data, lab panels, lab drift profiles, reference ranges, schema columns.
+* **mcp:** runtime tool annotations — every tool advertises `readOnlyHint: true`, `destructiveHint: false`, `openWorldHint: false`, `idempotentHint: true`, plus a human-readable `title`, via the MCP `tools/list` response. Reviewers introspecting the live server see the safety surface explicitly.
+* **mcp(submission):** complete turnkey package for the Anthropic Connector directory under an Organization account — `mcp/SUBMISSION.md` step-by-step guide, `mcp/LISTING.md` paste-ready listing copy, `mcp/build.sh` reproducible `.dxt` packager (with `@anthropic-ai/dxt` validator pre-check + manual-zip fallback), placeholder `mcp/icon.png` (replaceable), and `.github/workflows/dxt.yml` CI that auto-builds the `.dxt` on every tag push and uploads it as a release asset.
+* **docs:** new `PRIVACY.md`, `TERMS.md`, `SECURITY.md` at the repo root, satisfying the marketplace's public-policy requirement with honest, factual text matching the connector's actual behaviour.
+
+
 ## [0.5.9](https://github.com/ArioMoniri/syntha/compare/v0.5.8...v0.5.9) (2026-06-05)
 
 

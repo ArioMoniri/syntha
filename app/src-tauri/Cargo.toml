@@ -1,6 +1,6 @@
 [package]
 name = "syntha"
-version = "0.5.9"
+version = "0.5.10"
 description = "syntha — synthetic patient record generator (desktop)"
 authors = ["Ariorad Moniri"]
 license = "Apache-2.0"

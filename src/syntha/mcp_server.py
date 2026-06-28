@@ -1674,6 +1674,100 @@ def get_model_card(cohort: Literal["tolerant", "strict"] = "tolerant") -> dict:
     return _model_card_dict(cohort)
 
 
+# ─────────────────────────────────────────────────────────────────────
+# Tool annotations — per MCP spec, every tool advertises read-only /
+# destructive / open-world / idempotent hints. Every syntha tool loads
+# bundled JSON, computes, returns; none mutate state, write to disk, or
+# call external services. So one global annotation applies to all tools.
+# Anthropic Connector reviewers introspect tools/list and look for these
+# hints to size the trust / consent surface.
+# ─────────────────────────────────────────────────────────────────────
+
+_TOOL_TITLES: dict[str, str] = {
+    "syntha_version":                       "Library version",
+    "list_bundled_cohorts":                 "List bundled cohorts",
+    "get_cohort_summary":                   "Cohort summary",
+    "get_model_card":                       "Model card",
+    "generate_cohort_csv":                  "Generate cohort (CSV)",
+    "generate_cohort_fhir":                 "Generate cohort (FHIR R4)",
+    "generate_longitudinal_cohort":         "Generate longitudinal cohort (CSV)",
+    "generate_longitudinal_fhir":           "Generate longitudinal cohort (FHIR R4)",
+    "generate_cohort_with_lab_history":     "Generate cohort with lab time-series",
+    "generate_clinical_assessments":        "Generate clinical-assessment resources",
+    "sample_conditional":                   "Conditional rejection sampling",
+    "validate_synthetic_csv":               "Validate two CSVs",
+    "validate_against_bundled_cohort":      "Validate synthetic CSV vs bundled cohort",
+    "privacy_audit":                        "Privacy audit (MIA + AIA)",
+    "privacy_audit_bundled":                "Privacy self-audit (demo)",
+    "fraction_within_reference":            "Fraction within reference ranges",
+    "check_row_within_reference":           "Check one row against reference ranges",
+    "apply_physiologic_constraints":        "Apply physiologic-coherence filter",
+    "list_clinical_modules":                "List clinical modules",
+    "list_modules_detail":                  "List clinical-module detail",
+    "list_physiologic_constraints":         "List physiologic constraints",
+    "list_reference_ranges":                "List reference ranges",
+    "list_schema_columns":                  "List schema columns",
+    "list_condition_codes":                 "List condition codes",
+    "list_lab_loinc_codes":                 "List lab LOINC codes",
+    "list_lab_panels":                      "List lab panels",
+    "list_lab_drift_profiles":              "List lab drift profiles",
+    "list_rxnorm_medications":              "List RxNorm medications",
+    "list_locale_data":                     "List Turkish-locale data",
+    "list_clinical_assessment_instruments": "List clinical-assessment instruments",
+    "list_pipeline_config_options":         "List PipelineConfig options",
+    "ckd_stage_for_egfr":                   "CKD staging from eGFR",
+    "validate_condition_expression":        "Validate condition expression",
+    "get_correlation_pairs":                "Get correlation pairs",
+}
+
+
+def _annotate_registered_tools() -> None:
+    """Apply MCP ToolAnnotations to every @_app.tool()-registered tool.
+
+    Called once at import time, after all @tool decorators have run. We
+    don't add annotations to each decorator individually because (a) the
+    answer is the same for every syntha tool — read-only, deterministic,
+    no side effects — and (b) running this once keeps the 34 decorators
+    visually clean.
+    """
+    try:
+        from mcp.types import ToolAnnotations
+    except ImportError:  # pragma: no cover — older mcp-sdk
+        return
+
+    # The tool registry lives at _app._tool_manager._tools in the public
+    # FastMCP layout (mcp-sdk ≥ 1.2). Be defensive: silently no-op if the
+    # internal layout has moved.
+    tm = getattr(_app, "_tool_manager", None)
+    tools = getattr(tm, "_tools", None)
+    if not isinstance(tools, dict):
+        return
+
+    for name, tool in tools.items():
+        # If a tool already has an annotation block, leave it alone — the
+        # author's explicit choice wins.
+        if getattr(tool, "annotations", None) is not None:
+            continue
+        try:
+            tool.annotations = ToolAnnotations(
+                title=_TOOL_TITLES.get(name, name.replace("_", " ").title()),
+                readOnlyHint=True,
+                destructiveHint=False,
+                openWorldHint=False,
+                idempotentHint=True,
+            )
+        except Exception:
+            # If ToolAnnotations doesn't accept these keys on the installed
+            # SDK version, fall back to setting just title via dict-attr.
+            try:
+                tool.annotations = ToolAnnotations(title=_TOOL_TITLES.get(name, name))
+            except Exception:
+                pass
+
+
+_annotate_registered_tools()
+
+
 def main(argv: list[str] | None = None) -> int:
     """Entry point used by the ``syntha-mcp`` console script."""
     import argparse

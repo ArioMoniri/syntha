@@ -6,7 +6,7 @@ Top-level re-exports for ergonomics. Users can do:
 
 instead of having to know the submodule layout.
 """
-__version__ = "0.5.9"
+__version__ = "0.5.10"
 
 from .generator.copula import GaussianCopulaGenerator
 from .pipeline import PipelineConfig, run
