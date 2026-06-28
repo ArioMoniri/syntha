@@ -31,9 +31,19 @@ dev = [
     "ruff>=0.8",
     "pre-commit>=4.0",
 ]
+mcp = [
+    # Model Context Protocol SDK (Anthropic) — runs the syntha-mcp server
+    # that lets Claude Desktop, Claude.com custom connectors, mcp-cli,
+    # Cursor, Continue etc. drive synthetic-cohort generation.
+    "mcp>=1.2",
+]
 
 [project.scripts]
 syntha = "syntha.cli:main"
+syntha-mcp = "syntha.mcp_server:main"
+
+[tool.setuptools.package-data]
+"syntha.bundled_models" = ["*.json"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

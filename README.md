@@ -41,11 +41,30 @@ A Tauri 2 app bundling the trained Gaussian copula. Picks cohort + n + seed + co
 
 Install URLs auto-resolve to the latest release via `releases/latest/download/…` — no per-version link maintenance.
 
+## Use from Claude (MCP connector)
+
+`syntha` ships as an [MCP](https://modelcontextprotocol.io) connector. Claude (Desktop or Claude.com custom-connector slot) can drive synthetic-cohort generation directly through 8 tools (`generate_cohort_csv`, `generate_cohort_fhir`, `sample_conditional`, `get_cohort_summary`, …). The connector bundles the two trained copulas (`tolerant` n=135,569; `strict` n=55,141) so no source CSV is needed at runtime.
+
+```bash
+pip install "syntha-ehr[mcp]"
+```
+
+Add to Claude Desktop's config (`Settings → Developer → Edit Config`):
+
+```json
+{ "mcpServers": { "syntha": { "command": "syntha-mcp" } } }
+```
+
+Then ask Claude things like *"Using the syntha connector, give me 50 synthetic patients with hypertension and diabetes aged 60+, as a CSV."* Full guide + Claude.com Streamable-HTTP setup + connector-directory submission instructions: [docs/MCP.md](docs/MCP.md).
+
 ## Install
 
 ```bash
 # PyPI
 pip install syntha-ehr
+
+# With the MCP connector (Claude Desktop / custom connectors)
+pip install "syntha-ehr[mcp]"
 
 # Or from source
 git clone https://github.com/ArioMoniri/syntha

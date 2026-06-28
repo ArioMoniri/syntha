@@ -54,7 +54,16 @@ For *what* is needed and *how* to help, see [COLLABORATE.md](COLLABORATE.md). Th
 
 Plus engineering polish: signed installers for all 3 OSes (macOS notarized, Windows code-signed), Tauri 2 auto-updater (minisign), PyPI OIDC trusted-publisher, Docker image on ghcr.io, SBOM, CodeQL, daily install-button verification, Codecov, release-please, [all-contributors](https://allcontributors.org/), and a [test_cli.py](tests/test_cli.py) smoke-test suite.
 
-### v0.5.6 — Curation cleanup + collaboration platform ✅ (current)
+### v0.5.10 — MCP connector ✅ (current)
+
+- New optional extra: `pip install "syntha-ehr[mcp]"` installs the [Model Context Protocol](https://modelcontextprotocol.io) SDK and registers a `syntha-mcp` console script.
+- Eight tools exposed: `list_bundled_cohorts`, `get_cohort_summary`, `generate_cohort_csv`, `generate_cohort_fhir`, `sample_conditional`, `list_clinical_modules`, `list_physiologic_constraints`, `syntha_version`. Bundles the two trained copulas (`tolerant` n=135,569; `strict` n=55,141) inside the Python package via `[tool.setuptools.package-data]` so no source CSV is required at runtime.
+- Transports: stdio (Claude Desktop and local MCP clients) and Streamable HTTP (`syntha-mcp --transport http`, for the Claude.com custom-connector slot).
+- DXT manifest at [mcp/manifest.json](mcp/manifest.json) ready for submission to the Anthropic [Connector directory](https://www.claude.com/connectors).
+- Full guide + Claude Desktop config snippet + connector-directory submission notes: [docs/MCP.md](docs/MCP.md).
+- 12 new MCP tests in [tests/test_mcp_server.py](tests/test_mcp_server.py).
+
+### v0.5.6 — Curation cleanup + collaboration platform ✅
 
 - 29 source-pipeline curation flags dropped from default CSV (BERTurk score, `pristine_*`, drug-safety, `rf_*`). Opt back in with `--curation-flags`.
 - Desktop app **longitudinal-mode** toggle — multiple encounters per patient with shared HASTA_ID, age-advance, multiplicative Gaussian lab drift.

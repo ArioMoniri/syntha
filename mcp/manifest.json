@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json.schemastore.org/dxt-manifest.json",
+  "dxt_version": "0.1",
+  "name": "syntha",
+  "display_name": "syntha — synthetic patient generator",
+  "version": "0.5.9",
+  "description": "Generate realistic, fully synthetic patient cohorts (CSV or FHIR R4) trained on de-identified retrospective EHR episodes. Locale-aware (Turkish primary care), 9 Synthea-style clinical modules, polyserial/tetrachoric Gaussian copula, dual-coded LOINC + SNOMED CT + ICD-10 + RxNorm.",
+  "long_description": "syntha lets you generate synthetic patient records (no real-patient row is ever returned) for ML training, healthy-control cohorts in case–control studies, FHIR pipeline / ETL integration testing, biostatistics teaching, and data augmentation — without redistributing any source data. The connector exposes 8 tools: list and inspect the bundled cohorts (tolerant 135,569 episodes; strict 55,141), generate a CSV cohort, generate a FHIR R4 transaction-Bundle NDJSON, run AST-validated rejection sampling against a pandas-style filter expression, and enumerate the clinical modules and physiologic-validity rejection rules the generator applies. Built on the open-source syntha-ehr library; Apache 2.0; full source at https://github.com/ArioMoniri/syntha.",
+  "author": {
+    "name": "Ariorad Moniri",
+    "url": "https://github.com/ArioMoniri"
+  },
+  "homepage": "https://github.com/ArioMoniri/syntha",
+  "documentation": "https://github.com/ArioMoniri/syntha/blob/main/docs/MCP.md",
+  "support": "https://github.com/ArioMoniri/syntha/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArioMoniri/syntha"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "synthetic data",
+    "synthetic ehr",
+    "fhir",
+    "fhir r4",
+    "healthcare",
+    "clinical informatics",
+    "gaussian copula",
+    "turkish",
+    "loinc",
+    "snomed",
+    "icd-10",
+    "rxnorm",
+    "biostatistics",
+    "data augmentation"
+  ],
+  "icon": "https://avatars.githubusercontent.com/u/92126657?v=4",
+  "server": {
+    "type": "python",
+    "entry_point": "syntha.mcp_server",
+    "mcp_config": {
+      "command": "syntha-mcp",
+      "args": [],
+      "env": {}
+    }
+  },
+  "tools": [
+    {
+      "name": "syntha_version",
+      "description": "Return the syntha library version and bundled-cohort fingerprints."
+    },
+    {
+      "name": "list_bundled_cohorts",
+      "description": "List the cohorts whose trained copulas ship with this connector (tolerant, strict)."
+    },
+    {
+      "name": "get_cohort_summary",
+      "description": "Show n_train, comorbidity prevalences, lab/vital columns, and source date window for a cohort."
+    },
+    {
+      "name": "generate_cohort_csv",
+      "description": "Generate N synthetic patient records as a CSV string (physiologic constraints applied by default)."
+    },
+    {
+      "name": "generate_cohort_fhir",
+      "description": "Generate N synthetic patients as FHIR R4 transaction-Bundle NDJSON, with 9 Synthea-style modules."
+    },
+    {
+      "name": "sample_conditional",
+      "description": "AST-validated rejection sampling — return only synthetic records matching a pandas-style filter expression (e.g. 'Hipertansiyon == 1 & age > 60')."
+    },
+    {
+      "name": "list_clinical_modules",
+      "description": "Enumerate the 9 Synthea-style modules and the source flag each fires on."
+    },
+    {
+      "name": "list_physiologic_constraints",
+      "description": "Enumerate the physiologic-validity rejection rules (pulse pressure, Friedewald, eGFR ↔ creatinine)."
+    }
+  ],
+  "tools_generated": false,
+  "prompts": [],
+  "prompts_generated": false,
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  },
+  "user_config": {}
+}
