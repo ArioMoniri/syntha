@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 # on PyPI when we tried to claim it. The longer name is more descriptive
 # anyway — "syntha for electronic health records".
 name = "syntha-ehr"
-version = "0.5.9"
+version = "0.6.0"
 description = "Synthetic patient record generator (Synthea-inspired) trained on pristine-healthy episode data"
 readme = "README.md"
 license = { text = "Apache-2.0" }
