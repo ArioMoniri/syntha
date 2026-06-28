@@ -40,5 +40,6 @@ app/src-tauri/target/
 build/
 data/raw/*
 dist/
+mcp/*.dxt
 output/
 venv/

@@ -3,11 +3,12 @@
   "dxt_version": "0.1",
   "name": "syntha",
   "display_name": "syntha — synthetic patient generator",
-  "version": "0.5.9",
-  "description": "Generate realistic, fully synthetic patient cohorts (CSV or FHIR R4) trained on de-identified retrospective EHR episodes. Locale-aware (Turkish primary care), 9 Synthea-style clinical modules, polyserial/tetrachoric Gaussian copula, dual-coded LOINC + SNOMED CT + ICD-10 + RxNorm.",
-  "long_description": "syntha lets you generate synthetic patient records (no real-patient row is ever returned) for ML training, healthy-control cohorts in case–control studies, FHIR pipeline / ETL integration testing, biostatistics teaching, and data augmentation — without redistributing any source data. The connector exposes 8 tools: list and inspect the bundled cohorts (tolerant 135,569 episodes; strict 55,141), generate a CSV cohort, generate a FHIR R4 transaction-Bundle NDJSON, run AST-validated rejection sampling against a pandas-style filter expression, and enumerate the clinical modules and physiologic-validity rejection rules the generator applies. Built on the open-source syntha-ehr library; Apache 2.0; full source at https://github.com/ArioMoniri/syntha.",
+  "version": "0.5.10",
+  "description": "Generate realistic, fully synthetic patient cohorts (CSV or FHIR R4) trained on de-identified retrospective EHR episodes. Locale-aware (Turkish primary care), 9 Synthea-style clinical modules, polyserial/tetrachoric Gaussian copula, dual-coded LOINC + SNOMED CT + ICD-10 + RxNorm. No PHI ever returned.",
+  "long_description": "syntha lets you generate synthetic patient records (no real-patient row is ever returned) for ML training, healthy-control cohorts in case–control studies, FHIR pipeline / ETL integration testing, biostatistics teaching, and data augmentation — without redistributing any source data. The 0.5.10 connector exposes 34 tools across six areas: (1) cohort inspection — list/inspect the bundled cohorts (tolerant n=135,569; strict n=55,141), model cards, correlation pairs; (2) cross-sectional generation — CSV cohorts and FHIR R4 transaction-Bundle NDJSON with nine Synthea-style modules (hypertension, diabetes, hyperlipidemia, thyroid, depression, anxiety, IHD, asthma, COPD, CKD); (3) longitudinal mode — multi-encounter trajectories (CSV + FHIR), AR(1) lab time-series with Westgard biological variation + secular drift, intra-encounter BP triplets, and standalone PHQ-9 / GAD-7 / Charlson / FamilyMemberHistory resources; (4) validation & privacy — KS / Wasserstein / Frobenius statistical-fidelity reports against either a user CSV or the bundled cohort, plus MIA + AIA privacy audits with pass/fail verdicts; (5) reference-range coverage — Mayo / Tietz / KDIGO clinical intervals (sex-aware for hemoglobin & creatinine), per-cohort / per-row in-range fractions, and standalone physiologic-coherence filtering (pulse pressure, Friedewald, eGFR↔creatinine); (6) Turkish locale + reference data — TÜİK-frequency names, ISO 3166-2:TR cities, dual-coded SNOMED + ICD-10 + Turkish condition displays, LOINC lab catalog, RxNorm drug classes, KDIGO CKD staging, AST-validated rejection sampling, and full PipelineConfig documentation. Built on the open-source syntha-ehr library; Apache 2.0; full source, privacy policy, and submission docs at https://github.com/ArioMoniri/syntha.",
   "author": {
     "name": "Ariorad Moniri",
+    "email": "moniriario@gmail.com",
     "url": "https://github.com/ArioMoniri"
   },
   "homepage": "https://github.com/ArioMoniri/syntha",
@@ -19,22 +20,29 @@
   },
   "license": "Apache-2.0",
   "keywords": [
-    "synthetic data",
-    "synthetic ehr",
+    "synthetic-data",
+    "synthetic-ehr",
     "fhir",
-    "fhir r4",
+    "fhir-r4",
     "healthcare",
-    "clinical informatics",
-    "gaussian copula",
+    "clinical-informatics",
+    "gaussian-copula",
+    "longitudinal-ehr",
+    "privacy-audit",
     "turkish",
     "loinc",
     "snomed",
     "icd-10",
     "rxnorm",
     "biostatistics",
-    "data augmentation"
+    "data-augmentation"
   ],
-  "icon": "https://avatars.githubusercontent.com/u/92126657?v=4",
+  "icon": "icon.png",
+  "screenshots": [
+    "../docs/figures/distributions.png",
+    "../docs/figures/prevalence.png",
+    "../docs/figures/correlations.png"
+  ],
   "server": {
     "type": "python",
     "entry_point": "syntha.mcp_server",
@@ -45,38 +53,40 @@
     }
   },
   "tools": [
-    {
-      "name": "syntha_version",
-      "description": "Return the syntha library version and bundled-cohort fingerprints."
-    },
-    {
-      "name": "list_bundled_cohorts",
-      "description": "List the cohorts whose trained copulas ship with this connector (tolerant, strict)."
-    },
-    {
-      "name": "get_cohort_summary",
-      "description": "Show n_train, comorbidity prevalences, lab/vital columns, and source date window for a cohort."
-    },
-    {
-      "name": "generate_cohort_csv",
-      "description": "Generate N synthetic patient records as a CSV string (physiologic constraints applied by default)."
-    },
-    {
-      "name": "generate_cohort_fhir",
-      "description": "Generate N synthetic patients as FHIR R4 transaction-Bundle NDJSON, with 9 Synthea-style modules."
-    },
-    {
-      "name": "sample_conditional",
-      "description": "AST-validated rejection sampling — return only synthetic records matching a pandas-style filter expression (e.g. 'Hipertansiyon == 1 & age > 60')."
-    },
-    {
-      "name": "list_clinical_modules",
-      "description": "Enumerate the 9 Synthea-style modules and the source flag each fires on."
-    },
-    {
-      "name": "list_physiologic_constraints",
-      "description": "Enumerate the physiologic-validity rejection rules (pulse pressure, Friedewald, eGFR ↔ creatinine)."
-    }
+    { "name": "syntha_version",                            "description": "Library version, repo URL, and bundled-model fingerprints." },
+    { "name": "list_bundled_cohorts",                      "description": "List the two bundled cohorts (tolerant, strict) with size and format." },
+    { "name": "get_cohort_summary",                        "description": "n_train, comorbidity prevalences, modeled columns, source date window for a cohort." },
+    { "name": "generate_cohort_csv",                       "description": "Generate N synthetic patients as a CSV string. Physiologic constraints applied by default." },
+    { "name": "generate_cohort_fhir",                      "description": "Generate N synthetic patients as FHIR R4 transaction-Bundle NDJSON with 9 Synthea-style modules." },
+    { "name": "sample_conditional",                        "description": "AST-validated rejection sampling against a pandas-style filter expression." },
+    { "name": "list_clinical_modules",                     "description": "Enumerate the nine Synthea-style clinical modules and the source flag each fires on." },
+    { "name": "list_physiologic_constraints",              "description": "Enumerate the physiologic-validity rejection rules (pulse pressure, Friedewald, eGFR↔creatinine)." },
+    { "name": "generate_longitudinal_cohort",              "description": "Multi-encounter longitudinal cohort as CSV (Poisson encounters, lab drift, age advance)." },
+    { "name": "generate_longitudinal_fhir",                "description": "Multi-encounter longitudinal cohort as FHIR R4 NDJSON, one Bundle per encounter." },
+    { "name": "generate_cohort_with_lab_history",          "description": "FHIR bundles with AR(1) lab time-series (Westgard CV) and intra-encounter BP triplets." },
+    { "name": "generate_clinical_assessments",             "description": "Standalone Charlson / PHQ-9 / GAD-7 / FamilyMemberHistory FHIR resources per patient." },
+    { "name": "validate_synthetic_csv",                    "description": "Compare two CSVs with KS / Wasserstein / Frobenius correlation diff." },
+    { "name": "validate_against_bundled_cohort",           "description": "Validate a synthetic CSV against the bundled cohort's marginals (no source CSV needed)." },
+    { "name": "privacy_audit",                             "description": "Run MIA + AIA privacy attacks; return a pass/fail PrivacyReport." },
+    { "name": "privacy_audit_bundled",                     "description": "Self-audit: MIA + AIA using the bundled model's own samples (demonstration mode)." },
+    { "name": "fraction_within_reference",                 "description": "Per-column fraction of generated patients inside Mayo/Tietz/KDIGO reference intervals." },
+    { "name": "check_row_within_reference",                "description": "Per-record reference-interval check for one synthetic patient row (sex-aware)." },
+    { "name": "apply_physiologic_constraints",             "description": "Filter an arbitrary CSV against syntha's physiologic-coherence rules." },
+    { "name": "list_reference_ranges",                     "description": "Clinical reference intervals (Mayo / Tietz / KDIGO), optionally sex-filtered." },
+    { "name": "list_schema_columns",                       "description": "Column groupings + LAB_PANELS + PHYSIOLOGIC_BOUNDS for building valid expressions." },
+    { "name": "list_condition_codes",                      "description": "Dual-coded SNOMED + ICD-10 + Turkish display per comorbidity flag." },
+    { "name": "list_lab_loinc_codes",                      "description": "Per-lab LOINC code, display, and UCUM unit." },
+    { "name": "list_lab_panels",                           "description": "LOINC-coded DiagnosticReport panel definitions (lipid, CBC, CMP, iron, BP)." },
+    { "name": "list_lab_drift_profiles",                   "description": "Westgard biological variation + per-year secular trend for each modeled lab." },
+    { "name": "list_rxnorm_medications",                   "description": "RxNorm catalog used by the Synthea-style modules, optionally filtered by drug class." },
+    { "name": "list_locale_data",                          "description": "Turkish locale vocabulary: TÜİK-frequency names, ISO 3166-2:TR cities, condition displays." },
+    { "name": "list_clinical_assessment_instruments",      "description": "LOINC/SNOMED codes + scoring ranges for PHQ-9 / GAD-7 / Charlson / family history." },
+    { "name": "list_modules_detail",                       "description": "Per-module emission detail (encounters, procedures, medications, CarePlan)." },
+    { "name": "list_pipeline_config_options",              "description": "Documents every PipelineConfig field with default, type, and description." },
+    { "name": "ckd_stage_for_egfr",                        "description": "KDIGO 2024 CKD staging (G1-G5) for an eGFR value + SNOMED/ICD-10 codes." },
+    { "name": "validate_condition_expression",             "description": "Pre-validate a sample_conditional expression (AST allowlist + column check) without sampling." },
+    { "name": "get_correlation_pairs",                     "description": "Top-K modeled correlation pairs (continuous-continuous and polyserial)." },
+    { "name": "get_model_card",                            "description": "Model card: n_train, marginals, continuous quantile summary, top correlations." }
   ],
   "tools_generated": false,
   "prompts": [],

@@ -43,7 +43,7 @@ Install URLs auto-resolve to the latest release via `releases/latest/download/�
 
 ## Use from Claude (MCP connector)
 
-`syntha` ships as an [MCP](https://modelcontextprotocol.io) connector. Claude (Desktop or Claude.com custom-connector slot) can drive synthetic-cohort generation directly through 8 tools (`generate_cohort_csv`, `generate_cohort_fhir`, `sample_conditional`, `get_cohort_summary`, …). The connector bundles the two trained copulas (`tolerant` n=135,569; `strict` n=55,141) so no source CSV is needed at runtime.
+`syntha` ships as an [MCP](https://modelcontextprotocol.io) connector. Claude (Desktop or Claude.com custom-connector slot) can drive end-to-end synthetic-cohort workflows directly — **Turkish-locale patients, FHIR R4 bundles, and longitudinal multi-encounter histories** all without leaving the chat. The connector now exposes **34 tools** covering generation, validation, privacy audit, physiologic constraints, and reference-data lookup, and bundles the two trained copulas (`tolerant` n=135,569; `strict` n=55,141) so no source CSV is needed at runtime.
 
 ```bash
 pip install "syntha-ehr[mcp]"
@@ -55,7 +55,15 @@ Add to Claude Desktop's config (`Settings → Developer → Edit Config`):
 { "mcpServers": { "syntha": { "command": "syntha-mcp" } } }
 ```
 
-Then ask Claude things like *"Using the syntha connector, give me 50 synthetic patients with hypertension and diabetes aged 60+, as a CSV."* Full guide + Claude.com Streamable-HTTP setup + connector-directory submission instructions: [docs/MCP.md](docs/MCP.md).
+| Category | Representative tools | What it does |
+|---|---|---|
+| **Generate** | `generate_cohort_csv`, `generate_cohort_fhir`, `sample_conditional`, `generate_longitudinal_cohort`, `generate_longitudinal_fhir`, `generate_cohort_with_lab_history`, `generate_clinical_assessments` | Cross-sectional + longitudinal cohorts, conditional sampling, FHIR R4 bundles, lab-history series, validated clinical assessment instruments |
+| **Inspect** | `syntha_version`, `list_bundled_cohorts`, `get_cohort_summary`, `get_model_card`, `list_modules_detail`, `list_pipeline_config_options`, `list_clinical_modules`, `get_correlation_pairs` | Browse bundled cohorts, model cards, clinical modules, pipeline knobs, correlation structure |
+| **Validate & audit** | `validate_synthetic_csv`, `validate_against_bundled_cohort`, `privacy_audit`, `privacy_audit_bundled`, `fraction_within_reference`, `check_row_within_reference`, `apply_physiologic_constraints`, `ckd_stage_for_egfr`, `validate_condition_expression` | KS / prevalence / correlation fidelity, MIA + AIA privacy audit, reference-range checks, physiologic-constraint enforcement |
+| **Locale & terminology** | `list_locale_data`, `list_condition_codes`, `list_lab_loinc_codes`, `list_lab_panels`, `list_rxnorm_medications`, `list_clinical_assessment_instruments` | Turkish names/addresses + ICD-10 / SNOMED CT / LOINC / RxNorm catalogs |
+| **Reference data** | `list_physiologic_constraints`, `list_reference_ranges`, `list_schema_columns`, `list_lab_drift_profiles` | Constraint definitions, reference intervals, schema columns, longitudinal drift profiles |
+
+Then ask Claude things like *"Using the syntha connector, give me 50 longitudinal Turkish patients with hypertension and diabetes aged 60+ — 4 encounters each, as a FHIR bundle."* Marketplace listing is **in preparation**; full per-tool reference, Claude.com Streamable-HTTP setup, and [Submitting to the Connector directory](docs/MCP.md#submitting-to-the-connector-directory) instructions live in [docs/MCP.md](docs/MCP.md).
 
 ## Install
 

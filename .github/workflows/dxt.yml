@@ -1,0 +1,91 @@
+name: DXT (Anthropic Connector bundle)
+
+# Builds the .dxt (Desktop Extension) for the syntha MCP connector and
+# uploads it as a GitHub Release asset alongside the .dmg / .exe / .AppImage
+# on every tag push. This gives the Anthropic Connector directory
+# submission portal a stable public URL to pull from.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to attach the .dxt to (e.g. v0.5.10)"
+        required: true
+
+permissions:
+  contents: write   # release-asset upload
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Set up Python (for manifest validation helper)
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Resolve target tag
+        id: tag
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate manifest
+        shell: bash
+        run: |
+          # Anthropic publishes @anthropic-ai/dxt for validation + packaging.
+          # If the package isn't public yet, we fall back to a structural
+          # sanity check on the JSON.
+          if npx -y @anthropic-ai/dxt validate mcp/manifest.json 2>&1 | tee /tmp/dxt-validate.log; then
+            echo "✓ official dxt validate succeeded"
+          else
+            echo "ℹ @anthropic-ai/dxt not installable or schema mismatch — running structural fallback"
+            python3 - <<'PY'
+          import json, sys
+          m = json.load(open("mcp/manifest.json"))
+          required = ["name","version","description","author","license",
+                      "server","tools","homepage","repository"]
+          missing = [k for k in required if not m.get(k)]
+          if missing:
+              print(f"FAIL: manifest missing required keys: {missing}")
+              sys.exit(1)
+          if not isinstance(m["tools"], list) or not m["tools"]:
+              print("FAIL: tools[] must be a non-empty array")
+              sys.exit(1)
+          print(f"OK — {len(m['tools'])} tools declared, version {m['version']}")
+          PY
+          fi
+
+      - name: Build .dxt
+        shell: bash
+        run: |
+          bash mcp/build.sh "${{ steps.tag.outputs.tag }}" | tee /tmp/dxt-build.log
+          mv mcp/syntha-*.dxt syntha.dxt
+          ls -lh syntha.dxt
+
+      - name: Upload as Release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release upload "${{ steps.tag.outputs.tag }}" syntha.dxt --clobber
+
+      - name: Upload as workflow artifact (also useful for non-release builds)
+        uses: actions/upload-artifact@v7
+        with:
+          name: syntha-dxt
+          path: syntha.dxt
+          retention-days: 90

@@ -57,11 +57,24 @@ Plus engineering polish: signed installers for all 3 OSes (macOS notarized, Wind
 ### v0.5.10 — MCP connector ✅ (current)
 
 - New optional extra: `pip install "syntha-ehr[mcp]"` installs the [Model Context Protocol](https://modelcontextprotocol.io) SDK and registers a `syntha-mcp` console script.
-- Eight tools exposed: `list_bundled_cohorts`, `get_cohort_summary`, `generate_cohort_csv`, `generate_cohort_fhir`, `sample_conditional`, `list_clinical_modules`, `list_physiologic_constraints`, `syntha_version`. Bundles the two trained copulas (`tolerant` n=135,569; `strict` n=55,141) inside the Python package via `[tool.setuptools.package-data]` so no source CSV is required at runtime.
+- Expanded tool surface (33 tools, up from the initial 8) covering generation, validation, privacy, reference-range coverage, physiologic constraints, and introspection of bundled clinical metadata:
+  - **Core generation / summary (initial 8):** `list_bundled_cohorts`, `get_cohort_summary`, `generate_cohort_csv`, `generate_cohort_fhir`, `sample_conditional`, `list_clinical_modules`, `list_physiologic_constraints`, `syntha_version`.
+  - **Longitudinal + clinical workflows:** `generate_longitudinal_cohort`, `generate_longitudinal_fhir`, `generate_cohort_with_lab_history`, `generate_clinical_assessments`.
+  - **Validation + privacy audit:** `validate_synthetic_csv`, `validate_against_bundled_cohort`, `privacy_audit`, `privacy_audit_bundled`.
+  - **Reference ranges + physiology:** `fraction_within_reference`, `check_row_within_reference`, `apply_physiologic_constraints`, `list_reference_ranges`, `ckd_stage_for_egfr`.
+  - **Schema + bundled-metadata introspection:** `list_schema_columns`, `list_condition_codes`, `list_lab_loinc_codes`, `list_lab_panels`, `list_lab_drift_profiles`, `list_rxnorm_medications`, `list_locale_data`, `list_clinical_assessment_instruments`, `list_modules_detail`, `list_pipeline_config_options`, `validate_condition_expression`, `get_correlation_pairs`, `get_model_card`.
+- Bundles the two trained copulas (`tolerant` n=135,569; `strict` n=55,141) inside the Python package via `[tool.setuptools.package-data]` so no source CSV is required at runtime.
 - Transports: stdio (Claude Desktop and local MCP clients) and Streamable HTTP (`syntha-mcp --transport http`, for the Claude.com custom-connector slot).
-- DXT manifest at [mcp/manifest.json](mcp/manifest.json) ready for submission to the Anthropic [Connector directory](https://www.claude.com/connectors).
+- DXT manifest at [mcp/manifest.json](mcp/manifest.json) bumped to v0.5.10 and updated to advertise the full 33-tool surface for submission to the Anthropic [Connector directory](https://www.claude.com/connectors).
+- Marketplace-prep: draft [PRIVACY.md](PRIVACY.md) documenting data flows (no PHI, no network egress beyond the user's chosen MCP client, copulas trained on de-identified aggregates), retention, and the threat model surfaced by `privacy_audit` / `privacy_audit_bundled`.
 - Full guide + Claude Desktop config snippet + connector-directory submission notes: [docs/MCP.md](docs/MCP.md).
 - 12 new MCP tests in [tests/test_mcp_server.py](tests/test_mcp_server.py).
+- **Still pending for the official Anthropic Connector directory submission:**
+  - Finalize PRIVACY.md (currently a draft) and link it from `mcp/manifest.json` + the listing copy.
+  - Hosted Streamable-HTTP deployment with TLS and a stable public URL (the directory does not accept stdio-only or `localhost` connectors).
+  - OAuth / auth scheme decision for the hosted endpoint (open vs. token-gated) and matching rate-limit + abuse-prevention story.
+  - Publisher verification on claude.com, listing copy (short + long description, icon, screenshots), and an end-to-end recorded demo against `claude.ai`.
+  - Security review checklist sign-off (no PHI in logs, tool-arg validation, max-row caps) and a tagged GitHub release matching the manifest version.
 
 ### v0.5.6 — Curation cleanup + collaboration platform ✅
 

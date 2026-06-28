@@ -1,0 +1,11 @@
+# Files that should NOT be packaged into the .dxt — they're build-time
+# artifacts and submission documentation, not runtime inputs to the
+# installed extension.
+LISTING.md
+SUBMISSION.md
+build.sh
+icon.md
+README.md
+*.bak
+*.dxt
+.DS_Store
